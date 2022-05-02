@@ -1,5 +1,3 @@
-
-
 import 'package:portfolio_post/class/user_class.dart' show Author;
 
 class Comment {
@@ -19,13 +17,19 @@ class Comment {
       List<Map<String, dynamic>> _subComments = List<Map<String, dynamic>>.from(json["comments"]);
       _subComments.forEach((Map<String, dynamic> js) => _commentsList.add(Comment.fromJson(js)));
     }
+    String _convertISOToString(String iso) {
+      if (iso.isEmpty) return "";
+      final DateTime _UTC = DateTime.parse(iso);
+      final String _text = "${_UTC.year}년 ${_UTC.month}월 ${_UTC.day}일";
+      return _text;
+    };
     return Comment(
       commentUid: json["commentUid"].toString(),
       author: Author.fromJson(json["author"] as Map<String, dynamic>),
       text: json["text"].toString(),
       isPrivate: json["isPrivate"] as bool,
-      createdTime: json["createdTime"].toString(),
-      modifiedTime: json["modifiedTime"] ?? "",
+      createdTime: _convertISOToString(json["createdTime"].toString()),
+      modifiedTime: _convertISOToString(json["modifiedTime"] ?? ""),
       comments: _commentsList,
     );
   }

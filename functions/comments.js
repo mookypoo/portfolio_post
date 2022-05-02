@@ -12,7 +12,6 @@ app.get("/get/:postUid", async (req, res) => {
         if (_dataSnapshot.val() != null) {
             comments = Object.values(_dataSnapshot.val());
             comments.forEach(comment => {
-                comment.createdTime = timeToText(comment.createdTime);
                 if (comment.comments) comment.comments = Object.values(comment.comments);
                 console.log(comment);
             });
@@ -27,8 +26,8 @@ app.get("/get/:postUid", async (req, res) => {
 app.post("/add/:action", async (req, res) => {
     const commentUid = uuid.v1();
     req.body.commentUid = commentUid;
-    req.body.createdTime = new Date().toISOString();
-    const createdTime = timeToText(req.body.createdTime);
+    const createdTime = new Date().toISOString();
+    req.body.createdTime = createdTime;
     try {
         if (req.params.action == "comment")
             await admin.database().ref(`/comments/${req.body.postUid}/${commentUid}`).set(req.body);

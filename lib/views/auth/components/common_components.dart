@@ -169,20 +169,20 @@ class Tos extends StatelessWidget {
       child: Row(
         children: <Widget>[
           Stack(
-              children: <Widget>[
-                Icon(this.iconData, size: 27.0, color: this.isChecked ? Color.fromRGBO(0,0,0, 1.0) : Color.fromRGBO(255, 255, 255, 1.0)),
-                Positioned(
-                  bottom: 4.0,
-                  left: 5.0,
-                  child: Container(
-                    width: 14.0,
-                    height: 14.0,
-                    decoration: BoxDecoration(
-                      border: Border.all(),
-                    ),
+            children: <Widget>[
+              Icon(this.iconData, size: 27.0, color: this.isChecked ? Color.fromRGBO(0,0,0, 1.0) : Color.fromRGBO(255, 255, 255, 1.0)),
+              Positioned(
+                bottom: 4.0,
+                left: 5.0,
+                child: Container(
+                  width: 14.0,
+                  height: 14.0,
+                  decoration: BoxDecoration(
+                    border: Border.all(),
                   ),
                 ),
-              ]
+              ),
+            ],
           ),
           Container(
             margin: const EdgeInsets.only(left: 5.0, top: 10.0),

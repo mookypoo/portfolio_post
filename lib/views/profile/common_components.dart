@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 
-import '../../class/user_class.dart';
+import '../../class/profile_class.dart';
 import '../../repos/variables.dart';
 import '../auth/auth_page.dart';
 
@@ -27,9 +27,10 @@ class NotLoggedIn extends StatelessWidget {
 }
 
 class LoggedIn extends StatelessWidget {
-  const LoggedIn({Key? key, required this.logOut, required this.user}) : super(key: key);
-  final void Function() logOut;
-  final User? user;
+  const LoggedIn({Key? key, required this.logOut, required this.profile, required this.switchWidget}) : super(key: key);
+  final Future<void> Function() logOut;
+  final Profile? profile;
+  final Widget switchWidget;
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +38,23 @@ class LoggedIn extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
-        Text(this.user?.userName ?? ""),
+        Text(this.profile?.userName ?? ""),
+        Text("email: ${this.profile?.email}"),
+        GestureDetector(
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 10.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                this.switchWidget,
+                Padding(
+                  padding: EdgeInsets.only(left: 20.0),
+                  child: Text("receive notifications"),
+                ),
+              ],
+            ),
+          ),
+        ),
         GestureDetector(
           onTap: this.logOut,
           child: Padding(

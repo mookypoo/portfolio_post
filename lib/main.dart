@@ -1,10 +1,13 @@
 import 'dart:io';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:portfolio_post/providers/auth_provider.dart';
 import 'package:portfolio_post/providers/posts_provider.dart';
+import 'package:portfolio_post/providers/user_provider.dart';
+import 'package:portfolio_post/service/fcm_service.dart';
 import 'package:portfolio_post/views/auth/auth_page.dart';
 import 'package:portfolio_post/views/main/main_page.dart';
 import 'package:portfolio_post/views/new_post/new_post_page.dart';
@@ -12,8 +15,11 @@ import 'package:portfolio_post/views/post/post_page.dart';
 import 'package:portfolio_post/views/profile/profile_page.dart';
 import 'package:provider/provider.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await FCMService.initializeFirebase();
+  FirebaseMessaging.onBackgroundMessage(FCMService.fcmBackgroundHandler);
+  await FCMService.onMessage();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitDown, DeviceOrientation.portraitUp]);
   runApp(const PortfolioPost());
 }
@@ -21,8 +27,43 @@ void main() {
 class PortfolioPost extends StatelessWidget {
   const PortfolioPost({Key? key}) : super(key: key);
 
-  Widget _androidApp() => MaterialApp(
+  Widget _androidApp() => MaterialApp(onGenerateRoute: (RouteSettings route) {
+    if (route.name == NewPostPage.routeName) {
+      final String _pageTitle = route.arguments.toString();
+      return MaterialPageRoute(
+        builder: (BuildContext context) => NewPostPage(),
+        settings: RouteSettings(name: NewPostPage.routeName, arguments: _pageTitle),
+      );
+    };
+    if (route.name == ProfilePage.routeName) {
+      return MaterialPageRoute(
+        builder: (BuildContext context) => ProfilePage(),
+        settings: RouteSettings(name: ProfilePage.routeName),
+      );
+    };
+    if (route.name == AuthPage.routeName) {
+      return MaterialPageRoute<bool>(
+        builder: (BuildContext context) => AuthPage(),
+        settings: RouteSettings(name: AuthPage.routeName),
+      );
+    };
+    if (route.name == PostPage.routeName) {
+      return MaterialPageRoute(
+        builder: (BuildContext context) => PostPage(),
+        settings: RouteSettings(name: PostPage.routeName),
+      );
+    };
+    return MaterialPageRoute(
+      builder: (BuildContext context) => MainPage(),
+      settings: RouteSettings(name: MainPage.routeName),
+    );
+  },
     home: MainPage(),
+    theme: ThemeData(
+      textTheme: TextTheme(
+        bodyText2: TextStyle(fontSize: 17.0),
+      )
+    ),
   );
 
   Widget _iosApp() => CupertinoApp(
@@ -71,6 +112,7 @@ class PortfolioPost extends StatelessWidget {
       providers: [
         ChangeNotifierProvider<AuthProvider>(create: (_) => AuthProvider()),
         ChangeNotifierProvider<PostsProvider>(create: (_) => PostsProvider()),
+        ChangeNotifierProvider<UserProvider>(create: (_) => UserProvider())
       ],
       child: Platform.isAndroid ? this._androidApp() : this._iosApp(),
     );

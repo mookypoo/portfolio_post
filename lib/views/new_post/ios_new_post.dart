@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 
 import '../../providers/posts_provider.dart';
+import '../post/post_page.dart';
 
 class IosNewPost extends StatefulWidget {
   const IosNewPost({Key? key, required this.postsProvider, required this.pageTitle}) : super(key: key);
@@ -50,37 +51,37 @@ class _IosNewPostState extends State<IosNewPost> {
               );
             }
             if (!_success) return; // todo tell user "couldn't add post"
-            Navigator.of(context).pop();
+            Navigator.of(context).popAndPushNamed(PostPage.routeName);
           },
         ),
       ),
       child: SafeArea(
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 25.0, vertical: 20.0),
-          child: this.widget.postsProvider.user == null
-              ? Container(
-            child: Text("로그인을 해야지 글을 쓸 수 있습니다."),
-          )
+        child: SingleChildScrollView(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 25.0, vertical: 20.0),
+            child: this.widget.postsProvider.user == null
+              ? Center(child: Text("로그인을 해야지 글을 쓸 수 있습니다."))
               : Column(
-            children: <Widget>[
-              CupertinoTextField(
-                controller: this._titleCt,
-                placeholder: "Title",
-                decoration: const BoxDecoration(border: Border(bottom: BorderSide())),
-              ),
-              Container(
-                alignment: Alignment.topCenter,
-                margin: EdgeInsets.only(top: 25.0),
-                height: 250.0,
-                decoration: BoxDecoration(border: Border.all()),
-                child: CupertinoTextField(
-                  controller: this._textCt,
-                  maxLines: null,
-                  placeholder: "Text",
-                  decoration: const BoxDecoration(),
-                ),
-              ),
-            ],
+                  children: <Widget>[
+                    CupertinoTextField(
+                      controller: this._titleCt,
+                      placeholder: "Title",
+                      decoration: const BoxDecoration(border: Border(bottom: BorderSide())),
+                    ),
+                    Container(
+                      alignment: Alignment.topCenter,
+                      margin: EdgeInsets.only(top: 25.0),
+                      height: 350.0,
+                      decoration: BoxDecoration(border: Border.all()),
+                      child: CupertinoTextField(
+                        controller: this._textCt,
+                        maxLines: null,
+                        placeholder: "Text",
+                        decoration: const BoxDecoration(),
+                      ),
+                    ),
+                  ],
+            ),
           ),
         ),
       ),

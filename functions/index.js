@@ -1,8 +1,9 @@
 const serviceAccount = require("./service_account_key.json"),
     admin = require("firebase-admin"),
     { auth } = require("./auth"),
-    { posts, postActions } = require("./posts"),
-    { comments } = require("./comments");
+    { posts, addPreview, deletePreviewAndComment } = require("./posts"),
+    { comments } = require("./comments"),
+    { user, sendNewFollowerNotification } = require("./user");
 
 admin.initializeApp({
     projectId: "mooky-post",
@@ -11,6 +12,7 @@ admin.initializeApp({
 });
 
 module.exports = {
-    auth, posts, postActions, comments
+    auth, posts, comments, addPreview, deletePreviewAndComment, user, sendNewFollowerNotification
 }
     
+

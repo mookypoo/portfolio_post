@@ -17,7 +17,7 @@ class PostPreviewTile extends StatelessWidget {
       },
       child: Container(
         height: 115.0,
-        margin: EdgeInsets.only(bottom: 10.0),
+        margin: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           crossAxisAlignment: CrossAxisAlignment.start,

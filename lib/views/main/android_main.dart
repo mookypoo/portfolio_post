@@ -26,39 +26,29 @@ class AndroidMain extends StatelessWidget {
           ),
         ],
       ),
-      body: SafeArea(
-        child: Stack(
-          children: <Widget>[
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 25.0, vertical: 15.0),
-              width: _size.width,
-              height: _size.height,
-              child: Container(
-                child: ListView.builder(
-                  padding: EdgeInsets.zero,
-                  itemCount: this.postsProvider.postPreviews.length,
-                  itemBuilder: (BuildContext context, int index) => PostPreviewTile(
-                    getPost: this.postsProvider.getPostComments,
-                    post: this.postsProvider.postPreviews[index],
-                  ),
-                ),
-              ),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.add),
+        onPressed: () async {
+          this.postsProvider.resetPost();
+          await Navigator.of(context).pushNamed(
+            NewPostPage.routeName,
+            arguments: "새 글 쓰기",
+          );
+        },
+      ),
+      body: Container(
+        padding: EdgeInsets.symmetric(horizontal: 25.0, vertical: 15.0),
+        width: _size.width,
+        height: _size.height,
+        child: Container(
+          child: ListView.builder(
+            padding: EdgeInsets.zero,
+            itemCount: this.postsProvider.postPreviews.length,
+            itemBuilder: (BuildContext context, int index) => PostPreviewTile(
+              getPost: this.postsProvider.getPostComments,
+              post: this.postsProvider.postPreviews[index],
             ),
-            Positioned(
-              bottom: 0.0,
-              right: 10.0,
-              child: IconButton(
-                icon: const Icon(Icons.add, size: 55.0, color: MyColors.primary),
-                onPressed: () async {
-                  this.postsProvider.resetPost();
-                  await Navigator.of(context).pushNamed(
-                    NewPostPage.routeName,
-                    arguments: "새 글 쓰기",
-                  );
-                },
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

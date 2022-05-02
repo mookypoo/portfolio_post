@@ -1,7 +1,7 @@
 const express = require("express"),
     app = express(),
     axios = require("axios"),
-    firebaseAPI = "AIzaSyDnCNwBatirGobx6m6o0qNeWEI5zTtpmNw",
+    firebaseAPI = "AIzaSyAao5PL4usFRTcEinDJO0PwCmE114h4EAM",
     endPoint = (firebasePath) => `https://identitytoolkit.googleapis.com/v1/accounts:${firebasePath}?key=${firebaseAPI}`,
     functions = require("firebase-functions"),
     admin = require("firebase-admin"),
@@ -35,20 +35,9 @@ app.post("/saveUserInfo", async (req, res) => {
     }
 });
 
-verifyUser = functions.https.onRequest(async (req, res) => {
-
-    // use .once("value") and not .get() to handle "client is offline" error
-    const _dataSnapshot = await admin.database().ref("/usersAuth").child(req.body.user_uid).once("value");
-    if (_dataSnapshot.val().idToken != req.body.id_token) {
-        console.log("id does not match");
-        return false;
-    } else {
-        return true;
-    }
-});
-
 verifyUser = async (req) => {
     const _dataSnapshot = await admin.database().ref("/usersAuth").child(req.body.userUid).once("value");
+    if (_dataSnapshot.val() == null) return false;
     if (_dataSnapshot.val().idToken != req.body.idToken) return false;
     if (_dataSnapshot.val().idToken == req.body.idToken) return true;
 }

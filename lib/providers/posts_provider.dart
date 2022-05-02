@@ -78,6 +78,17 @@ class PostsProvider with ChangeNotifier {
     }
   }
 
+  // todo refresh할때는 어떻게?
+  Future<void> refreshPreviews() async {
+    final Map<String, dynamic> _res = await this._postService.getPreviews();
+    if (_res.containsKey("previews")) {
+      this._postPreviews = _res["previews"];
+      this.notifyListeners();
+    } else {
+
+    }
+  }
+
   Future<void> getPostComments(String postUid) async {
     this.changeState(ProviderState.connecting);
     final bool _gotPost = await this._getPost(postUid);
@@ -179,15 +190,22 @@ class PostsProvider with ChangeNotifier {
     this._post = null; this._comments = [];
   }
 
+  // todo after edititing or adding post, view the post (not go to main page)
   Future<bool> editPost({required String text, required String title}) async {
     if (this._post == null) return false;
-    // todo only if title is different, only if text is different
     final Map<String, dynamic> _body = {
-      "updateInfo": {"title": title, "text": text},
+      "updateInfo": {},
       "userUid": this._user!.userUid,
       "idToken": this._user!.idToken,
       "postUid": this._post!.postUid,
     };
+    if (this._post!.text != text) _body["updateInfo"]["text"] = text;
+    if (this._post!.title != title) _body["updateInfo"]["title"] = title;
+    int oldLength = this._post!.text.length;
+    int newLength = text.length;
+    if (this._post!.text.substring(0, oldLength < 100 ? oldLength : 100) != text.substring(0, newLength < 100 ? newLength : 100))
+      _body["previewText"] = text.substring(0, newLength < 100 ? newLength : 100);
+
     final Map<String, dynamic> _res = await this._postService.editPost(body: _body);
     if (_res.containsKey("modifiedTime")) {
       this._post = Post.edit(post: this._post!, text: text, title: title, modifiedTime: _res["modifiedTime"]);

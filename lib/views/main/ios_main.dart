@@ -25,24 +25,39 @@ class IosMain extends StatelessWidget {
         ),
       ),
       child: SafeArea(
-        child: Stack(
-          children: <Widget>[
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 25.0, vertical: 15.0),
-              width: _size.width,
-              height: _size.height,
-              child: Container(
-                child: ListView.builder(
-                  padding: EdgeInsets.zero,
-                  itemCount: this.postsProvider.postPreviews.length,
-                  itemBuilder: (BuildContext context, int index) => PostPreviewTile(
-                    getPost: this.postsProvider.getPostComments,
-                    post: this.postsProvider.postPreviews[index],
-                  ),
-                ),
-              ),
+        child: CustomScrollView(
+          slivers: [
+            CupertinoSliverRefreshControl(
+              onRefresh: () async {
+               await this.postsProvider.refreshPreviews();
+              },
             ),
-            Positioned(
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (BuildContext context, int index) => PostPreviewTile(
+                  getPost: this.postsProvider.getPostComments,
+                  post: this.postsProvider.postPreviews[index],
+                ),
+                childCount: this.postsProvider.postPreviews.length
+            )),
+          ],
+        ),
+      ),
+    );
+  }
+}
+/*
+
+CupertinoPageScaffold(
+      navigationBar: CupertinoNavigationBar(
+        middle: Text("계시판"),
+        trailing: CupertinoButton(
+          padding: EdgeInsets.zero,
+          onPressed: () async => await Navigator.of(context).pushNamed(ProfilePage.routeName),
+          child: Icon(CupertinoIcons.person),
+        ),
+      ),
+Positioned(
               bottom: 0.0,
               right: 10.0,
               child: CupertinoButton(
@@ -56,9 +71,4 @@ class IosMain extends StatelessWidget {
                 },
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+ */

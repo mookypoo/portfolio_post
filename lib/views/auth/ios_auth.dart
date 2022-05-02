@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 
 import '../../class/auth_class.dart';
 import '../../providers/auth_provider.dart';
-import '../main/main_page.dart';
 import 'components/common_components.dart';
 import 'components/ios_components.dart';
 
@@ -69,55 +68,55 @@ class _IosAuthState extends State<IosAuth> {
                         right: 0.0,
                         top: 77.0,
                         child: this.widget.authProvider.isLoginPage
-                            ? IosLoginWidget(
-                          emailCt: this._emailCt,
-                          pw1Ct: this._pw1Ct,
-                          authProvider: this.widget.authProvider,
-                        )
-                            : IosSignUpWidget(
-                          authProvider: this.widget.authProvider,
-                          emailCt: this._emailCt,
-                          nameCt: this._nameCt,
-                          pw1Ct: this._pw1Ct,
-                          pw2Ct: this._pw2Ct,
-                        ),
+                          ? IosLoginWidget(
+                              emailCt: this._emailCt,
+                              pw1Ct: this._pw1Ct,
+                              authProvider: this.widget.authProvider,
+                            )
+                          : IosSignUpWidget(
+                              authProvider: this.widget.authProvider,
+                              emailCt: this._emailCt,
+                              nameCt: this._nameCt,
+                              pw1Ct: this._pw1Ct,
+                              pw2Ct: this._pw2Ct,
+                            ),
                       ),
                       this.widget.authProvider.isLoginPage
-                          ? LogInBottom(
-                        onTapLogin: () async {
-                          final bool _success = await this.widget.authProvider.firebaseSignIn(
-                            data: LoginInfo(
-                              email: this._emailCt.text.trim(),
-                              pw: this._pw1Ct.text.trim(),
-                            ),);
-                          if (!_success) return;
-                          await Navigator.of(context).popAndPushNamed(MainPage.routeName);
-                        },
-                        switchPage: () {
-                          this.widget.authProvider.switchPage();
-                          <TextEditingController>[this._nameCt, this._emailCt, this._pw1Ct, this._pw2Ct].forEach(
-                                  (TextEditingController ct) => ct.clear());
-                        },
-                      )
-                          : SignUpBottom(
-                        switchPage: () {
-                          this.widget.authProvider.switchPage();
-                          <TextEditingController>[this._nameCt, this._emailCt, this._pw1Ct, this._pw2Ct].forEach(
-                                  (TextEditingController ct) => ct.clear());
-                        },
-                        onTapSignUp: () async {
-                          final bool _success = await this.widget.authProvider.firebaseSignUp(
-                            info: SignUpInfo(
-                              name: this._nameCt.text.trim(),
-                              isMale: this.widget.authProvider.isMale,
-                              email: this._emailCt.text.trim(),
-                              pw: this._pw1Ct.text.trim(),
-                            ),
-                          );
-                          if (!_success) return;
-                          await Navigator.of(context).popAndPushNamed(MainPage.routeName);
-                        },
-                      ),
+                        ? LogInBottom(
+                            onTapLogin: () async {
+                              final bool _success = await this.widget.authProvider.firebaseSignIn(
+                                data: LoginInfo(
+                                  email: this._emailCt.text.trim(),
+                                  pw: this._pw1Ct.text.trim(),
+                                ),);
+                              if (!_success) return;
+                              Navigator.of(context).pop();
+                            },
+                            switchPage: () {
+                              this.widget.authProvider.switchPage();
+                              <TextEditingController>[this._nameCt, this._emailCt, this._pw1Ct, this._pw2Ct].forEach(
+                                      (TextEditingController ct) => ct.clear());
+                            },
+                          )
+                        : SignUpBottom(
+                            switchPage: () {
+                              this.widget.authProvider.switchPage();
+                              <TextEditingController>[this._nameCt, this._emailCt, this._pw1Ct, this._pw2Ct].forEach(
+                                      (TextEditingController ct) => ct.clear());
+                            },
+                            onTapSignUp: () async {
+                              final bool _success = await this.widget.authProvider.firebaseSignUp(
+                                info: SignUpInfo(
+                                  name: this._nameCt.text.trim(),
+                                  isMale: this.widget.authProvider.isMale,
+                                  email: this._emailCt.text.trim(),
+                                  pw: this._pw1Ct.text.trim(),
+                                ),
+                              );
+                              if (!_success) return;
+                              Navigator.of(context).pop();
+                            },
+                          ),
                     ],
                   ),
                 ),

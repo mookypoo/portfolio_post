@@ -8,11 +8,13 @@ class PostService {
 
   Future<Map<String, dynamic>> getPreviews() async {
     try {
-      final Map<String, dynamic> _res = await this._connect.reqGetServer(path: "/post/getPreviews", cb: (ReqModel rm) {});
+      final Map<String, dynamic> _res = await this._connect.reqGetServer(path: "/posts/getPreviews", cb: (ReqModel rm) {});
       if (_res.containsKey("previews")) {
-        List<Map<String, dynamic>>? _previews = List<Map<String, dynamic>>.from(_res["previews"]);
         List<Preview> _previewList = [];
-        _previews.forEach((Map<String, dynamic> json) => _previewList.add(Preview.fromJson(json)));
+        if ((_res["previews"] as List<dynamic>).isNotEmpty){
+          List<Map<String, dynamic>>? _previews = List<Map<String, dynamic>>.from(_res["previews"]);
+          _previews.forEach((Map<String, dynamic> json) => _previewList.add(Preview.fromJson(json)));
+        }
         return {"previews": _previewList};
       }
       if (_res.containsKey("error")) {
@@ -24,6 +26,10 @@ class PostService {
     return {};
   }
 
+  Future refreshPreviews() async {
+    // todo refresh 할때 어떻게 하지???
+  }
+
   // todo 질문: 이렇게 parameter 다 받아와서 여기서 body로 변경? 아니면 provider에서 부터 body로 변경해서 줌?
   Future<Map<String, dynamic>> addPost({required String title, required String text, required Author author}) async {
     final Map<String, dynamic> _body = {
@@ -32,9 +38,9 @@ class PostService {
       "author": author.toJson(),
     };
     try {
-      final Map<String, dynamic> _res = await this._connect.reqPostServer(path: "/post/addPost", cb: (ReqModel rm) {}, body: {"post": _body});
+      final Map<String, dynamic> _res = await this._connect.reqPostServer(path: "/posts/add", cb: (ReqModel rm) {}, body: {"post": _body});
       if (_res.containsKey("postUid") && _res.containsKey("createdTime")) return {
-        "post": Post(createdTime: _res["createdTime"], author: author, text: text, title: title, postUid: _res["postUid"], numOfLikes: 0, likedUsers: []),
+        "post": Post(createdTime: Post.convertISOToString( _res["createdTime"]), author: author, text: text, title: title, postUid: _res["postUid"], numOfLikes: 0, likedUsers: []),
         "preview": Preview(userName: author.userName, title: title, text: text, postUid: _res["postUid"]),
       };
       return _res;
@@ -47,8 +53,9 @@ class PostService {
   Future<Map<String, dynamic>> getPost({required String postUid}) async {
     try {
       final Map<String, dynamic> _res = await this._connect.reqGetServer(
-        path: "/post/getPost/${postUid}", cb: (ReqModel rm) {}, );
+        path: "/posts/getPost/${postUid}", cb: (ReqModel rm) {}, );
       if (_res.containsKey("post")) {
+        // todo put this conversion in class
         Map<String, dynamic> _post = _res["post"] as Map<String, dynamic>;
         if (_post["likedUsers"] != null) _post["likedUsers"] = List<String>.from(_post["likedUsers"]);
         return {"post": Post.fromJson(_res["post"] as Map<String, dynamic>)};
@@ -63,7 +70,7 @@ class PostService {
   Future<Map<String, dynamic>> getComments({required String postUid}) async {
     try {
       final Map<String, dynamic> _res = await this._connect.reqGetServer(
-        path: "/comment/get/${postUid}", cb: (ReqModel rm) {}, );
+        path: "/comments/get/${postUid}", cb: (ReqModel rm) {}, );
       if (_res.containsKey("comments")) {
         List<Comment> _commentsList = [];
         if (_res["comments"] == null) {
@@ -89,7 +96,7 @@ class PostService {
       "userUid": userUid,
     };
     try {
-      final Map<String, dynamic> _res = await this._connect.reqPostServer(path: "/post/like", cb: (ReqModel rm) {}, body: _body);
+      final Map<String, dynamic> _res = await this._connect.reqPostServer(path: "/posts/like", cb: (ReqModel rm) {}, body: _body);
       return _res;
     } catch (e) {
       print(e);
@@ -104,7 +111,7 @@ class PostService {
       "userUid": userUid,
     };
     try {
-      final Map<String, dynamic> _res = await this._connect.reqPostServer(path: "/post/unlike", cb: (ReqModel rm) {}, body: _body);
+      final Map<String, dynamic> _res = await this._connect.reqPostServer(path: "/posts/unlike", cb: (ReqModel rm) {}, body: _body);
       return _res;
     } catch (e) {
       print(e);
@@ -116,7 +123,7 @@ class PostService {
     String _param = "comment";
     if (commentOnComment) _param = "commentOnComment";
     try {
-      final Map<String, dynamic> _res = await this._connect.reqPostServer(path: "/comment/add/${_param}", cb: (ReqModel rm) {}, body: body.toJson());
+      final Map<String, dynamic> _res = await this._connect.reqPostServer(path: "/comments/add/${_param}", cb: (ReqModel rm) {}, body: body.toJson());
       if (_res.containsKey("commentUid") && _res.containsKey("createdTime")) {
         return {"comment": Comment(
           comments: [],
@@ -133,10 +140,10 @@ class PostService {
     return {};
   }
 
-  Future deletePost({required String postUid, required User user}) async {
+  Future<Map<String, dynamic>> deletePost({required String postUid, required User user}) async {
     final Map<String, dynamic> _body = {"postUid": postUid, "userUid": user.userUid, "idToken": user.idToken};
     try {
-      final Map<String, dynamic> _res = await this._connect.reqPostServer(path: "/post/delete", cb: (ReqModel rm) {}, body: _body);
+      final Map<String, dynamic> _res = await this._connect.reqPostServer(path: "/posts/delete", cb: (ReqModel rm) {}, body: _body);
       return _res;
     } catch (e) {
       print(e);
@@ -145,9 +152,9 @@ class PostService {
   }
 
   // 여기까지 왔다는건 이미 verified 된건데 또 verify해야되나?
-  Future editPost({required Map<String, dynamic> body}) async {
+  Future<Map<String, dynamic>> editPost({required Map<String, dynamic> body}) async {
     try {
-      final Map<String, dynamic> _res = await this._connect.reqPostServer(path: "/post/edit", cb: (ReqModel rm) {}, body: body);
+      final Map<String, dynamic> _res = await this._connect.reqPostServer(path: "/posts/edit", cb: (ReqModel rm) {}, body: body);
       return _res;
     } catch (e) {
       print(e);

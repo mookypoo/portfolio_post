@@ -26,7 +26,6 @@ class Preview {
 class Post {
   final String postUid;
   final String title;
-  //final List<Comment> comments;
   final String text;
   final int numOfLikes;
   final List<String> likedUsers;
@@ -34,18 +33,27 @@ class Post {
   final String createdTime;
   final String? modifiedTime;
 
-  Post({required this.likedUsers, required this.title, required this.postUid, required this.author, required this.text, required this.numOfLikes, required this.createdTime, this.modifiedTime});
+  static String convertISOToString(String iso) {
+    if (iso.isEmpty) return "";
+    final DateTime _UTC = DateTime.parse(iso);
+    final String _text = "${_UTC.year}년 ${_UTC.month}월 ${_UTC.day}일";
+    return _text;
+  }
 
-  factory Post.fromJson(Map<String, dynamic> json) => Post(
-    title: json["title"].toString(),
-    text: json["text"].toString(),
-    postUid: json["postUid"].toString(),
-    author: Author.fromJson(json["author"] as Map<String, dynamic>),
-    numOfLikes: json["numOfLikes"] ?? 0,
-    likedUsers: json["likedUsers"] ?? [],
-    createdTime: json["createdTime"].toString(),
-    modifiedTime: json["modifiedTime"] ?? "",
-  );
+  Post({required this.likedUsers, required this.title, required this.postUid, required this.author, required this.text, required this.numOfLikes, this.modifiedTime, required this.createdTime});
+
+  factory Post.fromJson(Map<String, dynamic> json) {
+    return Post(
+      title: json["title"].toString(),
+      text: json["text"].toString(),
+      postUid: json["postUid"].toString(),
+      author: Author.fromJson(json["author"] as Map<String, dynamic>),
+      numOfLikes: json["numOfLikes"] ?? 0,
+      likedUsers: json["likedUsers"] ?? [],
+      createdTime: Post.convertISOToString(json["createdTime"].toString()),
+      modifiedTime: Post.convertISOToString(json["modifiedTime"] ?? ""),
+    );
+  }
 
   factory Post.like({required Post post, required int numOfLikes, required List<String> likedUsers}) => Post(
     text: post.text,

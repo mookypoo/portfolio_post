@@ -2,18 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../providers/posts_provider.dart';
+import '../../providers/user_provider.dart';
 import '../../repos/variables.dart';
 import 'android_components.dart';
 import 'common_components.dart';
 
 class AndroidPost extends StatelessWidget {
-  const AndroidPost({Key? key, required this.postsProvider}) : super(key: key);
+  const AndroidPost({Key? key, required this.postsProvider, required this.userProvider}) : super(key: key);
   final PostsProvider postsProvider;
+  final UserProvider userProvider;
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: Text(this.postsProvider.post?.title ?? ""),
         actions: [
@@ -24,15 +26,20 @@ class AndroidPost extends StatelessWidget {
           ),
         ],
       ),
-      body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 25.0),
+      body: Container(
+        margin: EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             this.postsProvider.post?.author.userUid == this.postsProvider.user!.userUid
-                ? EditDelete(delete: this.postsProvider.deletePost, userUid: this.postsProvider.user!.userUid, resetPost: this.postsProvider.resetPost,)
-                : Container(),
-            PostWidget(post: this.postsProvider.post!),
+              ? EditDelete(delete: this.postsProvider.deletePost, userUid: this.postsProvider.user!.userUid, resetPost: this.postsProvider.resetPost,)
+              : Container(),
+            PostWidget(
+              userUid: this.userProvider.user!.userUid,
+              post: this.postsProvider.post!,
+              follow: this.userProvider.follow, // todo show snackbar
+              isFollowing: this.userProvider.isFollowing(this.postsProvider.post!.author.userUid),
+            ),
             Container(
               margin: const EdgeInsets.only(top: 15.0),
               child: Column(
@@ -62,8 +69,8 @@ class AndroidPost extends StatelessWidget {
               ),
             ),
             this.postsProvider.comments.isNotEmpty
-                ? Comments(postsProvider: this.postsProvider,)
-                : Container(),
+              ? Comments(postsProvider: this.postsProvider,)
+              : Container(),
           ],
         ),
       ),

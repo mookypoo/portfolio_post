@@ -25,6 +25,7 @@ class FirebaseService {
         final String _userUid = _res["data"]["localId"].toString();
         final String _idToken = _res["data"]["idToken"].toString();
         final bool _success = await this._saveUserInfoDb(info: info, uid: _userUid, idToken: _idToken);
+        print("save user info db: ${_success}");
         if (_success) {
           await this._setFirebaseSql(info: _res["data"]);
           return User(userName: info.name, userUid: _userUid, idToken: _idToken);
@@ -96,6 +97,7 @@ class FirebaseService {
   Future<bool> _tableExists() async => await this._sqfliteRepo.tableExists(tableName: this._tableName);
 
   Future<void> _setFirebaseSql({required Map<String, dynamic> info}) async {
+    print("setting firebase sql");
     final List<String> _value = [
       info["displayName"].toString(),
       info["idToken"].toString(),
@@ -104,14 +106,16 @@ class FirebaseService {
       DateTime.now().add(Duration(seconds: int.parse(info["expiresIn"].toString()))).toIso8601String(),
       info["localId"].toString(),
     ];
-
+    print(await this._tableExists());
     if (!await this._tableExists()){
       final String _insertSql = "INSERT into ${this._tableName} (username, id_token, email, refresh_token, expires, user_uid) values (?, ?, ?, ?, ?, ?)";
       final String _sql = "CREATE TABLE ${this._tableName} (id INTEGER PRIMARY KEY, username TEXT, id_token TEXT, email TEXT, refresh_token TEXT, expires TEXT, user_uid TEXT)";
-      await this._sqfliteRepo.createTable(createTableSql: _sql, insertSql: _insertSql, value: _value);
+      final _int = await this._sqfliteRepo.createTable(createTableSql: _sql, insertSql: _insertSql, value: _value);
+      print(_int);
     } else {
       final String _updateSql = "UPDATE ${this._tableName} SET username = ?, id_token = ?, email = ?, refresh_token = ?, expires = ?, user_uid = ? where id = 1";
-      await this._sqfliteRepo.updateData(sql: _updateSql, value: _value);
+      final _int = await this._sqfliteRepo.updateData(sql: _updateSql, value: _value);
+      print(_int);
     }
   }
 

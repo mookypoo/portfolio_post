@@ -2,13 +2,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 
 import '../../providers/posts_provider.dart';
+import '../../providers/user_provider.dart';
 import '../../repos/variables.dart';
 import 'common_components.dart';
 import 'ios_components.dart';
 
 class IosPost extends StatelessWidget {
-  const IosPost({Key? key, required this.postsProvider}) : super(key: key);
+  const IosPost({Key? key, required this.postsProvider, required this.userProvider}) : super(key: key);
   final PostsProvider postsProvider;
+  final UserProvider userProvider;
 
   @override
   Widget build(BuildContext context) {
@@ -23,14 +25,19 @@ class IosPost extends StatelessWidget {
       ),
       child: SafeArea(
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 25.0),
+          padding: EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               this.postsProvider.post?.author.userUid == this.postsProvider.user!.userUid
-                  ? EditDelete(delete: this.postsProvider.deletePost, userUid: this.postsProvider.user!.userUid, resetPost: this.postsProvider.resetPost,)
-                  : Container(),
-              PostWidget(post: this.postsProvider.post!),
+                ? EditDelete(delete: this.postsProvider.deletePost, userUid: this.postsProvider.user!.userUid, resetPost: this.postsProvider.resetPost,)
+                : Container(),
+              PostWidget(
+                userUid: this.userProvider.user!.userUid,
+                post: this.postsProvider.post!,
+                follow: this.userProvider.follow,
+                isFollowing: this.userProvider.isFollowing(this.postsProvider.post!.author.userUid),
+              ),
               Container(
                 margin: const EdgeInsets.only(top: 15.0),
                 child: Column(

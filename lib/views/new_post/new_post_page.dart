@@ -18,7 +18,7 @@ class NewPostPage extends StatelessWidget {
     final String _pageTitle = ModalRoute.of(context)?.settings.arguments.toString() ?? "";
 
     return Platform.isAndroid
-        ? AndroidNewPost()
+        ? AndroidNewPost(pageTitle: _pageTitle, postsProvider: _postsProvider,)
         : IosNewPost(pageTitle: _pageTitle, postsProvider: _postsProvider,);
   }
 }

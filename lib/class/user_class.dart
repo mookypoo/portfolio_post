@@ -13,6 +13,17 @@ class User extends UserAbstract {
   final String idToken;
 
   User({required this.userUid, required this.userName, required this.idToken});
+
+  Map<String, dynamic> toJson() => {
+    "userUid": this.userUid,
+    "idToken": this.idToken,
+  };
+
+  Map<String, dynamic> toJsonWithName() => {
+    "userUid": this.userUid,
+    "idToken": this.idToken,
+    "userName": this.userName,
+  };
 }
 
 class Author extends UserAbstract {
