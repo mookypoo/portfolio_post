@@ -40,11 +40,22 @@ app.post("/saveDeviceToken", async (req, res) => {
     }
 });
 
+app.post("/deleteDeviceToken", async (req, res) => {
+    console.log("deleting device token");
+    try {
+        const _verified = await verifyUser(req);
+        if (_verified) await admin.database().ref(`/usersAuth/${req.body.userUid}`).child("deviceToken").remove();
+        res.end();
+    } catch (e) {
+        console.log(e);
+        res.send({ error: e });
+    }
+});
+
 app.post("/setNotifications", async (req, res) => {
     try {
         const _verified = await verifyUser(req);
         if (_verified) {
-            // todo if receive notification is false, delete device token 
             await admin.database().ref(`/users/${req.body.userUid}`).child("receiveNotifications").set(req.body.receiveNotifications);
             res.send({ data: "success" });
         }
@@ -59,9 +70,10 @@ app.post("/setNotifications", async (req, res) => {
 // - name: ...f
 // - deviceToken: ...
 saveFollower = functions.https.onRequest(async (req, res) => {
-    const followers = await admin.database().ref("/followers").child(req.body.postAuthorUid).get();
     const followerUid = req.body.userUid;
-    if (followers.val() == null || !followers.val().followerUid) {
+    const followers = await admin.database().ref(`/followers/${req.body.postAuthorUid}`).child(followerUid).get();
+    console.log(followers.val());
+    if (followers.val() == null) {
         console.log("adding follower");
         const followerInfo = {
             deviceToken: req.body.deviceToken,
@@ -70,7 +82,7 @@ saveFollower = functions.https.onRequest(async (req, res) => {
         await admin.database().ref(`/followers/${req.body.postAuthorUid}`).child(followerUid).set(followerInfo);
         return "successfully followed";
     }
-    if (followers.val().followedUid) {
+    if (followers.val() != null) {
         console.log("removing follower");
         await admin.database().ref(`/followers/${req.body.postAuthorUid}`).child(followerUid).remove();
         return "successfully unfollowed";
@@ -79,15 +91,15 @@ saveFollower = functions.https.onRequest(async (req, res) => {
 
 // users/followerId/following/followedId: following
 saveFollowing = functions.https.onRequest(async (req, res) => {
-    console.log(req.body);
-    const following = await admin.database().ref(`/users/${req.body.userUid}`).child("following").get();
+    console.log("saving following");
     const followingUid = req.body.postAuthorUid;
-    if (following.val() == null || !following.val().followingUid) {
+    const following = await admin.database().ref(`/users/${req.body.userUid}/following`).child(followingUid).get();
+    if (following.val() == null) {
         console.log("adding new author to follow");
         await admin.database().ref(`/users/${req.body.userUid}/following`).child(followingUid).set("follow");
         return "successfully followed";
     }
-    if (following.val().followingUid) {
+    if (following.val()) {
         console.log("unfollowing");
         await admin.database().ref(`/users/${req.body.userUid}/following`).child(followingUid).remove();
         return "successfully unfollowed";

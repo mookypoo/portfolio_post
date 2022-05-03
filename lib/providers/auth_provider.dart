@@ -134,7 +134,8 @@ class AuthProvider with ChangeNotifier {
   }
 
   Future<void> firebaseSignOut() async {
-    await this._firebaseService.signOut();
+    if (this._user == null) return;
+    await this._firebaseService.signOut(user: this._user!);
     this._user = null;
     this.changeState(state: AuthState.loggedOut);
   }

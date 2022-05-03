@@ -59,6 +59,7 @@ class FirebaseService {
     return false;
   }
 
+  // sign in 할때는 새로 id token 저장하기
   Future<Object> signIn({required String email, required String pw, String? username}) async {
     final Map<String, dynamic> _body = {"email": email, "password": pw, "returnSecureToken": true,};
     try {
@@ -77,9 +78,15 @@ class FirebaseService {
     return {};
   }
 
-  Future<void> signOut() async {
+  Future<void> signOut({required User user}) async {
     await this._sqfliteRepo.dropTable(tableName: this._tableName);
     await this._sqfliteRepo.closeDb();
+    try {
+      // todo unexpected end of input
+      await this._connect.reqPostServer(path: "/user/deleteDeviceToken", cb: (ReqModel rm) {}, body: user.toJson());
+    } catch (e) {
+      print(e);
+    }
   }
 
   Future<bool?> autoAuth({required String userUid, required String idToken}) async {
@@ -97,7 +104,6 @@ class FirebaseService {
   Future<bool> _tableExists() async => await this._sqfliteRepo.tableExists(tableName: this._tableName);
 
   Future<void> _setFirebaseSql({required Map<String, dynamic> info}) async {
-    print("setting firebase sql");
     final List<String> _value = [
       info["displayName"].toString(),
       info["idToken"].toString(),
@@ -106,7 +112,7 @@ class FirebaseService {
       DateTime.now().add(Duration(seconds: int.parse(info["expiresIn"].toString()))).toIso8601String(),
       info["localId"].toString(),
     ];
-    print(await this._tableExists());
+
     if (!await this._tableExists()){
       final String _insertSql = "INSERT into ${this._tableName} (username, id_token, email, refresh_token, expires, user_uid) values (?, ?, ?, ?, ?, ?)";
       final String _sql = "CREATE TABLE ${this._tableName} (id INTEGER PRIMARY KEY, username TEXT, id_token TEXT, email TEXT, refresh_token TEXT, expires TEXT, user_uid TEXT)";
@@ -146,7 +152,6 @@ class FirebaseService {
   /// server disconnect = false
   Future<Map<String, dynamic>> refreshToken({required String refreshToken, required String userUid}) async {
     final Map<String, String> _body = {"refreshToken": refreshToken, "userUid": userUid};
-    print(_body);
     try {
       final Map<String, dynamic> _res = await this._connect.reqPostServer(path: "auth/refreshToken", cb: (ReqModel rm) {}, body: _body);
       if (_res.containsKey("data")) {

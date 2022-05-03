@@ -18,7 +18,8 @@ import 'package:provider/provider.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await FCMService.initializeFirebase();
-  FirebaseMessaging.onBackgroundMessage(FCMService.fcmBackgroundHandler);
+  await FCMService.initializeLocalNotifications();
+  await FCMService.onBackgroundMsg();
   await FCMService.onMessage();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitDown, DeviceOrientation.portraitUp]);
   runApp(const PortfolioPost());

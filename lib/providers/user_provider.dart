@@ -32,10 +32,8 @@ class UserProvider with ChangeNotifier {
       this._user = user;
       final Map<String, dynamic> _res = await this._userService.getUserInfo(user: user);
       if (_res.containsKey("userInfo")) this._profile = Profile.fromJson(_res["userInfo"]);
-      print(_res["userInfo"]);
       this._state = ProviderState.complete;
       this.notifyListeners();
-      print(this._profile!.following);
       await this._fcmService.checkDeviceToken(user: user);
     }
   }

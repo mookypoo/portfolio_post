@@ -16,18 +16,22 @@ class IosProfile extends StatelessWidget {
       navigationBar: CupertinoNavigationBar(middle: const Text("프로필"),),
       child: SafeArea(
         child: Container(
-            height: _size.height,
-            width: _size.width,
-            child: this.userProvider.user == null
-              ? NotLoggedIn()
-              : LoggedIn(
-                  logOut: () async {
-                    this.userProvider.logout();
-                    await this.logOut();
-                  },
-              profile: this.userProvider.profile,
-                  switchWidget: CupertinoSwitch(value: this.userProvider.profile!.receiveNotifications, onChanged: (bool b) async => await this.userProvider.receiveNotifications()),
-                )
+          height: _size.height,
+          width: _size.width,
+          child: this.userProvider.user == null
+            ? NotLoggedIn()
+            : LoggedIn(
+                logOut: () async {
+                  this.userProvider.logout();
+                  await this.logOut();
+                },
+                profile: this.userProvider.profile,
+                  switchWidget: Container(
+                    child: CustomSwitch(
+                      value: this.userProvider.profile!.receiveNotifications,
+                      onSwitched: () async => await this.userProvider.receiveNotifications()),
+                  ),
+                ),
         ),
       ),
     );

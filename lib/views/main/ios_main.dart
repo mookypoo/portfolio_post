@@ -25,39 +25,25 @@ class IosMain extends StatelessWidget {
         ),
       ),
       child: SafeArea(
-        child: CustomScrollView(
-          slivers: [
-            CupertinoSliverRefreshControl(
-              onRefresh: () async {
-               await this.postsProvider.refreshPreviews();
-              },
-            ),
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (BuildContext context, int index) => PostPreviewTile(
-                  getPost: this.postsProvider.getPostComments,
-                  post: this.postsProvider.postPreviews[index],
+        child: Stack(
+          children: <Widget>[
+            CustomScrollView(
+              slivers: [
+                CupertinoSliverRefreshControl(
+                  onRefresh: () async {
+                    await this.postsProvider.refreshPreviews();
+                  },
                 ),
-                childCount: this.postsProvider.postPreviews.length
-            )),
-          ],
-        ),
-      ),
-    );
-  }
-}
-/*
-
-CupertinoPageScaffold(
-      navigationBar: CupertinoNavigationBar(
-        middle: Text("계시판"),
-        trailing: CupertinoButton(
-          padding: EdgeInsets.zero,
-          onPressed: () async => await Navigator.of(context).pushNamed(ProfilePage.routeName),
-          child: Icon(CupertinoIcons.person),
-        ),
-      ),
-Positioned(
+                SliverList(
+                  delegate: SliverChildBuilderDelegate((BuildContext context, int index) => PostPreviewTile(
+                      getPost: this.postsProvider.getPostComments,
+                      post: this.postsProvider.postPreviews[index],
+                    ),
+                    childCount: this.postsProvider.postPreviews.length
+                )),
+              ],
+            ),
+            Positioned(
               bottom: 0.0,
               right: 10.0,
               child: CupertinoButton(
@@ -71,4 +57,9 @@ Positioned(
                 },
               ),
             ),
- */
+          ],
+        )
+      ),
+    );
+  }
+}

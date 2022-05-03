@@ -9,14 +9,38 @@ class FCMService {
   Connect _connect = Connect();
   static Future<void> initializeFirebase() async => await Firebase.initializeApp();
 
-  // Future<void> Function(String?) onSelectNotification
   static FlutterLocalNotificationsPlugin _localNotificationsPlugin = FlutterLocalNotificationsPlugin();
   static Future<void> initializeLocalNotifications() async {
     final InitializationSettings _initializationSettings = InitializationSettings(
       android: AndroidInitializationSettings("notification_bell"),
       iOS: IOSInitializationSettings(),
     );
-    await _localNotificationsPlugin.initialize(_initializationSettings);
+    await FCMService._localNotificationsPlugin.initialize(_initializationSettings);
+  }
+
+  static NotificationDetails platformChannelSpecifics = NotificationDetails(
+      android: AndroidNotificationDetails(
+        "channel id", "channel name", priority: Priority.high, importance: Importance.max,
+      ),
+  );
+
+  static Future<void> onBackgroundMsg() async {
+    await FirebaseMessaging.instance.getInitialMessage();
+    FirebaseMessaging.onBackgroundMessage(FCMService.fcmBackgroundHandler);
+  }
+
+  static Future<void> fcmBackgroundHandler(RemoteMessage message) async {
+    print("handling background message ${message.messageId}");
+  }
+
+  static Future<void> onMessage() async {
+    await FirebaseMessaging.instance.getInitialMessage();
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
+      await FCMService._localNotificationsPlugin.show(
+        0, message.notification!.title, message.notification!.body, FCMService.platformChannelSpecifics,
+        payload: "new follower",
+      );
+    });
   }
 
   Future<void> checkDeviceToken({required User user}) async {
@@ -33,25 +57,6 @@ class FCMService {
     } catch (e) {
       print(e);
     }
-  }
-
-  static Future<void> onMessage() async {
-    await FirebaseMessaging.instance.getInitialMessage();
-    await FCMService.initializeLocalNotifications();
-    AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
-      "channel id", "channel name", priority: Priority.high, importance: Importance.max,
-    );
-    NotificationDetails platformChannelSpecifics = NotificationDetails(android: androidPlatformChannelSpecifics);
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
-      await _localNotificationsPlugin.show(
-        0, message.notification!.title, message.notification!.body, platformChannelSpecifics, payload: "item 1",
-      );
-      print("got message notification ${message.notification!.title}");
-    });
-  }
-
-  static Future<void> fcmBackgroundHandler(RemoteMessage message) async {
-    print("handling background message ${message.messageId}");
   }
 
   Future<void> _saveDeviceToken({required User user, required String deviceToken}) async {
@@ -76,7 +81,6 @@ class FCMService {
 
   // todo user.toJSON있으니 딴대고 고치셈
   // todo delete info when unfollow
-  // also when click on follow, the follow text does not change to unfollow
   Future<Map<String, dynamic>> follow({required User user, required String postAuthorUid}) async {
     final Map<String, dynamic> _body = user.toJsonWithName()..addAll({ "postAuthorUid": postAuthorUid });
     print(_body["userName"]);

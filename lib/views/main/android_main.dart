@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../providers/posts_provider.dart';
-import '../../repos/variables.dart';
 import '../new_post/new_post_page.dart';
 import '../profile/profile_page.dart';
 import 'common_components.dart';
@@ -37,19 +36,23 @@ class AndroidMain extends StatelessWidget {
         },
       ),
       body: Container(
-        padding: EdgeInsets.symmetric(horizontal: 25.0, vertical: 15.0),
         width: _size.width,
         height: _size.height,
-        child: Container(
-          child: ListView.builder(
-            padding: EdgeInsets.zero,
-            itemCount: this.postsProvider.postPreviews.length,
-            itemBuilder: (BuildContext context, int index) => PostPreviewTile(
-              getPost: this.postsProvider.getPostComments,
-              post: this.postsProvider.postPreviews[index],
+        child: RefreshIndicator(
+          onRefresh: () async {
+            await this.postsProvider.refreshPreviews();
+          },
+          child: Container(
+            child: ListView.builder(
+              padding: EdgeInsets.zero,
+              itemCount: this.postsProvider.postPreviews.length,
+              itemBuilder: (BuildContext context, int index) => PostPreviewTile(
+                getPost: this.postsProvider.getPostComments,
+                post: this.postsProvider.postPreviews[index],
+              ),
             ),
           ),
-        ),
+        )
       ),
     );
   }
