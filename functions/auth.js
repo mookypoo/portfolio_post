@@ -1,7 +1,7 @@
 const express = require("express"),
     app = express(),
     axios = require("axios"),
-    firebaseAPI = "AIzaSyAao5PL4usFRTcEinDJO0PwCmE114h4EAM",
+    
     endPoint = (firebasePath) => `https://identitytoolkit.googleapis.com/v1/accounts:${firebasePath}?key=${firebaseAPI}`,
     functions = require("firebase-functions"),
     admin = require("firebase-admin"),
