@@ -113,69 +113,67 @@ class Comments extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: ListView.builder(
-          itemCount: this.postsProvider.comments.length,
-          itemBuilder: (BuildContext context, int index) {
-            final Comment _comment = this.postsProvider.comments[index];
-            String _text = "${_comment.author.userName} : ${_comment.text}";
-            if (_comment.isPrivate) {
-              final String _secret = "${_comment.author.userName}: 비밀인 댓글입니다";
-              if (this.postsProvider.user?.userUid != _comment.author.userUid
-                  && this.postsProvider.user?.userUid != this.postsProvider.post?.author.userUid) _text = _secret;
-            };
-            return Container(
-              margin: const EdgeInsets.symmetric(vertical: 5.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: <Widget>[
-                  this._mainCommentWidget(text: _text),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Text("${_comment.createdTime}", style: TextStyle(fontSize: 13.5),),
-                      GestureDetector(
-                        child: Text("댓글달기", style: TextStyle(fontWeight: FontWeight.w600, color: MyColors.primary, fontSize: 15.0)),
-                        onTap: () async {
-                          final bool _save = await showCupertinoModalPopup<bool>(
-                            context: context,
-                            builder: (BuildContext ctx) {
-                              PostsProvider _postsProvider = Provider.of<PostsProvider>(ctx);
-                              return CommentBottomSheet(
-                                isPrivate: _postsProvider.isPrivate,
-                                onComment:  _postsProvider.onComment,
-                                changePrivate: _postsProvider.changePrivate,
-                              );
-                            },
-                          ) ?? false;
-                          if (!_save) return;
-                          final bool _success = await this.postsProvider.commentOnComment(mainCommentUid: this.postsProvider.comments[index].commentUid);
-                          if (!_success) return;
+    return ListView.builder(
+        itemCount: this.postsProvider.comments.length,
+        itemBuilder: (BuildContext context, int index) {
+          final Comment _comment = this.postsProvider.comments[index];
+          String _text = "${_comment.author.userName} : ${_comment.text}";
+          if (_comment.isPrivate) {
+            final String _secret = "${_comment.author.userName}: 비밀인 댓글입니다";
+            if (this.postsProvider.user?.userUid != _comment.author.userUid
+                && this.postsProvider.user?.userUid != this.postsProvider.post?.author.userUid) _text = _secret;
+          };
+          return Container(
+            margin: const EdgeInsets.symmetric(vertical: 5.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: <Widget>[
+                this._mainCommentWidget(text: _text),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Text("${_comment.createdTime}", style: TextStyle(fontSize: 13.5),),
+                    GestureDetector(
+                      child: Text("댓글달기", style: TextStyle(fontWeight: FontWeight.w600, color: MyColors.primary, fontSize: 15.0)),
+                      onTap: () async {
+                        final bool _save = await showCupertinoModalPopup<bool>(
+                          context: context,
+                          builder: (BuildContext ctx) {
+                            PostsProvider _postsProvider = Provider.of<PostsProvider>(ctx);
+                            return CommentBottomSheet(
+                              isPrivate: _postsProvider.isPrivate,
+                              onComment:  _postsProvider.onComment,
+                              changePrivate: _postsProvider.changePrivate,
+                            );
+                          },
+                        ) ?? false;
+                        if (!_save) return;
+                        final bool _success = await this.postsProvider.commentOnComment(mainCommentUid: this.postsProvider.comments[index].commentUid);
+                        if (!_success) return;
+                      },
+                    ),
+                  ],
+                ),
+                this.postsProvider.comments[index].comments.isNotEmpty
+                  ? Container(
+                      width: 300.0,
+                      height: 45.0 * this.postsProvider.comments[index].comments.length,
+                      child: ListView.builder(
+                        itemCount: this.postsProvider.comments[index].comments.length,
+                        itemBuilder: (BuildContext ctx, int i) {
+                          final Comment _subComment = this.postsProvider.comments[index].comments[i];
+                          String _text = "${_subComment.author.userName} : ${_subComment.text}";
+                          if (_subComment.isPrivate) {
+                            if (this.postsProvider.user?.userUid != _subComment.author.userUid && this.postsProvider.user?.userUid != this.postsProvider.post!.author.userUid) _text = "${_subComment.author.userName}: 비밀인 댓글입니다";
+                          };
+                          return this._subWidget(text: _text);
                         },
                       ),
-                    ],
-                  ),
-                  this.postsProvider.comments[index].comments.isNotEmpty
-                    ? Container(
-                        width: 300.0,
-                        height: 45.0 * this.postsProvider.comments[index].comments.length,
-                        child: ListView.builder(
-                          itemCount: this.postsProvider.comments[index].comments.length,
-                          itemBuilder: (BuildContext ctx, int i) {
-                            final Comment _subComment = this.postsProvider.comments[index].comments[i];
-                            String _text = "${_subComment.author.userName} : ${_subComment.text}";
-                            if (_subComment.isPrivate) {
-                              if (this.postsProvider.user?.userUid != _subComment.author.userUid && this.postsProvider.user?.userUid != this.postsProvider.post!.author.userUid) _text = "${_subComment.author.userName}: 비밀인 댓글입니다";
-                            };
-                            return this._subWidget(text: _text);
-                          },
-                        ),
-                      )
-                    : Container(),
-                ],
-              ),
-            );
-          }),
-    );
+                    )
+                  : Container(),
+              ],
+            ),
+          );
+        });
   }
 }

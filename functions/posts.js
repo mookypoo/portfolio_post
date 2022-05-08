@@ -28,6 +28,7 @@ addPreview = functions.region("asia-northeast3").database.instance("mooky-post-d
             text: original.text.substring(0, 100),
             userName: original.author.userName,
             createdTime: original.createdTime,
+            category: original.category,
         };
         return snapshot.ref.database.ref("/previews").child(context.params.postUid).set(preview);
     });
@@ -36,14 +37,21 @@ deletePreviewAndComment = functions.region("asia-northeast3").database.instance(
     .onDelete((snapshot, context) => {
         functions.logger.log("deleting preview and comment", context.params.postUid);
         return snapshot.ref.database.ref().set({ [`/previews/${context.params.postUid}`]: null, [`/comments/${context.params.postUid}`]: null,});
-        // return snapshot.ref.database.ref("/previews").child(context.params.postUid).remove();
     });
 
 app.get("/getPreviews", async (req, res) => {
     try {
-        const _dataSnapshot = await admin.database().ref("/previews").orderByChild("createdTime").get();
         let previews = [];
-        if (_dataSnapshot.val() != null) previews = Object.values(_dataSnapshot.val());
+        await new Promise(resolve => {
+            admin.database().ref("/previews").orderByChild("createdTime").on("value", async (snapshot) => {
+                // 왜 이건 되고 밑에껀 안되지? 
+                snapshot.forEach(child => {
+                    previews.push(child.val());
+                });
+                //snapshot.forEach(child => previews.push(child.val()));
+                setTimeout(_ => resolve(), 1000);
+            });
+        });
         res.send({ previews: previews });
     } catch (e) {
         console.log(e);
@@ -53,7 +61,7 @@ app.get("/getPreviews", async (req, res) => {
 
 app.get("/refreshPreviews", async (req, res) => {
     try {
-        const _dataSnapshot = await admin.database().ref("/previews").orderByChild("createdTime").get();
+        const _dataSnapshot = await admin.database().ref("/previews").orderByChild("createdTime").once("value");
         if (_dataSnapshot.val() != null) previews = Object.values(_dataSnapshot.val());
         res.send({ previews });
     } catch (e) {
@@ -132,6 +140,30 @@ app.post("/edit", async (req, res) => {
             res.send({ modifiedTime });
         }
         if (!_verified) res.send({ error: "user not verified" });
+    } catch (e) {
+        console.log(e);
+        res.send({ error: e });
+    }
+});
+
+app.get("/category", async (req, res) => {
+    console.log(req.query.category);
+    try {
+        let previews = [];
+        await new Promise(resolve => {
+            req.query.category.forEach(async (category) => {
+                const _dataSnapshot = await admin.database().ref("/previews").orderByChild("category").equalTo(category).get();
+                if (_dataSnapshot.val() != null) {
+                    Object.values(_dataSnapshot.val()).forEach(snapshot => previews.push(snapshot));
+                }
+                console.log(previews);
+            });
+            setTimeout(_ => {
+                resolve();
+            }, 1000);
+        });
+        console.log(previews);
+        res.send({ previews: previews });
     } catch (e) {
         console.log(e);
         res.send({ error: e });

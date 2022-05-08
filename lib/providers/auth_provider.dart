@@ -102,8 +102,8 @@ class AuthProvider with ChangeNotifier {
   }
 
   Future<bool> firebaseSignUp({required SignUpInfo info}) async {
-    final SignUpInfo data = SignUpInfo(email: "sookim482@gmail.com", name: "Soo Kim", pw: "todo123", isMale: false);
-    final _res = await this._firebaseService.signup(info: data);
+    //final SignUpInfo data = SignUpInfo(email: "sookim482@gmail.com", name: "Soo Kim", pw: "todo123", isMale: false);
+    final _res = await this._firebaseService.signup(info: info);
     if (_res.runtimeType == User) {
       this._user = _res as User;
       this.changeState(state: AuthState.loggedIn);

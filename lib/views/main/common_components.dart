@@ -23,7 +23,7 @@ class PostPreviewTile extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(this.post.title, style: TextStyle(fontWeight: FontWeight.w600, color: Color.fromRGBO(0, 0, 0, 1.0), fontSize: 20.0),),
-            Text(this.post.text, style: TextStyle(overflow: TextOverflow.ellipsis), maxLines: 2,),
+            Text(this.post.text, style: TextStyle(overflow: TextOverflow.ellipsis, fontSize: 16.0), maxLines: 2,),
             Align(
               alignment: Alignment.centerRight,
               child: Text(this.post.userName, style: TextStyle(fontSize: 15.0)),

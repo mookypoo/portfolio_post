@@ -13,9 +13,6 @@ class FirebaseService {
     print("firebase service init");
   }
 
-  /// firebase signup --> success --> realtime db --> success --> set sql --> success --> return uid
-  /// firebase signup --> success --> realtime db --> error --> ??
-  /// firebase signup --> error --> return error msg
   Future<Object> signup({required SignUpInfo info}) async {
     final Map<String, dynamic> _body = {"displayName": info.name, "email": info.email, "password": info.pw, "returnSecureToken": true,};
 
@@ -63,11 +60,14 @@ class FirebaseService {
   Future<Object> signIn({required String email, required String pw, String? username}) async {
     final Map<String, dynamic> _body = {"email": email, "password": pw, "returnSecureToken": true,};
     try {
+      print(1);
       final Map<String, dynamic> _res = await this._connect.reqPostServer(path: "auth/sign/in", cb: (ReqModel rm) {}, body: _body);
+      print(2);
       if (_res.containsKey("data")){
         await this._setFirebaseSql(info: _res["data"]);
         return User(userName: _res["data"]["displayName"].toString(), userUid: _res["data"]["localId"].toString(), idToken: _res["data"]["idToken"].toString());
       }
+      print(3);
       if (_res.containsKey("error")){
         if (_res["error"]["message"].toString() == "INVALID_PASSWORD") return {"error": "잘못된 비밀번호입니다."};
         if (_res["error"]["message"].toString() == "EMAIL_NOT_FOUND") return {"error": "아직 가입하지 않은 이메일입니다."};

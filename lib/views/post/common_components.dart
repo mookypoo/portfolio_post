@@ -12,8 +12,6 @@ class PostWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print(isFollowing);
-
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
       children: <Widget>[
@@ -24,7 +22,7 @@ class PostWidget extends StatelessWidget {
         Align(
           alignment: Alignment.centerLeft,
           child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 25.0),
+            padding: const EdgeInsets.all(10.0),
             child: Text(this.post.text),
           ),
         ),

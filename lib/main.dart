@@ -1,18 +1,19 @@
 import 'dart:io';
 
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:portfolio_post/providers/auth_provider.dart';
 import 'package:portfolio_post/providers/posts_provider.dart';
+import 'package:portfolio_post/providers/search_provider.dart';
+import 'package:portfolio_post/providers/tab_provider.dart';
 import 'package:portfolio_post/providers/user_provider.dart';
 import 'package:portfolio_post/service/fcm_service.dart';
 import 'package:portfolio_post/views/auth/auth_page.dart';
-import 'package:portfolio_post/views/main/main_page.dart';
 import 'package:portfolio_post/views/new_post/new_post_page.dart';
 import 'package:portfolio_post/views/post/post_page.dart';
 import 'package:portfolio_post/views/profile/profile_page.dart';
+import 'package:portfolio_post/views/scaffold/scaffold_page.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
@@ -55,11 +56,11 @@ class PortfolioPost extends StatelessWidget {
       );
     };
     return MaterialPageRoute(
-      builder: (BuildContext context) => MainPage(),
-      settings: RouteSettings(name: MainPage.routeName),
+      builder: (BuildContext context) => ScaffoldPage(),
+      settings: RouteSettings(name: ScaffoldPage.routeName),
     );
   },
-    home: MainPage(),
+    home: ScaffoldPage(),
     theme: ThemeData(
       textTheme: TextTheme(
         bodyText2: TextStyle(fontSize: 17.0),
@@ -100,11 +101,11 @@ class PortfolioPost extends StatelessWidget {
         );
       };
       return CupertinoPageRoute(
-        builder: (BuildContext context) => MainPage(),
-        settings: RouteSettings(name: MainPage.routeName),
+        builder: (BuildContext context) => ScaffoldPage(),
+        settings: RouteSettings(name: ScaffoldPage.routeName),
       );
     },
-    home: MainPage(),
+    home: ScaffoldPage(),
   );
 
   @override
@@ -113,7 +114,9 @@ class PortfolioPost extends StatelessWidget {
       providers: [
         ChangeNotifierProvider<AuthProvider>(create: (_) => AuthProvider()),
         ChangeNotifierProvider<PostsProvider>(create: (_) => PostsProvider()),
-        ChangeNotifierProvider<UserProvider>(create: (_) => UserProvider())
+        ChangeNotifierProvider<UserProvider>(create: (_) => UserProvider()),
+        ChangeNotifierProvider<TabProvider>(create: (_) => TabProvider()),
+        ChangeNotifierProvider<SearchProvider>(create: (_) => SearchProvider())
       ],
       child: Platform.isAndroid ? this._androidApp() : this._iosApp(),
     );

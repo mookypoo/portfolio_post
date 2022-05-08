@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import '../../providers/auth_provider.dart';
 import '../../providers/posts_provider.dart' show ProviderState;
+import '../../providers/tab_provider.dart';
 import '../../providers/user_provider.dart';
 import 'android_profile.dart';
 import 'ios_profile.dart';
@@ -18,11 +19,12 @@ class ProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     UserProvider _userProvider = Provider.of<UserProvider>(context);
     AuthProvider _authProvider = Provider.of<AuthProvider>(context);
+    void Function(int index) _changeTab = Provider.of<TabProvider>(context, listen: false).changeTab;
 
     if (_userProvider.state == ProviderState.connecting) return LoadingPage();
 
     return Platform.isAndroid
-        ? AndroidProfile(logOut: _authProvider.firebaseSignOut, userProvider: _userProvider,)
-        : IosProfile(logOut: _authProvider.firebaseSignOut, userProvider: _userProvider,);
+        ? AndroidProfile(logOut: _authProvider.firebaseSignOut, userProvider: _userProvider, changeTab: _changeTab,)
+        : IosProfile(logOut: _authProvider.firebaseSignOut, userProvider: _userProvider, changeTab: _changeTab);
   }
 }

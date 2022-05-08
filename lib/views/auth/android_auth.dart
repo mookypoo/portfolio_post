@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../class/auth_class.dart';
 import '../../providers/auth_provider.dart';
+import '../scaffold/scaffold_page.dart';
 import 'components/android_components.dart';
 import 'components/common_components.dart';
 
@@ -91,7 +92,7 @@ class _AndroidAuthState extends State<AndroidAuth> {
                                   pw: this._pw1Ct.text.trim(),
                                 ),);
                               if (!_success) return;
-                              Navigator.of(context).pop();
+                              await Navigator.of(context).pushReplacementNamed(ScaffoldPage.routeName);
                             },
                             switchPage: () {
                               this.widget.authProvider.switchPage();
@@ -115,7 +116,7 @@ class _AndroidAuthState extends State<AndroidAuth> {
                                 ),
                               );
                               if (!_success) return;
-                              Navigator.of(context).pop();
+                              await Navigator.of(context).pushReplacementNamed(ScaffoldPage.routeName);
                             },
                           ),
                     ],

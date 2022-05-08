@@ -13,7 +13,7 @@ class NewPostPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    PostsProvider _postsProvider = Provider.of<PostsProvider>(context, listen: false);
+    PostsProvider _postsProvider = Provider.of<PostsProvider>(context);
 
     final String _pageTitle = ModalRoute.of(context)?.settings.arguments.toString() ?? "";
 

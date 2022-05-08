@@ -1,22 +1,24 @@
 const express = require("express"),
     app = express(),
     axios = require("axios"),
-    firebaseAPI = "AIzaSyAao5PL4usFRTcEinDJO0PwCmE114h4EAM",
+    
     endPoint = (firebasePath) => `https://identitytoolkit.googleapis.com/v1/accounts:${firebasePath}?key=${firebaseAPI}`,
     functions = require("firebase-functions"),
     admin = require("firebase-admin"),
     qs = require("qs");
 
 app.post("/sign/:action", async (req, res) => {
-    let _path = "signUp";
-    if (req.params.action == "in") _path = "signInWithPassword";
+    let path = "signUp";
+    if (req.params.action == "in") path = "signInWithPassword";
     try {
-        const _res = await axios.post(
-            endPoint(_path),
+        const res = await axios.post(
+            endPoint(path),
             req.body,
             { headers: { "content-type": "application / json" } },
         );
-        res.send({ data: _res.data });
+        console.log(res.data.localId);
+        if (req.params.action == "in") await admin.database().ref(`/usersAuth/${res.data.localId}`).child("idToken").update(res.data.idToken);
+        res.send({ data: res.data });
     } catch (e) {
         console.log(e.response.data);
         res.send(e.response.data);

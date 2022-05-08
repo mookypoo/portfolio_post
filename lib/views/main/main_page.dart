@@ -12,7 +12,6 @@ import 'ios_main.dart';
 
 class MainPage extends StatelessWidget {
   const MainPage({Key? key}) : super(key: key);
-  static const String routeName = "/mainPage";
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +19,7 @@ class MainPage extends StatelessWidget {
     PostsProvider _postsProvider = Provider.of<PostsProvider>(context);
     UserProvider _userProvider = Provider.of<UserProvider>(context, listen: false);
 
-    if (_authProvider.authState == AuthState.await) return LoadingPage();
+    //if (_authProvider.authState == AuthState.await) return LoadingPage();
     if (_authProvider.user != null) {
       // todo make sure they are getting user only once
       _postsProvider.getUser(_authProvider.user!);

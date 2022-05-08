@@ -31,17 +31,18 @@ class PostService {
   }
 
   // todo 질문: 이렇게 parameter 다 받아와서 여기서 body로 변경? 아니면 provider에서 부터 body로 변경해서 줌?
-  Future<Map<String, dynamic>> addPost({required String title, required String text, required Author author}) async {
+  Future<Map<String, dynamic>> addPost({required String? category, required String title, required String text, required Author author}) async {
     final Map<String, dynamic> _body = {
       "title": title,
       "text": text,
       "author": author.toJson(),
+      "category": category,
     };
     try {
       final Map<String, dynamic> _res = await this._connect.reqPostServer(path: "/posts/add", cb: (ReqModel rm) {}, body: {"post": _body});
       if (_res.containsKey("postUid") && _res.containsKey("createdTime")) return {
-        "post": Post(createdTime: Post.convertISOToString( _res["createdTime"]), author: author, text: text, title: title, postUid: _res["postUid"], numOfLikes: 0, likedUsers: []),
-        "preview": Preview(userName: author.userName, title: title, text: text, postUid: _res["postUid"]),
+        "post": Post(createdTime: Post.convertISOToString( _res["createdTime"]), author: author, text: text, title: title, postUid: _res["postUid"], numOfLikes: 0, likedUsers: [], category: category),
+        "preview": Preview(userName: author.userName, title: title, text: text, postUid: _res["postUid"], category: category),
       };
       return _res;
     } catch (e) {
@@ -162,4 +163,26 @@ class PostService {
     return {};
   }
 
+
+  Future<Map<String, dynamic>> categoryPreviews({required List<String> categories}) async {
+    String query = "";
+    categories.forEach((String s) => query += "category[]=$s&");
+    query = query.substring(0, query.length - 1);
+    print(query);
+    try {
+      final Map<String, dynamic> _res = await this._connect.reqGetServer(path: "/posts/category?$query", cb: (ReqModel rm) {});
+      if (_res.containsKey("previews")) {
+        List<Preview> _previewList = [];
+        if ((_res["previews"] as List<dynamic>).isNotEmpty){
+          List<Map<String, dynamic>>? _previews = List<Map<String, dynamic>>.from(_res["previews"]);
+          _previews.forEach((Map<String, dynamic> json) => _previewList.add(Preview.fromJson(json)));
+        }
+        return {"previews": _previewList};
+      }
+      return _res;
+    } catch (e) {
+      print(e);
+    }
+    return {};
+  }
 }

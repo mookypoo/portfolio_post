@@ -5,23 +5,33 @@ import '../../repos/variables.dart';
 import '../auth/auth_page.dart';
 
 class NotLoggedIn extends StatelessWidget {
-  const NotLoggedIn({Key? key}) : super(key: key);
+  const NotLoggedIn({Key? key, required this.changeTab}) : super(key: key);
+  final void Function(int index) changeTab;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: <Widget>[
-        const Text("아직 로그인을 안했습니다."),
-        GestureDetector(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 20.0),
-            child: const Text("로그인 하러 가기", style: TextStyle(fontWeight: FontWeight.w500, color: MyColors.primary),),
+    Size _size = MediaQuery.of(context).size;
+
+    return Container(
+      height: _size.height - 230.0,
+      width: _size.width,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          const Text("아직 로그인을 안했습니다."),
+          GestureDetector(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 20.0),
+              child: const Text("로그인 하러 가기", style: TextStyle(fontWeight: FontWeight.w500, color: MyColors.primary),),
+            ),
+            onTap: () async {
+              this.changeTab(0);
+              await Navigator.of(context).pushReplacementNamed(AuthPage.routeName);
+            },
           ),
-          onTap: () async => await Navigator.of(context).pushReplacementNamed(AuthPage.routeName),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

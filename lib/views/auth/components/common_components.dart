@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import '../../../repos/variables.dart';
+import '../../scaffold/scaffold_page.dart';
 
 class TopImage extends StatelessWidget {
   const TopImage({Key? key}) : super(key: key);
@@ -145,8 +146,8 @@ class LogInBottom extends StatelessWidget {
             ],
           ),
           GestureDetector(
-            onTap: Navigator.of(context).pop,
-            child: Text("계시판으로 이동", style: TextStyle(color: MyColors.primary, fontWeight: FontWeight.w600),),
+            onTap: () async => await Navigator.of(context).pushReplacementNamed(ScaffoldPage.routeName),
+            child: Text("앱으로 이동", style: TextStyle(color: MyColors.primary, fontWeight: FontWeight.w600),),
           ),
         ],
       ),

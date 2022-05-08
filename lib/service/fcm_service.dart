@@ -44,12 +44,15 @@ class FCMService {
   }
 
   Future<void> checkDeviceToken({required User user}) async {
-    final Map<String, dynamic> _body = {"userUid": user.userUid, "idToken": user.idToken,};
     try {
-      final Map<String, dynamic> _res = await this._connect.reqPostServer(path: "/user/checkDeviceToken", cb: (ReqModel rm) {}, body: _body);
+      final Map<String, dynamic> _res = await this._connect.reqPostServer(
+          path: "/user/checkDeviceToken",
+          cb: (ReqModel rm) {},
+          body: user.toJson(),
+      );
       if (_res.containsKey("data")){
-        if (_res["data"] == "success") return;
-        if (_res["data"] == "need token"){
+        if (_res["data"].toString() == "success") return;
+        if (_res["data"].toString() == "need token"){
           final String? _deviceToken = await FirebaseMessaging.instance.getToken();
           if (_deviceToken != null) await this._saveDeviceToken(user: user, deviceToken: _deviceToken);
         }

@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../class/checkbox_class.dart';
 import '../class/comment_class.dart';
 import '../class/post_class.dart';
 import '../class/user_class.dart';
@@ -16,6 +17,26 @@ class PostsProvider with ChangeNotifier {
     print("post provider init");
     this._getPreviews();
   }
+
+  List<CheckboxClass> _categories = [
+    CheckboxClass(text: "Firebase"),
+    CheckboxClass(text: "Flutter"),
+    CheckboxClass(text: "JavaScript"),
+    CheckboxClass(text: "Node.js"),
+    CheckboxClass(text: "Miscellaneous"),
+  ];
+  List<CheckboxClass> get categories => [...this._categories];
+  set categories(List<CheckboxClass> s) => throw "error";
+
+  List<CheckboxClass> _viewCategories = [
+    CheckboxClass(text: "Firebase"),
+    CheckboxClass(text: "Flutter"),
+    CheckboxClass(text: "JavaScript"),
+    CheckboxClass(text: "Node.js"),
+    CheckboxClass(text: "Miscellaneous"),
+  ];
+  List<CheckboxClass> get viewCategories => [...this._viewCategories];
+  set viewCategories(List<CheckboxClass> s) => throw "error";
 
   User? _user;
   User? get user => this._user;
@@ -55,9 +76,18 @@ class PostsProvider with ChangeNotifier {
     this.notifyListeners();
   }
 
+  List<String> saveCategory(){
+    List<String> _categories = [];
+    this._viewCategories.forEach((CheckboxClass c) {
+      if (c.isChecked) _categories.add(c.text);
+    });
+    return _categories;
+  }
+
   Future<bool> addPost({required String title, required String text}) async {
     if (this._author == null) return false;
-    final Map<String, dynamic> _res = await this._postService.addPost(text: text, title: title, author: this._author!);
+    final int _catIndex = this._viewCategories.indexWhere((CheckboxClass c) => c.isChecked == true);
+    final Map<String, dynamic> _res = await this._postService.addPost(text: text, title: title, author: this._author!, category: this._viewCategories[_catIndex].text);
     if (_res.containsKey("preview") && _res.containsKey("post")) {
       this._postPreviews.add(_res["preview"] as Preview);
       this._post = _res["post"] as Post;
@@ -89,14 +119,12 @@ class PostsProvider with ChangeNotifier {
     }
   }
 
+  // todo 다른대도 multiple await 쓰면 이걸로 바꾸셈
   Future<void> getPostComments(String postUid) async {
     this.changeState(ProviderState.connecting);
-    final bool _gotPost = await this._getPost(postUid);
-    if (_gotPost) {
-      final bool _gotComments = await this._getComments(postUid);
-      if (_gotComments) this.changeState(ProviderState.complete);
-    }
-    this.changeState(ProviderState.error);
+    List<bool> _res = await Future.wait<bool>([this._getPost(postUid), this._getComments(postUid)]);
+    if (_res.every((bool b) => b == false)) this.changeState(ProviderState.error);
+    this.changeState(ProviderState.complete);
   }
 
   Future<bool> _getPost(String postUid) async {
@@ -153,18 +181,15 @@ class PostsProvider with ChangeNotifier {
 
   void onComment(String s) => this._comment = s;
 
-  // todo 질문 provider state
   Future<void> addComment() async {
     if (this._post == null || this._author == null) return;
-    this.changeState(ProviderState.connecting);
     final Map<String, dynamic> _res = await this._postService.addComment(
         body: CommentBody(postUid: this.post!.postUid, text: this._comment, author: this._author!, isPrivate: this._isPrivate,
-        ));
+    ));
     if (_res.containsKey("comment")) {
       this._comments.add(_res["comment"] as Comment);
-      this.changeState(ProviderState.complete);
+      this.notifyListeners();
     }
-    this.changeState(ProviderState.error);
   }
 
   void changePrivate({bool? isPrivate}){
@@ -188,30 +213,26 @@ class PostsProvider with ChangeNotifier {
 
   void resetPost(){
     this._post = null; this._comments = [];
+    this._categories = this._viewCategories.map((CheckboxClass c) => CheckboxClass.reset(c)).toList();
+    this.notifyListeners();
   }
 
-  // todo after edititing or adding post, view the post (not go to main page)
   Future<bool> editPost({required String text, required String title}) async {
-    if (this._post == null) return false;
-    final Map<String, dynamic> _body = {
-      "updateInfo": {},
-      "userUid": this._user!.userUid,
-      "idToken": this._user!.idToken,
-      "postUid": this._post!.postUid,
-    };
+    if (this._post == null || this._user == null) return false;
+    final Map<String, dynamic> _body = this._user!.toJson()..addAll({"postUid": this._post!.postUid, "updateInfo": {}});
     if (this._post!.text != text) _body["updateInfo"]["text"] = text;
     if (this._post!.title != title) _body["updateInfo"]["title"] = title;
-    int oldLength = this._post!.text.length;
-    int newLength = text.length;
-    if (this._post!.text.substring(0, oldLength < 100 ? oldLength : 100) != text.substring(0, newLength < 100 ? newLength : 100))
-      _body["previewText"] = text.substring(0, newLength < 100 ? newLength : 100);
+
+    final String oldPreview = this._post!.text.substring(0, this._post!.text.length < 100 ? this._post!.text.length : 100);
+    final String newPreview = text.substring(0, text.length < 100 ? text.length : 100);
+    if (oldPreview != newPreview) _body["previewText"] = newPreview;
 
     final Map<String, dynamic> _res = await this._postService.editPost(body: _body);
     if (_res.containsKey("modifiedTime")) {
-      this._post = Post.edit(post: this._post!, text: text, title: title, modifiedTime: _res["modifiedTime"]);
-      // todo todo only if title is different, only if first 100 characters of text is different
-      final int _index = this._postPreviews.indexWhere((Preview p) => p.postUid == this._post!.postUid);
-      this._postPreviews[_index] = Preview.edited(preview: this._postPreviews[_index], title: title, text: text);
+      final int _catIndex = this._viewCategories.indexWhere((CheckboxClass c) => c.isChecked == true);
+      this._post = Post.edit(category: this._viewCategories[_catIndex].text, post: this._post!, text: text, title: title, modifiedTime: _res["modifiedTime"]);
+      final int _postIndex = this._postPreviews.indexWhere((Preview p) => p.postUid == this._post!.postUid);
+      this._postPreviews[_postIndex] = Preview.edited(category: this._viewCategories[_catIndex].text, preview: this._postPreviews[_postIndex], title: title, text: text);
       this.notifyListeners();
       return true;
     }
@@ -231,5 +252,28 @@ class PostsProvider with ChangeNotifier {
       return true;
     }
     return false;
+  }
+
+  void onCheckView(CheckboxClass c){
+    final int _index = this._viewCategories.indexWhere((CheckboxClass ch) => ch.text == c.text);
+    this._viewCategories[_index] = CheckboxClass.onTap(c);
+    this.notifyListeners();
+  }
+
+  void onCheckWrite(CheckboxClass c){
+    final int _prevIndex = this._categories.indexWhere((CheckboxClass ch) => ch.isChecked == true);
+    if (_prevIndex != -1) this._categories[_prevIndex] = CheckboxClass.onTap(this._categories[_prevIndex]);
+    final int _index = this._categories.indexWhere((CheckboxClass ch) => ch.text == c.text);
+    this._categories[_index] = CheckboxClass.onTap(c);
+    this.notifyListeners();
+  }
+
+  Future<void> getCategoryPreviews() async {
+    if (this._viewCategories.every((CheckboxClass ch) => ch.isChecked == false)) return;
+    final Map<String, dynamic> _res = await this._postService.categoryPreviews(categories: this.saveCategory());
+    if (_res.containsKey("previews")){
+      this._postPreviews = _res["previews"];
+      this.notifyListeners();
+    }
   }
 }

@@ -189,7 +189,7 @@ class IosLoginWidget extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Padding(child: Text("Posts and Comments", style: const TextStyle(fontSize: 25.0),), padding: EdgeInsets.only(bottom: 35.0)),
+          Padding(child: Text("Mooky's Posts", style: const TextStyle(fontSize: 25.0),), padding: EdgeInsets.only(bottom: 35.0)),
           AuthTextField(
             textCt: this.emailCt,
             hintText: "이메일",

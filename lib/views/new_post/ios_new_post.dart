@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 
+import '../../class/checkbox_class.dart';
 import '../../providers/posts_provider.dart';
+import '../components/ios_checkbox.dart';
 import '../post/post_page.dart';
 
 class IosNewPost extends StatefulWidget {
@@ -15,6 +17,7 @@ class IosNewPost extends StatefulWidget {
 class _IosNewPostState extends State<IosNewPost> {
   final TextEditingController _titleCt = TextEditingController();
   final TextEditingController _textCt = TextEditingController();
+  bool _isExpanded = false;
 
   @override
   void initState() {
@@ -51,7 +54,7 @@ class _IosNewPostState extends State<IosNewPost> {
               );
             }
             if (!_success) return; // todo tell user "couldn't add post"
-            Navigator.of(context).popAndPushNamed(PostPage.routeName);
+            Navigator.of(context).pop(PostPage.routeName);
           },
         ),
       ),
@@ -63,6 +66,32 @@ class _IosNewPostState extends State<IosNewPost> {
               ? Center(child: Text("로그인을 해야지 글을 쓸 수 있습니다."))
               : Column(
                   children: <Widget>[
+                    Container(
+                      margin: EdgeInsets.only(bottom: 20.0),
+                      child: Column(
+                        children: <Widget>[
+                          GestureDetector(
+                            onTap: () {
+                              this.setState(() {
+                                this._isExpanded = !this._isExpanded;
+                              });
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.only(bottom: 7.0),
+                              child: const Text("Choose a Category", style: TextStyle(fontWeight: FontWeight.w500, fontSize: 18.0),),
+                            ),
+                          ),
+                          this._isExpanded
+                            ? Container(
+                                child: Column(
+                                    children: this.widget.postsProvider.categories.map((CheckboxClass c) => IosCheckbox(
+                                      data: c, onChanged: this.widget.postsProvider.onCheckWrite)).toList()
+                                ),
+                              )
+                            : Container()
+                        ],
+                      ),
+                    ),
                     CupertinoTextField(
                       controller: this._titleCt,
                       placeholder: "Title",
@@ -71,7 +100,7 @@ class _IosNewPostState extends State<IosNewPost> {
                     Container(
                       alignment: Alignment.topCenter,
                       margin: EdgeInsets.only(top: 25.0),
-                      height: 350.0,
+                      height: 500.0,
                       decoration: BoxDecoration(border: Border.all()),
                       child: CupertinoTextField(
                         controller: this._textCt,

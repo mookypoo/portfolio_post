@@ -3,7 +3,10 @@ const serviceAccount = require("./service_account_key.json"),
     { auth } = require("./auth"),
     { posts, addPreview, deletePreviewAndComment } = require("./posts"),
     { comments } = require("./comments"),
-    { user, sendNewFollowerNotification } = require("./user");
+    { user, sendNewFollowerNotification } = require("./user"),
+    { search } = require("./search"),
+    express = require("express"),
+    app = express();
 
 admin.initializeApp({
     projectId: "mooky-post",
@@ -11,8 +14,18 @@ admin.initializeApp({
     databaseURL: "https://mooky-post-default-rtdb.asia-southeast1.firebasedatabase.app"
 });
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+
+app.use("/auth", auth);
+app.use("/posts", posts);
+app.use("/comments", comments);
+app.use("/search", search);
+app.use("/user", user);
+
 module.exports = {
-    auth, posts, comments, addPreview, deletePreviewAndComment, user, sendNewFollowerNotification
+    auth, posts, comments, addPreview, deletePreviewAndComment, user, sendNewFollowerNotification,
+    search,
 }
     
-
+app.listen(3000, _ => console.log("connected to server"));
