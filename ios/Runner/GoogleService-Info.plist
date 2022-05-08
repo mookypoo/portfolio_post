@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>497330309537-goc25vecpp4de8p28a289bsmvp4c14r4.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.497330309537-goc25vecpp4de8p28a289bsmvp4c14r4</string>
+	<key>API_KEY</key>
+	<string>AIzaSyCmFRlEl1Dl0z9cka5L7qoQiNdvaXY0L0k</string>
+	<key>GCM_SENDER_ID</key>
+	<string>497330309537</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.Mooky.portfolioPost</string>
+	<key>PROJECT_ID</key>
+	<string>mooky-post</string>
+	<key>STORAGE_BUCKET</key>
+	<string>mooky-post.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:497330309537:ios:5bb8f9edc0a8746bd523e0</string>
+	<key>DATABASE_URL</key>
+	<string>https://mooky-post-default-rtdb.asia-southeast1.firebasedatabase.app</string>
+</dict>
+</plist>
