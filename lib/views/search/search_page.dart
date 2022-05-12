@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/widgets.dart';
-import 'package:portfolio_post/providers/posts_provider.dart';
+import 'package:portfolio_post/providers/post_provider.dart';
 import 'package:portfolio_post/views/search/android_search.dart';
 import 'package:portfolio_post/views/search/ios_search.dart';
 import 'package:provider/provider.dart';

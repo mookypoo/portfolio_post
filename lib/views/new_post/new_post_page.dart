@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 
-import '../../providers/posts_provider.dart';
+import '../../providers/post_provider.dart';
 import 'android_new_post.dart';
 import 'ios_new_post.dart';
 

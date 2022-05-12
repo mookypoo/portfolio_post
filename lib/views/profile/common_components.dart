@@ -54,7 +54,6 @@ class _CustomSwitchState extends State<CustomSwitch> with SingleTickerProviderSt
     this._ct = AnimationController(vsync: this, duration: Duration(milliseconds: 100))
       ..addListener(() {
         if (!this.mounted) return;
-        print(this._ct!.status);
         if (this._ct!.status == AnimationStatus.completed) this.setState(() {});
         if (this._ct!.status == AnimationStatus.dismissed) this.setState(() {});
       });
@@ -67,7 +66,6 @@ class _CustomSwitchState extends State<CustomSwitch> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
-    print(this._animation!.value);
     return GestureDetector(
       onTap: () async {
         await this.widget.onSwitched();

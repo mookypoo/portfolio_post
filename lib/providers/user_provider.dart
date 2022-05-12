@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:portfolio_post/providers/posts_provider.dart' show ProviderState;
+import 'package:portfolio_post/providers/post_provider.dart' show ProviderState;
 import 'package:portfolio_post/service/fcm_service.dart';
 
 import '../class/profile_class.dart';

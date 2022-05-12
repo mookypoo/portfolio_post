@@ -39,6 +39,7 @@ dependencies:
   sqflite: ^2.0.2
   firebase_messaging: ^11.2.15
   flutter_local_notifications: ^9.4.1
+  image_picker: ^0.8.5+1
 
 dev_dependencies:
   flutter_test:

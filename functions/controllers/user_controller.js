@@ -1,10 +1,8 @@
-const express = require("express"),
-    app = express(),
-    functions = require("firebase-functions"),
+const functions = require("firebase-functions"),
     admin = require("firebase-admin"),
-    { verifyUser } = require("./auth");
-  
-app.post("/checkDeviceToken", async (req, res) => {
+    { verifyUser } = require("../controllers/auth_controller");
+
+const checkDeviceToken = async (req, res) => {
     console.log("checking device token");
     try {
         const _dataSnapshot = await admin.database().ref("/usersAuth").child(req.body.userUid).once("value");
@@ -20,15 +18,15 @@ app.post("/checkDeviceToken", async (req, res) => {
         console.log(e);
         res.send({ error: e });
     }
-});
+}
 
-getDeviceToken = functions.https.onRequest(async (req, res) => {
+getDeviceToken = functions.https.onRequest(async (req, _) => {
     console.log("getting user device token");
     const _dataSnapshot = await admin.database().ref(`/usersAuth/${req.body.userUid}`).child("deviceToken").get();
     req.body.deviceToken = _dataSnapshot.val();
 });
 
-app.post("/saveDeviceToken", async (req, res) => {
+const saveDeviceToken = async (req, res) => {
     console.log("saving device token");
     try {
         const _verified = await verifyUser(req);
@@ -38,9 +36,9 @@ app.post("/saveDeviceToken", async (req, res) => {
         console.log(e);
         res.send({ error: e });
     }
-});
+}
 
-app.post("/deleteDeviceToken", async (req, res) => {
+const deleteDeviceToken = async (req, res) => {
     console.log("deleting device token");
     try {
         const _verified = await verifyUser(req);
@@ -50,9 +48,9 @@ app.post("/deleteDeviceToken", async (req, res) => {
         console.log(e);
         res.send({ error: e });
     }
-});
+}
 
-app.post("/setNotifications", async (req, res) => {
+const setNotification = async (req, res) => {
     try {
         const _verified = await verifyUser(req);
         if (_verified) {
@@ -64,12 +62,9 @@ app.post("/setNotifications", async (req, res) => {
         console.log(e);
         res.send({ error: e });
     }
-});
+}
 
-// followers/followedId
-// - name: ...f
-// - deviceToken: ...
-saveFollower = functions.https.onRequest(async (req, res) => {
+const saveFollower = functions.https.onRequest(async (req, res) => {
     const followerUid = req.body.userUid;
     const followers = await admin.database().ref(`/followers/${req.body.postAuthorUid}`).child(followerUid).get();
     console.log(followers.val());
@@ -89,7 +84,6 @@ saveFollower = functions.https.onRequest(async (req, res) => {
     }
 });
 
-// users/followerId/following/followedId: following
 saveFollowing = functions.https.onRequest(async (req, res) => {
     console.log("saving following");
     const followingUid = req.body.postAuthorUid;
@@ -106,8 +100,7 @@ saveFollowing = functions.https.onRequest(async (req, res) => {
     }
 });
 
-app.post("/follow", async (req, res) => {
-    console.log("follow");
+const follow = async (req, res) => {
     try {
         // todo 여기 뭔가 하나가 잘못되면 나머지도 다시 원상복귀해야되는데...
         await getDeviceToken(req, res);
@@ -119,15 +112,15 @@ app.post("/follow", async (req, res) => {
         console.log(e);
         res.send({ error: e });
     }
-});
+}
 
-sendNewFollowerNotification = functions.region("asia-northeast3").database.instance("mooky-post-default-rtdb").ref("/followers/{followedUid}/{followerUid}")
+const sendNewFollowerNotification = functions.region("asia-northeast3").database.instance("mooky-post-default-rtdb").ref("/followers/{followedUid}/{followerUid}")
     .onWrite(async (change, context) => {
         const followerUid = context.params.followerUid;
         const followedUid = context.params.followedUid;
-        
+
         if (!change.after.val()) return functions.logger.log(followedUid, "unfollowed by", followerUid);
-        
+
         functions.logger.log("added follower info", change.after.val()); // should be { deviceToken: ... , name: ... }
         const receiveNotifications = await admin.database().ref(`/users/${followedUid}`).child("receiveNotifications").get();
         if (!receiveNotifications) return functions.logger.log(followedUid, "does not receive notifications");
@@ -147,8 +140,7 @@ sendNewFollowerNotification = functions.region("asia-northeast3").database.insta
         return functions.logger.log("attempted to send new follower notification");
     });
 
-app.get("/getInfo/:userUid", async (req, res) => {
-    console.log("getting user info");
+const getUserInfo = async (req, res) => {
     try {
         const userSnapshot = await admin.database().ref(`/users`).child(req.params.userUid).get();
         let userInfo = userSnapshot.val();
@@ -156,15 +148,15 @@ app.get("/getInfo/:userUid", async (req, res) => {
         if (userInfo != null) {
             if (userInfo.following != null) userInfo.following = Object.keys(userInfo.following);
             console.log(`userInfo: ${userInfo}`);
-            res.send({ userInfo }); 
+            res.send({ userInfo });
         }
     } catch (e) {
         console.log(e);
         res.send({ error: e });
     }
-});
+}
 
 module.exports = {
-    user: functions.https.onRequest(app),
-    sendNewFollowerNotification,
+    checkDeviceToken, saveDeviceToken, deleteDeviceToken, setNotification,
+    follow, sendNewFollowerNotification, getUserInfo,
 }

@@ -29,7 +29,7 @@ class IosProfile extends StatelessWidget {
                   profile: this.userProvider.profile,
                   switchWidget: Container(
                     child: CustomSwitch(
-                        value: this.userProvider.profile!.receiveNotifications,
+                        value: this.userProvider.profile?.receiveNotifications ?? false,
                         onSwitched: () async => await this.userProvider.receiveNotifications()),
                   ),
                 ),

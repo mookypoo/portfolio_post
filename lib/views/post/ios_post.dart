@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 
-import '../../providers/posts_provider.dart';
+import '../../providers/post_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../repos/variables.dart';
 import 'common_components.dart';

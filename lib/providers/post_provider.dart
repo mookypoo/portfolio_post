@@ -1,9 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
+import 'package:image_picker/image_picker.dart' show XFile;
 
 import '../class/checkbox_class.dart';
 import '../class/comment_class.dart';
 import '../class/post_class.dart';
 import '../class/user_class.dart';
+import '../service/image_service.dart';
 import '../service/post_service.dart';
 
 enum ProviderState {
@@ -12,6 +16,7 @@ enum ProviderState {
 
 class PostsProvider with ChangeNotifier {
   PostService _postService = PostService();
+  ImageService _imageService = ImageService();
 
   PostsProvider(){
     print("post provider init");
@@ -65,6 +70,10 @@ class PostsProvider with ChangeNotifier {
   bool _isPrivate = false;
   bool get isPrivate => this._isPrivate;
   set isPrivate(bool b) => throw "error";
+
+  File? _photo;
+  File? get photo => this._photo;
+  set photo(File? x) => throw "error";
 
   void getUser(User user){
     this._user = user;
@@ -160,7 +169,6 @@ class PostsProvider with ChangeNotifier {
 
   Future<void> like() async {
     if (this._post == null || this._user == null) return;
-    this.changeState(ProviderState.connecting);
     final int _index = this._post!.likedUsers.indexWhere((String uid) => this.user!.userUid == uid);
     int _numOfLikes = this._post!.numOfLikes;
     List<String> _likedUsers = [];
@@ -176,9 +184,9 @@ class PostsProvider with ChangeNotifier {
     }
     if (_res.containsKey("data")) {
       this._post = Post.like(post: this._post!, numOfLikes: _numOfLikes, likedUsers: _likedUsers);
-      this.changeState(ProviderState.complete);
+      this.notifyListeners();
     } else {
-      this.changeState(ProviderState.error);
+
     }
   }
 
@@ -279,4 +287,16 @@ class PostsProvider with ChangeNotifier {
       this.notifyListeners();
     }
   }
+
+  Future<void> getPhoto(String text) async {
+    XFile? _xFile;
+    if (text == "Camera") _xFile = await this._imageService.takePhoto();
+    if (text == "Gallery") _xFile = await this._imageService.pickImage();
+    print("got photo");
+    if (_xFile == null) return;
+    print(_xFile.path);
+    this._photo = File(_xFile.path);
+    this.notifyListeners();
+  }
+
 }

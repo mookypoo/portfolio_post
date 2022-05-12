@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 
 import '../../class/comment_class.dart';
-import '../../providers/posts_provider.dart';
+import '../../providers/post_provider.dart';
 import '../../repos/variables.dart';
 import '../new_post/new_post_page.dart';
 

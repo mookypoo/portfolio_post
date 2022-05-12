@@ -4,7 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:portfolio_post/providers/auth_provider.dart';
-import 'package:portfolio_post/providers/posts_provider.dart';
+import 'package:portfolio_post/providers/post_provider.dart';
 import 'package:portfolio_post/providers/search_provider.dart';
 import 'package:portfolio_post/providers/tab_provider.dart';
 import 'package:portfolio_post/providers/user_provider.dart';

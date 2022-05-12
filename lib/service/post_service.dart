@@ -168,7 +168,6 @@ class PostService {
     String query = "";
     categories.forEach((String s) => query += "category[]=$s&");
     query = query.substring(0, query.length - 1);
-    print(query);
     try {
       final Map<String, dynamic> _res = await this._connect.reqGetServer(path: "/posts/category?$query", cb: (ReqModel rm) {});
       if (_res.containsKey("previews")) {

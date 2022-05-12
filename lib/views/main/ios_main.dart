@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 
 import '../../class/checkbox_class.dart';
-import '../../providers/posts_provider.dart';
+import '../../providers/post_provider.dart';
 import '../../repos/variables.dart';
 import '../components/ios_checkbox.dart';
 import '../new_post/new_post_page.dart';
@@ -16,8 +16,7 @@ class IosMain extends StatefulWidget {
   State<IosMain> createState() => _IosMainState();
 }
 
-class _IosMainState extends State<IosMain> with AutomaticKeepAliveClientMixin {
-  ScrollController _ct = ScrollController();
+class _IosMainState extends State<IosMain> with AutomaticKeepAliveClientMixin<IosMain> {
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +24,6 @@ class _IosMainState extends State<IosMain> with AutomaticKeepAliveClientMixin {
     return Stack(
       children: <Widget>[
         CustomScrollView(
-          controller: this._ct,
           slivers: [
             CupertinoSliverNavigationBar(
               largeTitle: const Text("계시판"),
@@ -60,12 +58,16 @@ class _IosMainState extends State<IosMain> with AutomaticKeepAliveClientMixin {
               onRefresh: () async => await this.widget.postsProvider.refreshPreviews(),
             ),
             SliverList(
-              delegate: SliverChildBuilderDelegate((BuildContext ctx, int index) => PostPreviewTile(
-                  getPost: this.widget.postsProvider.getPostComments,
-                  post: this.widget.postsProvider.postPreviews[index],
-                ),
+              delegate: SliverChildBuilderDelegate((BuildContext ctx, int index) {
+                PostsProvider _pp = Provider.of<PostsProvider>(context);
+                  return PostPreviewTile(
+                    getPost: _pp.getPostComments,
+                    post: _pp.postPreviews[index],
+                  );
+                },
                 childCount: this.widget.postsProvider.postPreviews.length,
-            )),
+              ),
+            ),
           ],
         ),
         Positioned(
@@ -76,7 +78,6 @@ class _IosMainState extends State<IosMain> with AutomaticKeepAliveClientMixin {
             onPressed: () async {
               this.widget.postsProvider.resetPost();
               await Navigator.of(context).pushNamed(NewPostPage.routeName, arguments: "새 글 쓰기",);
-
             },
           ),
         ),

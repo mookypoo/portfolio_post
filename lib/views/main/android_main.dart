@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../class/checkbox_class.dart';
-import '../../providers/posts_provider.dart';
+import '../../providers/post_provider.dart';
 import '../../repos/variables.dart';
 import '../components/android_checkbox.dart';
 import '../new_post/new_post_page.dart';
@@ -61,11 +61,14 @@ class _AndroidMainState extends State<AndroidMain> with AutomaticKeepAliveClient
                 ],
               ),
               SliverList(
-                delegate: SliverChildBuilderDelegate((BuildContext context, int index) => PostPreviewTile(
-                  getPost: this.widget.postsProvider.getPostComments,
-                  post: this.widget.postsProvider.postPreviews[index],
-                  ),
-                childCount: this.widget.postsProvider.postPreviews.length
+                delegate: SliverChildBuilderDelegate((BuildContext ctx, int index) {
+                  PostsProvider _pp = Provider.of<PostsProvider>(context);
+                    return PostPreviewTile(
+                      getPost: _pp.getPostComments,
+                      post: _pp.postPreviews[index],
+                    );
+                  },
+                  childCount: this.widget.postsProvider.postPreviews.length,
                 ),
               ),
             ],
@@ -96,7 +99,7 @@ class _AndroidMainState extends State<AndroidMain> with AutomaticKeepAliveClient
 // import 'package:provider/provider.dart';
 //
 // import '../../class/checkbox_class.dart';
-// import '../../providers/posts_provider.dart';
+// import '../../providers/post_provider.dart';
 // import '../../repos/variables.dart';
 // import '../components/android_checkbox.dart';
 // import '../new_post/new_post_page.dart';

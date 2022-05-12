@@ -5,7 +5,7 @@ import 'package:portfolio_post/views/scaffold/android_scaffold.dart';
 import 'package:portfolio_post/views/scaffold/ios_scaffold.dart';
 import 'package:provider/provider.dart';
 
-import '../../providers/posts_provider.dart';
+import '../../providers/post_provider.dart';
 import '../../providers/tab_provider.dart';
 
 class ScaffoldPage extends StatelessWidget {

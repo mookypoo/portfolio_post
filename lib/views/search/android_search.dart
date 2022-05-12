@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:portfolio_post/repos/variables.dart';
 
-import '../../providers/posts_provider.dart';
+import '../../providers/post_provider.dart';
 import '../../providers/search_provider.dart';
 import 'common_components.dart';
 

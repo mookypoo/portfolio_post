@@ -3,7 +3,7 @@ import 'package:portfolio_post/views/components/android_checkbox.dart';
 import 'package:portfolio_post/views/post/post_page.dart';
 
 import '../../class/checkbox_class.dart';
-import '../../providers/posts_provider.dart';
+import '../../providers/post_provider.dart';
 import '../../repos/variables.dart';
 
 class AndroidNewPost extends StatefulWidget {

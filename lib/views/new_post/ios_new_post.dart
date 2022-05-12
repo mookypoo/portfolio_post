@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
+import 'package:portfolio_post/views/new_post/common_components.dart';
+import 'package:provider/provider.dart';
 
 import '../../class/checkbox_class.dart';
-import '../../providers/posts_provider.dart';
+import '../../providers/post_provider.dart';
 import '../components/ios_checkbox.dart';
 import '../post/post_page.dart';
 
@@ -109,6 +111,46 @@ class _IosNewPostState extends State<IosNewPost> {
                         decoration: const BoxDecoration(),
                       ),
                     ),
+                    CupertinoButton(
+                      child: Text("Add Image"),
+                      onPressed: () async {
+                        await showCupertinoDialog(
+                          barrierDismissible: true,
+                          context: context,
+                          builder: (BuildContext context) {
+                            PostsProvider _pp = Provider.of<PostsProvider>(context);
+                            return CupertinoAlertDialog(
+                              content: Container(
+                                color: CupertinoColors.white,
+                                width: 100.0,
+                                height: 100.0,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  children: <Widget>[
+                                    CameraGalleryButton(
+                                      icon: CupertinoIcons.camera,
+                                      text: "Camera",
+                                      onTap: _pp.getPhoto,
+                                    ),
+                                    CameraGalleryButton(
+                                      icon: CupertinoIcons.photo,
+                                      text: "Gallery",
+                                      onTap: _pp.getPhoto,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                    this.widget.postsProvider.photo != null
+                      ? Container(
+                          padding: const EdgeInsets.all(15.0),
+                          child: Image.file(this.widget.postsProvider.photo!, fit: BoxFit.cover),
+                        )
+                      : Container()
                   ],
             ),
           ),

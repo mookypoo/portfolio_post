@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 
-import '../../providers/posts_provider.dart';
+import '../../providers/post_provider.dart';
 import '../../providers/search_provider.dart';
 import 'common_components.dart';
 

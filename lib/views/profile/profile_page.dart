@@ -5,7 +5,7 @@ import 'package:portfolio_post/views/loading/loading_page.dart';
 import 'package:provider/provider.dart';
 
 import '../../providers/auth_provider.dart';
-import '../../providers/posts_provider.dart' show ProviderState;
+import '../../providers/post_provider.dart' show ProviderState;
 import '../../providers/tab_provider.dart';
 import '../../providers/user_provider.dart';
 import 'android_profile.dart';

@@ -8,16 +8,29 @@ import '../profile/profile_page.dart';
 import '../search/search_page.dart';
 import 'common_components.dart';
 
-class AndroidScaffold extends StatelessWidget {
+class AndroidScaffold extends StatefulWidget {
   AndroidScaffold({Key? key, required this.tabProvider, required this.resetPost}) : super(key: key);
   final TabProvider tabProvider;
   final void Function() resetPost;
+
+  @override
+  State<AndroidScaffold> createState() => _AndroidScaffoldState();
+}
+
+class _AndroidScaffoldState extends State<AndroidScaffold> {
+  final PageController _ct = PageController();
 
   final List<NavBarItem> _tabs = [
     NavBarItem(name: "Home", page: MainPage(), icon: Icons.home),
     NavBarItem(name: "Search", page: SearchPage(), icon: Icons.search),
     NavBarItem(name: "Profile", page: ProfilePage(), icon: Icons.person),
   ];
+
+  @override
+  void dispose() {
+    this._ct.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +42,14 @@ class AndroidScaffold extends StatelessWidget {
         body: Column(
           children: <Widget>[
             Expanded(
-              child: this._tabs[this.tabProvider.selectedTab].page,
+              child: PageView(
+                onPageChanged: this.widget.tabProvider.changeTab,
+                children: [
+                  MainPage(),
+                  SearchPage(),
+                  ProfilePage(),
+                ],
+              ),
             ),
             Container(
               height: 52.0,
@@ -39,9 +59,12 @@ class AndroidScaffold extends StatelessWidget {
                 children: this._tabs.map<Widget>((NavBarItem item) {
                   final int _index = this._tabs.indexOf(item);
                   return GestureDetector(
-                    onTap: () => this.tabProvider.changeTab(_index),
+                    onTap: () {
+                      this.widget.tabProvider.changeTab(_index);
+                      this._ct.jumpToPage(_index);
+                    },
                     child: NavBarWidget(
-                      isSelected: _index == this.tabProvider.selectedTab,
+                      isSelected: _index == this.widget.tabProvider.selectedTab,
                       icon: item.icon,
                     ),
                   );

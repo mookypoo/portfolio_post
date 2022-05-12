@@ -8,15 +8,28 @@ import '../main/main_page.dart';
 import '../search/search_page.dart';
 import 'common_components.dart';
 
-class IosScaffold extends StatelessWidget {
+class IosScaffold extends StatefulWidget {
   IosScaffold({Key? key, required this.tabProvider}) : super(key: key);
   final TabProvider tabProvider;
+
+  @override
+  State<IosScaffold> createState() => _IosScaffoldState();
+}
+
+class _IosScaffoldState extends State<IosScaffold> {
+  final PageController _ct = PageController();
 
   final List<NavBarItem> _tabs = [
     NavBarItem(name: "Home", page: MainPage(), icon: CupertinoIcons.home),
     NavBarItem(name: "Search", page: SearchPage(), icon: CupertinoIcons.search),
     NavBarItem(name: "Profile", page: ProfilePage(), icon: CupertinoIcons.person),
   ];
+
+  @override
+  void dispose() {
+    this._ct.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,10 +40,16 @@ class IosScaffold extends StatelessWidget {
       child: CupertinoPageScaffold(
         child: Column(
           children: <Widget>[
-            // todo pageview
-            //PageView()
             Expanded(
-              child: this._tabs[this.tabProvider.selectedTab].page,
+              child: PageView(
+                controller: this._ct,
+                onPageChanged: this.widget.tabProvider.changeTab,
+                children: [
+                  MainPage(),
+                  SearchPage(),
+                  ProfilePage(),
+                ],
+              ),
             ),
             Container(
               padding: EdgeInsets.only(bottom: 10.0),
@@ -41,9 +60,12 @@ class IosScaffold extends StatelessWidget {
                 children: this._tabs.map<Widget>((NavBarItem item) {
                   final int _index = this._tabs.indexOf(item);
                   return GestureDetector(
-                    onTap: () => this.tabProvider.changeTab(_index),
+                    onTap: () {
+                      this.widget.tabProvider.changeTab(_index);
+                      this._ct.jumpToPage(_index);
+                    },
                     child: NavBarWidget(
-                      isSelected: _index == this.tabProvider.selectedTab,
+                      isSelected: _index == this.widget.tabProvider.selectedTab,
                       icon: item.icon,
                     ),
                   );
