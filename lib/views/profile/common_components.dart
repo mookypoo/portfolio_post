@@ -27,7 +27,7 @@ class NotLoggedIn extends StatelessWidget {
             ),
             onTap: () async {
               this.changeTab(0);
-              await Navigator.of(context).pushReplacementNamed(AuthPage.routeName);
+              Navigator.of(context).popAndPushNamed(AuthPage.routeName);
             },
           ),
         ],
@@ -62,6 +62,12 @@ class _CustomSwitchState extends State<CustomSwitch> with SingleTickerProviderSt
       end: this.widget.value ? Alignment.centerLeft : Alignment.centerRight,
     ).animate(this._ct!);
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    this._ct?.dispose();
+    super.dispose();
   }
 
   @override

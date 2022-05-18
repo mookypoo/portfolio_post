@@ -25,7 +25,7 @@ class _AndroidMainState extends State<AndroidMain> with AutomaticKeepAliveClient
       children: <Widget>[
         RefreshIndicator(
           displacement: 150.0,
-          onRefresh: () async => await this.widget.postsProvider.refreshPreviews(),
+          onRefresh: () async => await this.widget.postsProvider.getPreviews(),
           child: CustomScrollView(
             slivers: [
               SliverAppBar(

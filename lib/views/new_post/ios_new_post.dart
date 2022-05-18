@@ -145,7 +145,7 @@ class _IosNewPostState extends State<IosNewPost> {
                         );
                       },
                     ),
-                    this.widget.postsProvider.photo != null
+                    this.widget.postsProvider.photo!.existsSync()
                       ? Container(
                           padding: const EdgeInsets.all(15.0),
                           child: Image.file(this.widget.postsProvider.photo!, fit: BoxFit.cover),

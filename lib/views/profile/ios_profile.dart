@@ -20,7 +20,7 @@ class IosProfile extends StatelessWidget {
         SliverList(
           delegate: SliverChildListDelegate.fixed([
             this.userProvider.user == null
-              ? NotLoggedIn(changeTab: this.changeTab,)
+              ? NotLoggedIn(changeTab: this.changeTab)
               : LoggedIn(
                   logOut: () async {
                     this.userProvider.logout();

@@ -1,37 +1,38 @@
-const axios = require("axios"),
+const express = require("express"),
+    axios = require("axios"),
     qs = require("qs"),
     admin = require("firebase-admin"),
     { firebaseAPI } = require("../../secret/firebaseAPI"),
     endPoint = (firebasePath) => `https://identitytoolkit.googleapis.com/v1/accounts:${firebasePath}?key=${firebaseAPI}`;
 
 const verifyUser = async (req) => {
-    const _dataSnapshot = await admin.database().ref("/usersAuth").child(req.body.userUid).once("value");
-    if (_dataSnapshot.val() == null) return false;
-    if (_dataSnapshot.val().idToken != req.body.idToken) return false;
-    if (_dataSnapshot.val().idToken == req.body.idToken) return true;
+    const _dataSnapshot = await admin.database().ref(`/users/${req.body.userUid}`).child("idToken").get();
+    if (_dataSnapshot.val() == null || _dataSnapshot.val() != req.body.idToken) return false;
+    if (_dataSnapshot.val() == req.body.idToken) return true;
 }
 
 const sign = async (req, res) => {
     let path = "signUp";
+    console.log("signing in");
     if (req.params.action == "in") path = "signInWithPassword";
     try {
-        const res = await axios.post(
+        const _res = await axios.post(
             endPoint(path),
             req.body,
             { headers: { "content-type": "application / json" } },
         );
-        if (req.params.action == "in") await admin.database().ref(`/usersAuth/${res.data.localId}`).child("idToken").update(res.data.idToken);
-        res.send({ data: res.data });
+        if (req.params.action == "in") await admin.database().ref(`/users`).child(_res.data.localId).update({ "idToken": `${_res.data.idToken}` });
+        res.send({ data: _res.data });
     } catch (e) {
+        console.log(e);
         console.log(e.response.data);
-        res.send(e.response.data);
+        res.send(e);
     }
 }
 
 const saveUserInfo = async (req, res) => {
     try {
         await admin.database().ref("/users").child(req.body.userUid).set(req.body.info);
-        await admin.database().ref("/usersAuth").child(req.body.userUid).set({ idToken: req.body.idToken });
         res.send({ data: "success" });
     } catch (e) {
         console.log(e);
@@ -59,7 +60,7 @@ const refreshToken = async (req, res) => {
     const _header = { headers: { "content-type": "application/x-www-form-urlencoded" } };
     try {
         const _res = await axios.post(_path, qs.stringify(_body), _header);
-        await admin.database().ref("/usersAuth").child(req.body.userUid).update({ "idToken": _res.data.id_token });
+        await admin.database().ref("/users").child(req.body.userUid).update({ "idToken": _res.data.id_token });
         res.send({ data: _res.data });
     } catch (e) {
         console.log(e);

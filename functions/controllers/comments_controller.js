@@ -10,7 +10,6 @@ const getComment = async (req, res) => {
             comments = Object.values(_dataSnapshot.val());
             comments.forEach(comment => {
                 if (comment.comments) comment.comments = Object.values(comment.comments);
-                console.log(comment);
             });
         }
         res.send({ comments });

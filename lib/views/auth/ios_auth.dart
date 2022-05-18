@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 
 import '../../class/auth_class.dart';
+import '../../class/controller_node_class.dart';
 import '../../providers/auth_provider.dart';
 import '../scaffold/scaffold_page.dart';
 import 'components/common_components.dart';
@@ -15,17 +16,19 @@ class IosAuth extends StatefulWidget {
 }
 
 class _IosAuthState extends State<IosAuth> {
-  TextEditingController _nameCt = TextEditingController();
-  TextEditingController _emailCt = TextEditingController();
-  TextEditingController _pw1Ct = TextEditingController();
-  TextEditingController _pw2Ct = TextEditingController();
+  final ControllerClass _nameCt = ControllerClass(name: "nameCt", textCt: new TextEditingController());
+  final ControllerClass _emailCt = ControllerClass(name: "emailCt", textCt: new TextEditingController());
+  final ControllerClass _pw1Ct = ControllerClass(name: "pw1Ct", textCt: new TextEditingController());
+  final ControllerClass _pw2Ct = ControllerClass(name: "pw2Ct", textCt: new TextEditingController());
 
   @override
   void initState() {
-    <TextEditingController>[this._nameCt, this._emailCt, this._pw1Ct, this._pw2Ct].forEach((TextEditingController ct) {
+    <TextEditingController>[this._nameCt.textCt, this._emailCt.textCt, this._pw1Ct.textCt, this._pw2Ct.textCt].forEach((TextEditingController ct) {
       ct.addListener(() {
-        if (ct.text.trim().length == 1) this.setState(() {});
-        if (ct.text.trim().isEmpty) this.setState(() {});
+        if (ct == this._nameCt.textCt) this.widget.authProvider.checkName(name: this._nameCt.textCt.text.trim());
+        if (ct == this._emailCt.textCt) this.widget.authProvider.checkEmail(email: this._emailCt.textCt.text.trim());
+        if (ct == this._pw1Ct.textCt) this.widget.authProvider.checkPw(pw: this._pw1Ct.textCt.text.trim());
+        if (ct == this._pw2Ct.textCt) this.widget.authProvider.confirmPw(pw: this._pw1Ct.textCt.text.trim(), pw2: this._pw2Ct.textCt.text.trim());
       });
     });
     super.initState();
@@ -33,7 +36,7 @@ class _IosAuthState extends State<IosAuth> {
 
   @override
   void dispose() {
-    <TextEditingController>[this._nameCt, this._emailCt, this._pw1Ct, this._pw2Ct].forEach((TextEditingController ct) => ct.dispose());
+    [this._nameCt, this._emailCt, this._pw1Ct, this._pw2Ct].forEach((ControllerClass cn) => cn.textCt.dispose());
     super.dispose();
   }
 
@@ -70,16 +73,12 @@ class _IosAuthState extends State<IosAuth> {
                         top: 77.0,
                         child: this.widget.authProvider.isLoginPage
                           ? IosLoginWidget(
-                              emailCt: this._emailCt,
-                              pw1Ct: this._pw1Ct,
+                              ctsNodes: <ControllerClass>[this._emailCt, this._pw1Ct],
                               authProvider: this.widget.authProvider,
                             )
                           : IosSignUpWidget(
                               authProvider: this.widget.authProvider,
-                              emailCt: this._emailCt,
-                              nameCt: this._nameCt,
-                              pw1Ct: this._pw1Ct,
-                              pw2Ct: this._pw2Ct,
+                              ctsNodes: <ControllerClass>[this._emailCt, this._pw1Ct, this._nameCt, this._pw2Ct],
                             ),
                       ),
                       this.widget.authProvider.isLoginPage
@@ -87,31 +86,31 @@ class _IosAuthState extends State<IosAuth> {
                             onTapLogin: () async {
                               final bool _success = await this.widget.authProvider.firebaseSignIn(
                                 data: LoginInfo(
-                                  email: this._emailCt.text.trim(),
-                                  pw: this._pw1Ct.text.trim(),
+                                  email: this._emailCt.textCt.text.trim(),
+                                  pw: this._pw1Ct.textCt.text.trim(),
                                 ),);
                               if (!_success) return;
                               await Navigator.of(context).pushReplacementNamed(ScaffoldPage.routeName);
                             },
                             switchPage: () {
-                              this.widget.authProvider.switchPage();
-                              <TextEditingController>[this._nameCt, this._emailCt, this._pw1Ct, this._pw2Ct].forEach(
+                              <TextEditingController>[this._nameCt.textCt, this._emailCt.textCt, this._pw1Ct.textCt, this._pw2Ct.textCt].forEach(
                                       (TextEditingController ct) => ct.clear());
+                              this.widget.authProvider.switchPage();
                             },
                           )
                         : SignUpBottom(
                             switchPage: () {
-                              this.widget.authProvider.switchPage();
-                              <TextEditingController>[this._nameCt, this._emailCt, this._pw1Ct, this._pw2Ct].forEach(
+                              <TextEditingController>[this._nameCt.textCt, this._emailCt.textCt, this._pw1Ct.textCt, this._pw2Ct.textCt].forEach(
                                       (TextEditingController ct) => ct.clear());
+                              this.widget.authProvider.switchPage();
                             },
                             onTapSignUp: () async {
                               final bool _success = await this.widget.authProvider.firebaseSignUp(
                                 info: SignUpInfo(
-                                  name: this._nameCt.text.trim(),
+                                  name: this._nameCt.textCt.text.trim(),
                                   isMale: this.widget.authProvider.isMale,
-                                  email: this._emailCt.text.trim(),
-                                  pw: this._pw1Ct.text.trim(),
+                                  email: this._emailCt.textCt.text.trim(),
+                                  pw: this._pw1Ct.textCt.text.trim(),
                                 ),
                               );
                               if (!_success) return;

@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 
+import '../../../class/controller_node_class.dart';
 import '../../../providers/auth_provider.dart';
 import 'common_components.dart';
 
@@ -17,7 +18,7 @@ class AuthTextField extends StatelessWidget {
 
   final bool? obscureText;
   final Widget? suffixIcon;
-  final TextEditingController textCt;
+  final TextEditingController? textCt;
   final String hintText;
   final double? width;
   final TextInputAction? textInputAction;
@@ -102,19 +103,9 @@ class GenderWidget extends StatelessWidget {
 }
 
 class IosSignUpWidget extends StatelessWidget {
-  const IosSignUpWidget({Key? key,
-    required this.authProvider,
-    required this.nameCt,
-    required this.emailCt,
-    required this.pw1Ct,
-    required this.pw2Ct,
-  }) : super(key: key);
+  const IosSignUpWidget({Key? key, required this.authProvider, required this.ctsNodes}) : super(key: key);
 
-  final TextEditingController nameCt;
-  final TextEditingController emailCt;
-  final TextEditingController pw1Ct;
-  final TextEditingController pw2Ct;
-
+  final List<ControllerClass> ctsNodes;
   final AuthProvider authProvider;
 
   @override
@@ -127,12 +118,13 @@ class IosSignUpWidget extends StatelessWidget {
       child: Column(
         children: <Widget>[
           AuthTextField(
-            textCt: this.nameCt,
+            textCt: this.ctsNodes.firstWhere((ControllerClass cn) => cn.name == "nameCt").textCt,
             hintText: "이름",
             textInputAction: TextInputAction.next,
+            errorText: this.authProvider.nameErrorText,
           ),
           AuthTextField(
-            textCt: this.emailCt,
+            textCt: this.ctsNodes.firstWhere((ControllerClass cn) => cn.name == "emailCt").textCt,
             hintText: "이메일",
             errorText: this.authProvider.emailErrorText,
             textInputAction: TextInputAction.next,
@@ -143,7 +135,7 @@ class IosSignUpWidget extends StatelessWidget {
             isMale: this.authProvider.isMale,
           ),
           AuthTextField(
-            textCt: this.pw1Ct,
+            textCt: this.ctsNodes.firstWhere((ControllerClass cn) => cn.name == "pw1Ct").textCt,
             hintText: "비밀번호",
             suffixIcon: IosRedEye(onPressed: this.authProvider.onTapRedEye, isPw1: true),
             errorText: this.authProvider.pwErrorText,
@@ -151,10 +143,11 @@ class IosSignUpWidget extends StatelessWidget {
             obscureText: this.authProvider.pw1obscure,
           ),
           AuthTextField(
-            textCt: this.pw2Ct,
+            textCt: this.ctsNodes.firstWhere((ControllerClass cn) => cn.name == "pw2Ct").textCt,
             hintText: "비밀번호 확인",
             suffixIcon: IosRedEye(onPressed: this.authProvider.onTapRedEye, isPw1: false),
             obscureText: this.authProvider.pw2obscure,
+            errorText: this.authProvider.pw2ErrorText,
           ),
           Container(
             width: _size.width * 0.79,
@@ -172,11 +165,9 @@ class IosSignUpWidget extends StatelessWidget {
 }
 
 class IosLoginWidget extends StatelessWidget {
-  const IosLoginWidget({Key? key, required this.authProvider, required this.emailCt, required this.pw1Ct}) : super(key: key);
+  const IosLoginWidget({Key? key, required this.authProvider, required this.ctsNodes}) : super(key: key);
 
-  final TextEditingController emailCt;
-  final TextEditingController pw1Ct;
-
+  final List<ControllerClass> ctsNodes;
   final AuthProvider authProvider;
 
   @override
@@ -191,14 +182,14 @@ class IosLoginWidget extends StatelessWidget {
         children: <Widget>[
           Padding(child: Text("Mooky's Posts", style: const TextStyle(fontSize: 25.0),), padding: EdgeInsets.only(bottom: 35.0)),
           AuthTextField(
-            textCt: this.emailCt,
+            textCt: this.ctsNodes.firstWhere((ControllerClass cn) => cn.name == "emailCt").textCt,
             hintText: "이메일",
             errorText: this.authProvider.emailErrorText,
             textInputAction: TextInputAction.next,
             textInputType: TextInputType.emailAddress,
           ),
           AuthTextField(
-            textCt: this.pw1Ct,
+            textCt: this.ctsNodes.firstWhere((ControllerClass cn) => cn.name == "pw1Ct").textCt,
             hintText: "비밀번호",
             suffixIcon: IosRedEye(onPressed: this.authProvider.onTapRedEye, isPw1: true),
             errorText: this.authProvider.pwErrorText,

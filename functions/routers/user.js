@@ -21,7 +21,7 @@ app.get("/getInfo/:userUid", userController.getUserInfo);
 //         const receiveNotifications = await admin.database().ref(`/users/${followedUid}`).child("receiveNotifications").get();
 //         if (!receiveNotifications) return functions.logger.log(followedUid, "does not receive notifications");
 //         if (receiveNotifications) {
-//             const deviceToken = await admin.database().ref(`/usersAuth/${followedUid}`).child("deviceToken").get();
+//             const deviceToken = await admin.database().ref(`/users/${followedUid}`).child("deviceToken").get();
 //             functions.logger.log("sending notification to followed user ");
 //             const followerName = change.after.val().name;
 //             const payload = {

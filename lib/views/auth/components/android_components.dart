@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../class/controller_node_class.dart';
 import '../../../providers/auth_provider.dart';
 import 'common_components.dart' show Tos;
 
@@ -12,12 +13,12 @@ class AuthTextField extends StatelessWidget {
     required this.hintText,
     this.textInputAction,
     this.textInputType,
-    this.errorText
+    this.errorText,
   }) : super(key: key);
 
   final bool? obscureText;
   final Widget? suffixIcon;
-  final TextEditingController textCt;
+  final TextEditingController? textCt;
   final String hintText;
   final double? width;
   final TextInputAction? textInputAction;
@@ -42,7 +43,6 @@ class AuthTextField extends StatelessWidget {
             borderRadius: BorderRadius.circular(4.0),
             borderSide: const BorderSide(color: Colors.red, width: 2.0,),
           ),
-
           contentPadding: const EdgeInsets.only(bottom: 3.0),
           isDense: true,
           hintText: this.hintText,
@@ -77,17 +77,10 @@ class AndroidRedEye extends StatelessWidget {
 class AndroidSignUpWidget extends StatelessWidget {
   AndroidSignUpWidget({Key? key,
     required this.authProvider,
-    required this.nameCt,
-    required this.emailCt,
-    required this.pw1Ct,
-    required this.pw2Ct,
+    required this.ctsNodes
   }) : super(key: key);
 
-  final TextEditingController nameCt;
-  final TextEditingController emailCt;
-  final TextEditingController pw1Ct;
-  final TextEditingController pw2Ct;
-
+  final List<ControllerClass> ctsNodes;
   final AuthProvider authProvider;
 
   @override
@@ -100,12 +93,13 @@ class AndroidSignUpWidget extends StatelessWidget {
       child: Column(
         children: <Widget>[
           AuthTextField(
-            textCt: this.nameCt,
+            textCt: this.ctsNodes.firstWhere((ControllerClass cn) => cn.name == "nameCt").textCt,
             hintText: "이름",
             textInputAction: TextInputAction.next,
+            errorText: this.authProvider.nameErrorText,
           ),
           AuthTextField(
-            textCt: this.emailCt,
+            textCt: this.ctsNodes.firstWhere((ControllerClass cn) => cn.name == "emailCt").textCt,
             hintText: "이메일",
             errorText: this.authProvider.emailErrorText,
             textInputAction: TextInputAction.next,
@@ -116,7 +110,7 @@ class AndroidSignUpWidget extends StatelessWidget {
             isMale: this.authProvider.isMale,
           ),
           AuthTextField(
-            textCt: this.pw1Ct,
+            textCt: this.ctsNodes.firstWhere((ControllerClass cn) => cn.name == "pw1Ct").textCt,
             hintText: "비밀번호",
             suffixIcon: AndroidRedEye(onPressed: this.authProvider.onTapRedEye, isPw1: true),
             errorText: this.authProvider.pwErrorText,
@@ -124,10 +118,11 @@ class AndroidSignUpWidget extends StatelessWidget {
             obscureText: this.authProvider.pw1obscure,
           ),
           AuthTextField(
-            textCt: this.pw2Ct,
+            textCt: this.ctsNodes.firstWhere((ControllerClass cn) => cn.name == "pw2Ct").textCt,
             hintText: "비밀번호 확인",
             suffixIcon: AndroidRedEye(onPressed: this.authProvider.onTapRedEye, isPw1: false),
             obscureText: this.authProvider.pw2obscure,
+            errorText: this.authProvider.pw2ErrorText,
           ),
           Container(
             width: _size.width * 0.79,
@@ -180,11 +175,9 @@ class GenderWidget extends StatelessWidget {
 }
 
 class AndroidLoginWidget extends StatelessWidget {
-  const AndroidLoginWidget({Key? key, required this.authProvider, required this.emailCt, required this.pw1Ct,}) : super(key: key);
+  const AndroidLoginWidget({Key? key, required this.authProvider, required this.ctsNodes}) : super(key: key);
 
-  final TextEditingController emailCt;
-  final TextEditingController pw1Ct;
-
+  final List<ControllerClass> ctsNodes;
   final AuthProvider authProvider;
 
   @override
@@ -199,14 +192,14 @@ class AndroidLoginWidget extends StatelessWidget {
         children: <Widget>[
           Padding(child: Text("Mooky's Posts", style: const TextStyle(fontSize: 25.0),), padding: EdgeInsets.only(bottom: 35.0)),
           AuthTextField(
-            textCt: this.emailCt,
+            textCt: this.ctsNodes.firstWhere((ControllerClass cn) => cn.name == "emailCt").textCt,
             hintText: "이메일",
             errorText: this.authProvider.emailErrorText,
             textInputAction: TextInputAction.next,
             textInputType: TextInputType.emailAddress,
           ),
           AuthTextField(
-            textCt: this.pw1Ct,
+            textCt: this.ctsNodes.firstWhere((ControllerClass cn) => cn.name == "pw1Ct").textCt,
             hintText: "비밀번호",
             suffixIcon: AndroidRedEye(onPressed: this.authProvider.onTapRedEye, isPw1: true),
             errorText: this.authProvider.pwErrorText,

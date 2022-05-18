@@ -5,7 +5,7 @@ const functions = require("firebase-functions"),
 const checkDeviceToken = async (req, res) => {
     console.log("checking device token");
     try {
-        const _dataSnapshot = await admin.database().ref("/usersAuth").child(req.body.userUid).once("value");
+        const _dataSnapshot = await admin.database().ref(`/users`).child(req.body.userUid).once("value");
         if (_dataSnapshot.val().idToken != req.body.idToken) res.send({ error: "user not verified" });
         if (_dataSnapshot.val().idToken == req.body.idToken) {
             if (_dataSnapshot.val().deviceToken == null) res.send({ data: "need token" });
@@ -20,9 +20,9 @@ const checkDeviceToken = async (req, res) => {
     }
 }
 
-getDeviceToken = functions.https.onRequest(async (req, _) => {
+const getDeviceToken = functions.https.onRequest(async (req, _) => {
     console.log("getting user device token");
-    const _dataSnapshot = await admin.database().ref(`/usersAuth/${req.body.userUid}`).child("deviceToken").get();
+    const _dataSnapshot = await admin.database().ref(`/users/${req.body.userUid}`).child("deviceToken").get();
     req.body.deviceToken = _dataSnapshot.val();
 });
 
@@ -30,7 +30,7 @@ const saveDeviceToken = async (req, res) => {
     console.log("saving device token");
     try {
         const _verified = await verifyUser(req);
-        if (_verified) await admin.database().ref(`/usersAuth/${req.body.userUid}`).child("deviceToken").set(req.body.deviceToken);
+        if (_verified) await admin.database().ref(`/users/${req.body.userUid}`).child("deviceToken").set(req.body.deviceToken);
         res.end();
     } catch (e) {
         console.log(e);
@@ -42,7 +42,7 @@ const deleteDeviceToken = async (req, res) => {
     console.log("deleting device token");
     try {
         const _verified = await verifyUser(req);
-        if (_verified) await admin.database().ref(`/usersAuth/${req.body.userUid}`).child("deviceToken").remove();
+        if (_verified) await admin.database().ref(`/users/${req.body.userUid}`).child("deviceToken").remove();
         res.end();
     } catch (e) {
         console.log(e);
@@ -103,7 +103,6 @@ saveFollowing = functions.https.onRequest(async (req, res) => {
 const follow = async (req, res) => {
     try {
         // todo 여기 뭔가 하나가 잘못되면 나머지도 다시 원상복귀해야되는데...
-        await getDeviceToken(req, res);
         const savingFollower = await saveFollower(req, res);
         const savingFollowing = await saveFollowing(req, res);
         if (savingFollower == savingFollowing) res.send({ data: savingFollowing });
@@ -125,7 +124,7 @@ const sendNewFollowerNotification = functions.region("asia-northeast3").database
         const receiveNotifications = await admin.database().ref(`/users/${followedUid}`).child("receiveNotifications").get();
         if (!receiveNotifications) return functions.logger.log(followedUid, "does not receive notifications");
         if (receiveNotifications) {
-            const deviceToken = await admin.database().ref(`/usersAuth/${followedUid}`).child("deviceToken").get();
+            const deviceToken = await admin.database().ref(`/users/${followedUid}`).child("deviceToken").get();
             functions.logger.log("sending notification to followed user ");
             const followerName = change.after.val().name;
             const payload = {

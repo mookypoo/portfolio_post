@@ -15,7 +15,6 @@ class Profile extends UserAbstract {
   Profile({required this.userName, required this.userUid, required this.email, required this.following, required this.receiveNotifications});
 
   factory Profile.fromJson(Map<String, dynamic> json){
-    print(json);
     List<String> _following = [];
     if (json["following"] != null) _following = List<String>.from(json["following"]);
     return Profile(

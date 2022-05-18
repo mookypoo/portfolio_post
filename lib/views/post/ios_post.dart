@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 
@@ -14,6 +16,8 @@ class IosPost extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print(this.postsProvider.photo);
+
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         middle: Text(this.postsProvider.post?.title ?? ""),
@@ -42,6 +46,19 @@ class IosPost extends StatelessWidget {
                   follow: this.userProvider.follow,
                   isFollowing: this.userProvider.isFollowing(this.postsProvider.post!.author.userUid),
                 ),
+                // todo why is photo not null????? --- this is when you just added a photo (or edit)
+                // this.postsProvider.photo != null
+                //   ? Container(
+                //       padding: const EdgeInsets.all(15.0),
+                //       child: Image.file(this.postsProvider.photo!, fit: BoxFit.cover),
+                //     )
+                //   : Container(),
+                this.postsProvider.post?.filePath != null
+                  ? Container(
+                      padding: const EdgeInsets.all(15.0),
+                      child: Image.memory(Uint8List.fromList(this.postsProvider.post!.filePath!), fit: BoxFit.cover),
+                    )
+                  : Container(),
                 Container(
                   margin: const EdgeInsets.only(top: 15.0),
                   child: Column(

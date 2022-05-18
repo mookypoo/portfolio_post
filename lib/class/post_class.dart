@@ -36,7 +36,7 @@ class Post {
   final String createdTime;
   final String? modifiedTime;
   final String? category;
-
+  final List<int>? filePath;
   static String convertISOToString(String iso) {
     if (iso.isEmpty) return "";
     final DateTime _UTC = DateTime.parse(iso);
@@ -44,9 +44,10 @@ class Post {
     return _text;
   }
 
-  Post({required this.likedUsers, required this.title, required this.postUid, required this.author, required this.text, required this.numOfLikes, this.modifiedTime, required this.createdTime, required this.category});
+  Post({required this.likedUsers, required this.title, required this.postUid, required this.author, required this.text, required this.numOfLikes, this.modifiedTime, required this.createdTime, required this.category, this.filePath});
 
   factory Post.fromJson(Map<String, dynamic> json) {
+    print(json["filePath"]["data"]);
     return Post(
       title: json["title"].toString(),
       text: json["text"].toString(),
@@ -57,6 +58,7 @@ class Post {
       createdTime: Post.convertISOToString(json["createdTime"].toString()),
       modifiedTime: Post.convertISOToString(json["modifiedTime"] ?? ""),
       category: json["category"].toString(),
+      filePath: List<int>.from(json["filePath"]["data"]),
     );
   }
 
@@ -65,7 +67,7 @@ class Post {
     postUid: post.postUid,
     title: post.title,
     numOfLikes: numOfLikes,
-    likedUsers: likedUsers,
+    likedUsers: post.likedUsers,
     author: post.author,
     createdTime: post.createdTime,
     modifiedTime: post.modifiedTime,

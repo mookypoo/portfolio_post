@@ -24,7 +24,7 @@ class ProfilePage extends StatelessWidget {
     if (_userProvider.state == ProviderState.connecting) return LoadingPage();
 
     return Platform.isAndroid
-        ? AndroidProfile(logOut: _authProvider.firebaseSignOut, userProvider: _userProvider, changeTab: _changeTab,)
+        ? AndroidProfile(logOut: _authProvider.firebaseSignOut, userProvider: _userProvider, changeTab: _changeTab)
         : IosProfile(logOut: _authProvider.firebaseSignOut, userProvider: _userProvider, changeTab: _changeTab);
   }
 }

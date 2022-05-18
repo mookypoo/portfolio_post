@@ -14,7 +14,7 @@ class CameraGalleryButton extends StatelessWidget {
         Navigator.of(context).pop();
       },
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
           Icon(this.icon, size: 35.0,),
           Text(this.text, style: TextStyle(fontSize: 17.0, fontWeight: FontWeight.w500)),

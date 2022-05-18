@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:portfolio_post/views/components/android_checkbox.dart';
 import 'package:portfolio_post/views/post/post_page.dart';
+import 'package:provider/provider.dart';
 
 import '../../class/checkbox_class.dart';
 import '../../providers/post_provider.dart';
 import '../../repos/variables.dart';
+import 'common_components.dart';
 
 class AndroidNewPost extends StatefulWidget {
   const AndroidNewPost({Key? key, required this.postsProvider, required this.pageTitle}) : super(key: key);
@@ -33,7 +35,6 @@ class _AndroidNewPostState extends State<AndroidNewPost> {
   void dispose() {
     this._textCt.dispose();
     this._titleCt.dispose();
-    this.widget.postsProvider.resetPost();
     super.dispose();
   }
 
@@ -123,6 +124,47 @@ class _AndroidNewPostState extends State<AndroidNewPost> {
                         ),
                       ),
                     ),
+                    TextButton(
+                      child: Text("Add Image"),
+                      onPressed: () async {
+                        await showDialog(
+                          barrierDismissible: true,
+                          context: context,
+                          builder: (BuildContext ctx) {
+                            PostsProvider _pp = Provider.of<PostsProvider>(ctx);
+                            return Dialog(
+                              child: Container(
+                                padding: EdgeInsets.symmetric(vertical: 10.0),
+                                color: Colors.white,
+                                width: 70.0,
+                                height: 100.0,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  children: <Widget>[
+                                    CameraGalleryButton(
+                                      icon: Icons.camera,
+                                      text: "Camera",
+                                      onTap: _pp.getPhoto,
+                                    ),
+                                    CameraGalleryButton(
+                                      icon: Icons.photo,
+                                      text: "Gallery",
+                                      onTap: _pp.getPhoto,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                    this.widget.postsProvider.photo!.existsSync()
+                      ? Container(
+                          padding: const EdgeInsets.all(15.0),
+                          child: Image.file(this.widget.postsProvider.photo!, fit: BoxFit.cover),
+                        )
+                      : Container()
                   ],
                 ),
           ),

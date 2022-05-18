@@ -21,9 +21,9 @@ class _AndroidScaffoldState extends State<AndroidScaffold> {
   final PageController _ct = PageController();
 
   final List<NavBarItem> _tabs = [
-    NavBarItem(name: "Home", page: MainPage(), icon: Icons.home),
-    NavBarItem(name: "Search", page: SearchPage(), icon: Icons.search),
-    NavBarItem(name: "Profile", page: ProfilePage(), icon: Icons.person),
+    NavBarItem(name: "Home", icon: Icons.home),
+    NavBarItem(name: "Search", icon: Icons.search),
+    NavBarItem(name: "Profile", icon: Icons.person),
   ];
 
   @override
@@ -43,6 +43,7 @@ class _AndroidScaffoldState extends State<AndroidScaffold> {
           children: <Widget>[
             Expanded(
               child: PageView(
+                controller: this._ct,
                 onPageChanged: this.widget.tabProvider.changeTab,
                 children: [
                   MainPage(),

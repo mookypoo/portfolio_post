@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 
 class Connect {
   //final String _serverEndPoint = "https://us-central1-mooky-post.cloudfunctions.net";
-  final String _serverEndPoint = "http://192.168.200.181:3000";
+  final String _serverEndPoint = "http://192.168.35.179:3000";
   final Map<String, String> _headers = {"Mooky": "post", "content-type":"application/json"};
 
   Future<T?> reqPostServer<T>({required String path, required void Function(ReqModel) cb, Map<String, String>? headers, dynamic body}) async {
@@ -44,6 +44,22 @@ class Connect {
     } catch (e) {
       print(e.toString());
       return {"error": "cannot connect to server"} as T;
+    }
+  }
+
+  Future<T?> postImageServer<T>({required String postUid, required String filePath, required void Function(ReqModel) cb, Map<String, String>? headers}) async {
+    http.MultipartFile _file = await http.MultipartFile.fromPath("file", filePath);
+
+    try {
+      final http.MultipartRequest _request = http.MultipartRequest("POST", Uri.parse(this._serverEndPoint + "/posts/uploadPhoto"))
+        ..fields["postUid"] = postUid..files.add(_file);
+      final http.StreamedResponse _res = await _request.send();
+      print(_res);
+      print("headers: ${_res.headers}");
+      print("stream: ${_res.stream}");
+    } catch (e) {
+      print(e.toString());
+      return e as T;
     }
   }
 }

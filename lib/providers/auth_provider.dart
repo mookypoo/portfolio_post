@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:portfolio_post/service/auth_service.dart';
 
 import '../class/auth_class.dart';
 import '../class/user_class.dart';
@@ -10,6 +11,7 @@ enum AuthState {
 
 class AuthProvider with ChangeNotifier {
   FirebaseService _firebaseService = FirebaseService();
+  AuthService _authService = AuthService();
 
   AuthProvider(){
     print("auth provider init");
@@ -44,6 +46,10 @@ class AuthProvider with ChangeNotifier {
   bool get isMale => this._isMale;
   set isMale(bool b) => throw "error";
 
+  String? _nameErrorText;
+  String? get nameErrorText => this._nameErrorText;
+  set nameErrorText(String? s) => throw "error";
+
   String? _emailErrorText;
   String? get emailErrorText => this._emailErrorText;
   set emailErrorText(String? s) => throw "error";
@@ -52,8 +58,36 @@ class AuthProvider with ChangeNotifier {
   String? get pwErrorText => this._pwErrorText;
   set pwErrorText(String? s) => throw "error";
 
+  String? _pw2ErrorText;
+  String? get pw2ErrorText => this._pw2ErrorText;
+  set pw2ErrorText(String? s) => throw "error";
+
+  void _init() async {
+    var _info = await this._firebaseService.getFirebaseSql();
+    if (_info == null) {
+      this.changeState(state: AuthState.loggedOut);
+      return;
+    } else {
+      final String _userUid = _info["user_uid"].toString();
+      final String _idToken = _info["id_token"].toString();
+      final bool? _success = await this._firebaseService.autoAuth(userUid: _userUid, idToken: _idToken);
+      // todo error handling
+      if (_success == null) return;
+      if (_success) {
+        this._user = User(userUid: _userUid, idToken: _idToken, userName: _info["username"]);
+        this.changeState(state: AuthState.loggedIn);
+      } else {
+        await this._refreshToken(info: _info);
+      }
+    }
+  }
+
   void switchPage(){
     this._isLoginPage = !this._isLoginPage;
+    this._pwErrorText = null;
+    this._pw2ErrorText = null;
+    this._nameErrorText = null;
+    this._emailErrorText = null;
     this.notifyListeners();
   }
 
@@ -78,31 +112,33 @@ class AuthProvider with ChangeNotifier {
     this.notifyListeners();
   }
 
-  /// check for firebase sql --> null --> logged out
-  /// check for firebase sql --> exist --> send id token to firebase and auth --> success --> loggedIn
-  /// check for firebase sql --> exist --> send id token to firebase and auth --> fail --> refreshtoken --> success --> loggedIn
-  void _init() async {
-    var _info = await this._firebaseService.getFirebaseSql();
-    if (_info == null) {
-      this.changeState(state: AuthState.loggedOut);
-      return;
-    } else {
-      final String _userUid = _info["user_uid"].toString();
-      final String _idToken = _info["id_token"].toString();
-      final bool? _success = await this._firebaseService.autoAuth(userUid: _userUid, idToken: _idToken);
-      // todo error handling
-      if (_success == null) return;
-      if (_success) {
-        this._user = User(userUid: _userUid, idToken: _idToken, userName: _info["username"]);
-        this.changeState(state: AuthState.loggedIn);
-      } else {
-        await this._refreshToken(info: _info);
-      }
-    }
+  void checkName({required String name}){
+    this._nameErrorText = this._authService.checkName(name: name);
+    this.notifyListeners();
+  }
+
+  void checkEmail({required String email}){
+    this._emailErrorText = this._authService.checkEmail(email: email);
+    this.notifyListeners();
+  }
+
+  void checkPw({required String pw}){
+    this._pwErrorText = this._authService.checkPw(pw: pw);
+    this.notifyListeners();
+  }
+
+  void confirmPw({required String pw, required String pw2}){
+    this._pw2ErrorText = this._authService.confirmPw(pw: pw, pw2: pw2);
+    this.notifyListeners();
+  }
+
+  bool validateFields(){
+    // true 이면 가입하기 버튼 안눌러짐
+    if ([this._nameErrorText, this._pwErrorText, this._pw2ErrorText].any((String? s) => s != null)) return true;
+    return false;
   }
 
   Future<bool> firebaseSignUp({required SignUpInfo info}) async {
-    //final SignUpInfo data = SignUpInfo(email: "sookim482@gmail.com", name: "Soo Kim", pw: "todo123", isMale: false);
     final _res = await this._firebaseService.signup(info: info);
     if (_res.runtimeType == User) {
       this._user = _res as User;
@@ -119,7 +155,6 @@ class AuthProvider with ChangeNotifier {
 
   Future<bool> firebaseSignIn({required AuthAbstract data}) async {
     final Object _res = await this._firebaseService.signIn(email: data.email, pw: data.pw);
-
     if (_res.runtimeType == User) {
       this._user = _res as User;
       this.changeState(state: AuthState.loggedIn);

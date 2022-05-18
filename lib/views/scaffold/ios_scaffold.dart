@@ -20,9 +20,9 @@ class _IosScaffoldState extends State<IosScaffold> {
   final PageController _ct = PageController();
 
   final List<NavBarItem> _tabs = [
-    NavBarItem(name: "Home", page: MainPage(), icon: CupertinoIcons.home),
-    NavBarItem(name: "Search", page: SearchPage(), icon: CupertinoIcons.search),
-    NavBarItem(name: "Profile", page: ProfilePage(), icon: CupertinoIcons.person),
+    NavBarItem(name: "Home", icon: CupertinoIcons.home),
+    NavBarItem(name: "Search", icon: CupertinoIcons.search),
+    NavBarItem(name: "Profile",  icon: CupertinoIcons.person),
   ];
 
   @override
@@ -34,6 +34,7 @@ class _IosScaffoldState extends State<IosScaffold> {
   @override
   Widget build(BuildContext context) {
     Size _size = MediaQuery.of(context).size;
+    Navigator.of(context);
 
     return GestureDetector(
       onTap: FocusManager.instance.primaryFocus?.unfocus,

@@ -14,6 +14,7 @@ class AndroidPost extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    //print(this.postsProvider.photo!.existsSync());
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
@@ -45,6 +46,12 @@ class AndroidPost extends StatelessWidget {
                 follow: this.userProvider.follow, // todo show snackbar
                 isFollowing: this.userProvider.isFollowing(this.postsProvider.post!.author.userUid),
               ),
+              this.postsProvider.photo!.existsSync()
+                ? Container(
+                    padding: const EdgeInsets.all(15.0),
+                    child: Image.file(this.postsProvider.photo!, fit: BoxFit.cover),
+                  )
+                : Container(),
               Container(
                 margin: const EdgeInsets.only(top: 15.0),
                 child: Column(

@@ -8,6 +8,7 @@ import 'package:portfolio_post/providers/post_provider.dart';
 import 'package:portfolio_post/providers/search_provider.dart';
 import 'package:portfolio_post/providers/tab_provider.dart';
 import 'package:portfolio_post/providers/user_provider.dart';
+import 'package:portfolio_post/repos/variables.dart';
 import 'package:portfolio_post/service/fcm_service.dart';
 import 'package:portfolio_post/views/auth/auth_page.dart';
 import 'package:portfolio_post/views/new_post/new_post_page.dart';
@@ -64,7 +65,9 @@ class PortfolioPost extends StatelessWidget {
     theme: ThemeData(
       textTheme: TextTheme(
         bodyText2: TextStyle(fontSize: 17.0),
-      )
+        button: TextStyle(color: MyColors.primary, fontSize: 17.0)
+      ),
+      iconTheme: IconThemeData(color: MyColors.primary),
     ),
   );
 
@@ -80,12 +83,6 @@ class PortfolioPost extends StatelessWidget {
         return CupertinoPageRoute(
           builder: (BuildContext context) => NewPostPage(),
           settings: RouteSettings(name: NewPostPage.routeName, arguments: _pageTitle),
-        );
-      };
-      if (route.name == ProfilePage.routeName) {
-        return CupertinoPageRoute(
-          builder: (BuildContext context) => ProfilePage(),
-          settings: RouteSettings(name: ProfilePage.routeName),
         );
       };
       if (route.name == AuthPage.routeName) {

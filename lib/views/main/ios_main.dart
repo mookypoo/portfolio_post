@@ -42,8 +42,7 @@ class _IosMainState extends State<IosMain> with AutomaticKeepAliveClientMixin<Io
                             padding: const EdgeInsets.symmetric(vertical: 10.0),
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
-                              children: _pp.viewCategories.map((CheckboxClass c) => IosCheckbox(
-                                  data: c, onChanged: _pp.onCheckView)).toList(),
+                              children: _pp.viewCategories.map((CheckboxClass c) => IosCheckbox(data: c, onChanged: _pp.onCheckView)).toList(),
                             ),
                           ),
                         );
@@ -55,17 +54,17 @@ class _IosMainState extends State<IosMain> with AutomaticKeepAliveClientMixin<Io
             ),
             CupertinoSliverRefreshControl(
               refreshTriggerPullDistance: 150.0,
-              onRefresh: () async => await this.widget.postsProvider.refreshPreviews(),
+              onRefresh: () async => await this.widget.postsProvider.getPreviews(),
             ),
             SliverList(
               delegate: SliverChildBuilderDelegate((BuildContext ctx, int index) {
-                PostsProvider _pp = Provider.of<PostsProvider>(context);
+                PostsProvider _pp = Provider.of<PostsProvider>(ctx);
                   return PostPreviewTile(
                     getPost: _pp.getPostComments,
                     post: _pp.postPreviews[index],
                   );
                 },
-                childCount: this.widget.postsProvider.postPreviews.length,
+                childCount: context.watch<PostsProvider>().postPreviews.length,
               ),
             ),
           ],
