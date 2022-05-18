@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:portfolio_post/views/components/android_checkbox.dart';
 import 'package:portfolio_post/views/post/post_page.dart';
@@ -6,6 +8,7 @@ import 'package:provider/provider.dart';
 import '../../class/checkbox_class.dart';
 import '../../providers/post_provider.dart';
 import '../../repos/variables.dart';
+import '../post/common_components.dart';
 import 'common_components.dart';
 
 class AndroidNewPost extends StatefulWidget {
@@ -144,12 +147,12 @@ class _AndroidNewPostState extends State<AndroidNewPost> {
                                     CameraGalleryButton(
                                       icon: Icons.camera,
                                       text: "Camera",
-                                      onTap: _pp.getPhoto,
+                                      onTap: _pp.selectPhotos,
                                     ),
                                     CameraGalleryButton(
                                       icon: Icons.photo,
                                       text: "Gallery",
-                                      onTap: _pp.getPhoto,
+                                      onTap: _pp.takePhoto,
                                     ),
                                   ],
                                 ),
@@ -159,12 +162,9 @@ class _AndroidNewPostState extends State<AndroidNewPost> {
                         );
                       },
                     ),
-                    this.widget.postsProvider.photo!.existsSync()
-                      ? Container(
-                          padding: const EdgeInsets.all(15.0),
-                          child: Image.file(this.widget.postsProvider.photo!, fit: BoxFit.cover),
-                        )
-                      : Container()
+                    ...this.widget.postsProvider.newPhotos.map((String path) => new NewPhoto(
+                        path: path, delete: this.widget.postsProvider.deletePhoto, icon: Icons.delete)),
+                    ...?this.widget.postsProvider.post?.filePaths?.map((Uint8List bytes) => new PhotoWidget(bytes: bytes)),
                   ],
                 ),
           ),

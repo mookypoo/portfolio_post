@@ -19,12 +19,12 @@ class EditDelete extends StatelessWidget {
       children: <Widget>[
         CupertinoButton(
           padding: EdgeInsets.zero,
-          child: const Text("Edit"),
+          child: const Text("수정"),
           onPressed: () async => await Navigator.of(context).pushNamed(NewPostPage.routeName, arguments: "글 수정하기"),
         ),
         CupertinoButton(
           padding: EdgeInsets.zero,
-          child: const Text("Delete"),
+          child: const Text("삭제"),
           onPressed: () async {
             final bool _deleted = await this.delete();
             if (!_deleted) return; // todo error handling
@@ -114,6 +114,7 @@ class Comments extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
+
         itemCount: this.postsProvider.comments.length,
         itemBuilder: (BuildContext context, int index) {
           final Comment _comment = this.postsProvider.comments[index];
@@ -124,6 +125,7 @@ class Comments extends StatelessWidget {
                 && this.postsProvider.user?.userUid != this.postsProvider.post?.author.userUid) _text = _secret;
           };
           return Container(
+
             margin: const EdgeInsets.symmetric(vertical: 5.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,

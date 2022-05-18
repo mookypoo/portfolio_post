@@ -144,7 +144,6 @@ class PostService {
 
   // 여기까지 왔다는건 이미 verified 된건데 또 verify해야되나?
   Future<Map<String, dynamic>> editPost({required Map<String, dynamic> body}) async {
-    print(body["filePath"]);
     try {
       final Map<String, dynamic> _res = await this._connect.reqPostServer(path: "/posts/edit", cb: (ReqModel rm) {}, body: body);
       return _res;

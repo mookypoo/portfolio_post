@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../../providers/post_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../repos/variables.dart';
+import '../new_post/common_components.dart';
 import 'common_components.dart';
 import 'ios_components.dart';
 
@@ -16,7 +17,7 @@ class IosPost extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print(this.postsProvider.photo);
+    print(this.postsProvider.newPhoto);
 
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
@@ -33,8 +34,9 @@ class IosPost extends StatelessWidget {
             constraints: BoxConstraints(
               minHeight: MediaQuery.of(context).size.height,
             ),
-            padding: EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
+            padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 this.postsProvider.post?.author.userUid == this.postsProvider.user?.userUid
@@ -46,52 +48,35 @@ class IosPost extends StatelessWidget {
                   follow: this.userProvider.follow,
                   isFollowing: this.userProvider.isFollowing(this.postsProvider.post!.author.userUid),
                 ),
-                // todo why is photo not null????? --- this is when you just added a photo (or edit)
-                // this.postsProvider.photo != null
-                //   ? Container(
-                //       padding: const EdgeInsets.all(15.0),
-                //       child: Image.file(this.postsProvider.photo!, fit: BoxFit.cover),
-                //     )
-                //   : Container(),
-                this.postsProvider.post?.filePath != null
-                  ? Container(
-                      padding: const EdgeInsets.all(15.0),
-                      child: Image.memory(Uint8List.fromList(this.postsProvider.post!.filePath!), fit: BoxFit.cover),
-                    )
-                  : Container(),
-                Container(
-                  margin: const EdgeInsets.only(top: 15.0),
-                  child: Column(
-                    children: <Widget>[
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: CupertinoButton(
-                          onPressed: () async {
-                            final bool _save = await showCupertinoModalPopup<bool>(
-                              context: context,
-                              builder: (BuildContext ctx) {
-                                PostsProvider _postsProvider = Provider.of<PostsProvider>(ctx);
-                                return CommentBottomSheet(
-                                  isPrivate: _postsProvider.isPrivate,
-                                  onComment:  _postsProvider.onComment,
-                                  changePrivate: _postsProvider.changePrivate,
-                                );
-                              },
-                            ) ?? false;
-                            if (!_save) return;
-                            await this.postsProvider.addComment();
-                          },
-                          child: const Text("add comment", style: TextStyle(fontWeight: FontWeight.w600, color: MyColors.primary, fontSize: 15.0)),
-                        ),
-                      ),
-                    ],
+                ...this.postsProvider.newPhotos.map((String path) => new NewPhoto(
+                    path: path, delete: this.postsProvider.deletePhoto, icon: CupertinoIcons.delete)),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: CupertinoButton(
+                    padding: EdgeInsets.zero,
+                    onPressed: () async {
+                      final bool _save = await showCupertinoModalPopup<bool>(
+                        context: context,
+                        builder: (BuildContext ctx) {
+                          PostsProvider _postsProvider = Provider.of<PostsProvider>(ctx);
+                          return CommentBottomSheet(
+                            isPrivate: _postsProvider.isPrivate,
+                            onComment:  _postsProvider.onComment,
+                            changePrivate: _postsProvider.changePrivate,
+                          );
+                        },
+                      ) ?? false;
+                      if (!_save) return;
+                      await this.postsProvider.addComment();
+                    },
+                    child: const Text("댓글 달기", style: const TextStyle(fontWeight: FontWeight.w600, color: MyColors.primary, fontSize: 15.0)),
                   ),
                 ),
                 this.postsProvider.comments.isNotEmpty
                     ? Container(
-                        child: Comments(postsProvider: this.postsProvider,),
+                        child: Comments(postsProvider: this.postsProvider),
                         constraints: BoxConstraints(
-                          maxHeight: MediaQuery.of(context).size.height,
+                          maxHeight: 100.0 * this.postsProvider.comments.length,
                         ),
                       )
                     : Container(),

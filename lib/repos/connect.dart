@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 
 class Connect {
   //final String _serverEndPoint = "https://us-central1-mooky-post.cloudfunctions.net";
-  final String _serverEndPoint = "http://192.168.35.179:3000";
+  final String _serverEndPoint = "http://192.168.35.73:3000";
   final Map<String, String> _headers = {"Mooky": "post", "content-type":"application/json"};
 
   Future<T?> reqPostServer<T>({required String path, required void Function(ReqModel) cb, Map<String, String>? headers, dynamic body}) async {

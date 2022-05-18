@@ -3,33 +3,6 @@ const functions = require("firebase-functions"),
     uuid = require("uuid"),
     { getStorage } = require("firebase-admin/storage");
 
-    // edit 
-const uploadPhoto = async (req) => {
-    console.log("uploading photo");
-    //var image = new Uint8Array(image).buffer;
-    //console.log(image.);
-    
-    const bucket = getStorage().bucket();
-    const destFileName = `${req.body.postUid}/${req.body.fileName}`;
-    await bucket.upload(req.body.filePath, { destination: destFileName, resumable: true })
-    req.body.updateInfo.destFileName = destFileName;
-}
-
-// const uploadPhoto = async (req, res) => {
-//     console.log("uploading photo with multer");
-//     console.log(req.file.path);
-//     const bucket = getStorage().bucket();
-//     const filePath = `${req.body.postUid}/${req.file.originalname}`;
-//     console.log(filePath);
-//     try {
-//         await bucket.upload(req.file.path, { destination: filePath, resumable: true })
-//         res.send({ filePath });
-//     } catch (e) {
-//         console.log(e);
-//         res.send({ error: e });
-//     }
-// }
-
 const addPost = async (req, res) => {
     const postUid = uuid.v1();
     req.body.post.postUid = postUid;
@@ -37,6 +10,7 @@ const addPost = async (req, res) => {
     req.body.post.createdTime = createdTime;
     try {
         console.log(req.body.post.filePath);
+        // todo redo below 
         if (req.body.image != null) await uploadPhoto(req.body.image, req.body.fileName, postUid);
         await admin.database().ref("/posts").child(postUid).set(req.body.post);
         res.send({ postUid, createdTime });
@@ -97,27 +71,30 @@ const refreshPreviews = async (req, res) => {
     }
 }
 
-// why is this shit doing twice 
-const getImage = async (destFileName) => {
+const getImage = async (fileNames, postUid) => {
     const bucket = getStorage().bucket();
-    const file = await bucket.file(destFileName);
-    const filePath = await file.download();
-    
-    //const filePath = new Uint8Array(new TextDecoder().decode(image));
-    
-    return filePath;
+    const filePaths = await new Promise(resolve => {
+        let paths = [];
+        fileNames.forEach(async fileName => {
+            const file = await bucket.file(`${postUid}/${fileName}`).download();
+            console.log(file);
+            paths.push(file[0]);
+        });
+        setTimeout(_ => resolve(paths), 3000);
+    });
+    return filePaths;
 }
 
 const getPost = async (req, res) => {
+    console.log("getting post");
     try {
         const _dataSnapshot = await admin.database().ref(`/posts/${req.params.postUid}`).once("value");
         if (_dataSnapshot.val() != null) {
             let post = _dataSnapshot.val();
             if (post.likedUsers) post.likedUsers = Object.keys(_dataSnapshot.val().likedUsers);
-            if (post.destFileName) {
-                const filePath = await getImage(post.destFileName);
-                post.filePath = filePath[0];
-                console.log(post.filePath);
+            if (post.images) {
+                const filePaths = await getImage(Object.values(post.images), req.params.postUid);
+                post.filePaths = filePaths;
             }
             res.send({ post });
         }
@@ -166,15 +143,30 @@ const deletePost = async (req, res) => {
     }
 }
 
+const uploadPhoto = async (req) => {
+    const bucket = getStorage().bucket();
+    const images = await new Promise(resolve => {
+        let imageFileNames = {};    
+        req.body.filePaths.forEach(async path => {
+            const imageUid = uuid.v1();
+            const subPaths = path.split("/");
+            const fileName = subPaths[subPaths.length - 1];
+            imageFileNames[imageUid] = fileName;
+            await bucket.upload(path, { destination: `${req.body.postUid}/${fileName}`, resumable: true })
+        });
+        setTimeout(_ => resolve(imageFileNames), 3000)
+    });
+    req.body.updateInfo.images = images;
+}
+
 const edit = async (req, res) => {
     try {
         const _verified = await verifyPostAuthor(req, res);
         if (_verified) {
             let modifiedTime = new Date().toISOString();
             req.body.updateInfo.modifiedTime = modifiedTime;
-            if (req.body.filePath != null) await uploadPhoto(req);
+            if (req.body.filePaths != null) await uploadPhoto(req);
 
-            console.log(req.body.updateInfo);
             await admin.database().ref("/posts").child(req.body.postUid).update(req.body.updateInfo);
             
             let previewBody = {};
@@ -215,6 +207,5 @@ const category = async (req, res) => {
  
 module.exports = {
     addPost, addPreview, deletePreviewAndComment, getPreviews, refreshPreviews, getPost,
-    like, unlike, deletePost, edit, category, uploadPhoto
+    like, unlike, deletePost, edit, category,
 }
-// delete uploadPhoto in post.js 

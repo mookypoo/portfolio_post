@@ -1,7 +1,4 @@
-import 'dart:convert';
-import 'dart:ffi';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart' show XFile;
@@ -75,9 +72,14 @@ class PostsProvider with ChangeNotifier {
   bool get isPrivate => this._isPrivate;
   set isPrivate(bool b) => throw "error";
 
-  File? _photo;
-  File? get photo => this._photo;
-  set photo(File? x) => throw "error";
+  List<String> _newPhotos = [];
+  List<String> get newPhotos => [...this._newPhotos];
+  set newPhotos(List<String> l) => throw "error";
+
+  // try multiple photos
+  File? _newPhoto;
+  File? get newPhoto => this._newPhoto;
+  set newPhoto(File? x) => throw "error";
 
   void getUser(User user){
     this._user = user;
@@ -108,7 +110,7 @@ class PostsProvider with ChangeNotifier {
     if (this._author == null) return false;
 
     // todo 여기 parameter뭔가 더 간략하게 할 수 있을 듯 - text, title, author, category, filePath --> filepath 다시 하셈
-    final Map<String, dynamic> _res = await this._postService.addPost(text: text, title: title, author: this._author!, category: this._categoryText(), filePath: this._photo!.readAsBytesSync().toString() );
+    final Map<String, dynamic> _res = await this._postService.addPost(text: text, title: title, author: this._author!, category: this._categoryText(), filePath: this._newPhoto!.readAsBytesSync().toString() );
     if (_res.containsKey("preview") && _res.containsKey("post")) {
       this._postPreviews.add(_res["preview"] as Preview);
       this._post = _res["post"] as Post;
@@ -132,12 +134,12 @@ class PostsProvider with ChangeNotifier {
   // todo 다른대도 multiple await 쓰면 이걸로 바꾸셈
   Future<void> getPostComments(String postUid) async {
     this.changeState(ProviderState.connecting);
-    // todo 속도 차이 테스트 해보셈
     // todo 그냥 해도 됨?!?!?!?!  thread (native임) - isolate (flutter) --> 속도가 떨어짐?!?!
     // android native는 http request를 다른 thread 만들어서 함
     await this._getPost(postUid);
-    List<bool> _res = await Future.wait<bool>([this._getPost(postUid), this._getComments(postUid)]);
-    if (_res.any((bool b) => b == false)) this.changeState(ProviderState.error);
+    await this._getComments(postUid);
+    //List<bool> _res = await Future.wait<bool>([this._getPost(postUid), this._getComments(postUid)]);
+    //if (_res.any((bool b) => b == false)) this.changeState(ProviderState.error);
     this.changeState(ProviderState.complete);
   }
 
@@ -145,11 +147,7 @@ class PostsProvider with ChangeNotifier {
     final Map<String, dynamic> _res = await this._postService.getPost(postUid: postUid);
     if (_res.containsKey("post")) {
       this._post = _res["post"] as Post;
-      if (this._post?.filePath != null) {
-
-        //this._photo = File(this._post!.filePath!);
-        print("has file");
-      }
+      if (this._post?.filePaths != null) print("has file");
       return true;
     }
     return false;
@@ -228,19 +226,12 @@ class PostsProvider with ChangeNotifier {
       "updateInfo": {"text": text, "title": title},
     });
 
-    if (this._photo != null) {
-      //final Map<String, dynamic> _res = await this._postService.uploadPhoto(postUid:this._post!.postUid, filePath: this._photo!.path);
-      //if (_res.containsKey("filePath")) _body["filePath"] = _res["filePath"];
-      //String fileName =
-      //print("filename: $fileName");
-      //Uint8List uint8 = this._photo!.readAsBytesSync();
-      //String base64Image = base64Encode(this._photo!.readAsBytesSync());
-      //print("base64 image: $base64Image");
-      _body["filePath"] = this._photo!.path;
-      _body["fileName"] = this._photo!.path.split("/").last;
-      //print(_body["filePath"]);
-      //_body["image"] = uint8;
-    }
+    print("new photos: ${this._newPhotos}");
+    if (this._newPhotos.isNotEmpty) _body["filePaths"] = this._newPhotos;
+    // if (this._newPhoto != null) {
+    //   _body["filePath"] = this._newPhoto!.path;
+    //   _body["fileName"] = this._newPhoto!.path.split("/").last;
+    // }
 
     final Map<String, dynamic> _res = await this._postService.editPost(body: _body);
     if (_res.containsKey("modifiedTime")) {
@@ -290,12 +281,23 @@ class PostsProvider with ChangeNotifier {
     }
   }
 
-  Future<void> getPhoto(String text) async {
-    XFile? _xFile;
-    if (text == "Camera") _xFile = await this._imageService.takePhoto();
-    if (text == "Gallery") _xFile = await this._imageService.pickImage();
+  Future<void> takePhoto() async {
+    final XFile? _xFile = await this._imageService.takePhoto();
     if (_xFile == null) return;
-    this._photo = File(_xFile.path);
+    this._newPhotos.add(_xFile.path);
+    this.notifyListeners();
+  }
+
+  Future<void> selectPhotos() async {
+    final List<XFile>? _xFiles = await this._imageService.multipleImages();
+    if (_xFiles == null) return;
+    _xFiles.forEach((XFile x) => this._newPhotos.add(x.path));
+    this.notifyListeners();
+  }
+
+  // for non-uploaded photos, newly added
+  void deletePhoto(String path){
+    this._newPhotos.removeWhere((String p) => p == path);
     this.notifyListeners();
   }
 

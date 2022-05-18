@@ -1,9 +1,6 @@
 const express = require("express"),
     app = express(),
     postsController = require("../controllers/posts_controller"),
-    multer = require("multer"),
-    storage = multer.memoryStorage(),
-    upload = multer({ dest: "uploads/" }).single('file'),
     functions = require("firebase-functions");
 
 app.post("/add", postsController.addPost);
@@ -13,9 +10,8 @@ app.get("/getPost/:postUid", postsController.getPost);
 app.post("/like", postsController.like);
 app.post("/unlike", postsController.unlike);
 app.post("/delete", postsController.deletePost);
-app.post("/edit", upload, postsController.edit); // upload - multer 필요 
+app.post("/edit", postsController.edit); // upload - multer 필요? 
 app.get("/category", postsController.category);
-app.post("/uploadPhoto", upload, postsController.uploadPhoto);
 // addPreview = functions.region("asia-northeast3").database.instance("mooky-post-default-rtdb").ref('/posts/{postUid}')
 //     .onCreate((snapshot, context) => {
 //         const original = snapshot.val();

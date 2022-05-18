@@ -1,9 +1,12 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../providers/post_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../repos/variables.dart';
+import '../new_post/common_components.dart';
 import 'android_components.dart';
 import 'common_components.dart';
 
@@ -33,7 +36,7 @@ class AndroidPost extends StatelessWidget {
           constraints: BoxConstraints(
             minHeight: MediaQuery.of(context).size.height,
           ),
-          margin: EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
+          margin: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
@@ -46,39 +49,33 @@ class AndroidPost extends StatelessWidget {
                 follow: this.userProvider.follow, // todo show snackbar
                 isFollowing: this.userProvider.isFollowing(this.postsProvider.post!.author.userUid),
               ),
-              this.postsProvider.photo!.existsSync()
-                ? Container(
-                    padding: const EdgeInsets.all(15.0),
-                    child: Image.file(this.postsProvider.photo!, fit: BoxFit.cover),
-                  )
-                : Container(),
-              Container(
-                margin: const EdgeInsets.only(top: 15.0),
-                child: Column(
-                  children: <Widget>[
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: () async {
-                          final bool _save = await showModalBottomSheet<bool>(
-                            context: context,
-                            builder: (BuildContext ctx) {
-                              PostsProvider _postsProvider = Provider.of<PostsProvider>(ctx);
-                              return CommentBottomSheet(
-                                isPrivate: _postsProvider.isPrivate,
-                                onComment:  _postsProvider.onComment,
-                                changePrivate: _postsProvider.changePrivate,
-                              );
-                            },
-                          ) ?? false;
-                          if (!_save) return;
-                          await this.postsProvider.addComment();
-                        },
-                        child: const Text("add comment", style: TextStyle(fontWeight: FontWeight.w600, color: MyColors.primary, fontSize: 15.0)),
-                      ),
+              ...this.postsProvider.newPhotos.map((String path) => new NewPhoto(
+                  path: path, delete: this.postsProvider.deletePhoto, icon: Icons.delete)),
+              ...?this.postsProvider.post?.filePaths?.map((Uint8List bytes) => new PhotoWidget(bytes: bytes)),
+              Column(
+                children: <Widget>[
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () async {
+                        final bool _save = await showModalBottomSheet<bool>(
+                          context: context,
+                          builder: (BuildContext ctx) {
+                            PostsProvider _postsProvider = Provider.of<PostsProvider>(ctx);
+                            return CommentBottomSheet(
+                              isPrivate: _postsProvider.isPrivate,
+                              onComment:  _postsProvider.onComment,
+                              changePrivate: _postsProvider.changePrivate,
+                            );
+                          },
+                        ) ?? false;
+                        if (!_save) return;
+                        await this.postsProvider.addComment();
+                      },
+                      child: const Text("add comment", style: const TextStyle(fontWeight: FontWeight.w600, color: MyColors.primary, fontSize: 15.0)),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
               this.postsProvider.comments.isNotEmpty
                 ? Container(

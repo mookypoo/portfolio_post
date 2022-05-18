@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:portfolio_post/class/user_class.dart';
 
 class Preview {
@@ -36,7 +38,8 @@ class Post {
   final String createdTime;
   final String? modifiedTime;
   final String? category;
-  final List<int>? filePath;
+  final List<Uint8List>? filePaths;
+
   static String convertISOToString(String iso) {
     if (iso.isEmpty) return "";
     final DateTime _UTC = DateTime.parse(iso);
@@ -44,10 +47,20 @@ class Post {
     return _text;
   }
 
-  Post({required this.likedUsers, required this.title, required this.postUid, required this.author, required this.text, required this.numOfLikes, this.modifiedTime, required this.createdTime, required this.category, this.filePath});
+  Post({required this.likedUsers, required this.title, required this.postUid, required this.author, required this.text, required this.numOfLikes, this.modifiedTime, required this.createdTime, required this.category, this.filePaths});
 
   factory Post.fromJson(Map<String, dynamic> json) {
-    print(json["filePath"]["data"]);
+    // Uint8List.fromList(this.postsProvider.post!.filePaths!)
+    print("filePaths: ${json["filePaths"]}");
+    List<Uint8List> _filePaths = [];
+    // todo check if its null or empty for those that dont have images
+    if (json["filePaths"] != null) {
+      final List<Map<String, dynamic>> _list = List<Map<String, dynamic>>.from(json["filePaths"]);
+      _list.forEach((Map<String, dynamic> data) {
+        final List<int> _filePath = List<int>.from(data["data"]);
+        _filePaths.add(Uint8List.fromList(_filePath));
+      });
+    }
     return Post(
       title: json["title"].toString(),
       text: json["text"].toString(),
@@ -58,7 +71,7 @@ class Post {
       createdTime: Post.convertISOToString(json["createdTime"].toString()),
       modifiedTime: Post.convertISOToString(json["modifiedTime"] ?? ""),
       category: json["category"].toString(),
-      filePath: List<int>.from(json["filePath"]["data"]),
+      filePaths: _filePaths,
     );
   }
 
