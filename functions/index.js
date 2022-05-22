@@ -7,7 +7,7 @@ const express = require("express"),
     { comments } = require("./routers/comments"),
     { user } = require("./routers/user"),
     { search } = require("./routers/search"),
-    { addPreview, deletePreviewAndComment } = require("./controllers/posts_controller"),
+    { addPreview, deletePreviewAndComment, deleteImageInDb } = require("./controllers/posts_controller"),
     { sendNewFollowerNotification } = require("./controllers/user_controller");
 
 admin.initializeApp({
@@ -22,7 +22,7 @@ admin.initializeApp({
 
 // extended true = any type?? false = string or array 
 app.use(express.json()); // { limit: "50mb" }
-app.use(express.urlencoded({ extended: false, limit: "50mb" })); 
+//app.use(express.urlencoded({ extended: false, })); // limit: "50mb"  urlencoded도 필요없는데? 
 
 app.use("/auth", auth);
 app.use("/posts", posts);
@@ -32,7 +32,7 @@ app.use("/user", user);
 
 module.exports = {
     auth, posts, comments, user, search,
-    addPreview, deletePreviewAndComment, sendNewFollowerNotification,
+    addPreview, deletePreviewAndComment, sendNewFollowerNotification, deleteImageInDb
 }
     
 app.listen(3000, _ => console.log("connected to server"));

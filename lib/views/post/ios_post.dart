@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 
@@ -17,8 +15,6 @@ class IosPost extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print(this.postsProvider.newPhoto);
-
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         middle: Text(this.postsProvider.post?.title ?? ""),
@@ -49,7 +45,7 @@ class IosPost extends StatelessWidget {
                   isFollowing: this.userProvider.isFollowing(this.postsProvider.post!.author.userUid),
                 ),
                 ...this.postsProvider.newPhotos.map((String path) => new NewPhoto(
-                    path: path, delete: this.postsProvider.deletePhoto, icon: CupertinoIcons.delete)),
+                    path: path, deleteNewPhoto: this.postsProvider.deleteNewPhoto, icon: CupertinoIcons.delete)),
                 Align(
                   alignment: Alignment.centerRight,
                   child: CupertinoButton(

@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 
-import '../../class/post_class.dart';
+import '../../class/preview_class.dart';
 import '../../service/search_service.dart';
 import '../post/post_page.dart';
 
@@ -12,7 +12,6 @@ class SearchPostPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return GestureDetector(
       onTap: () async {
         Navigator.of(context).pushNamed(PostPage.routeName);
@@ -20,14 +19,14 @@ class SearchPostPreview extends StatelessWidget {
       },
       child: Container(
         height: 150.0,
-        margin: EdgeInsets.symmetric(vertical: 5.0, horizontal: 20.0),
+        margin: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 20.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             RichText(
               text: TextSpan(
-                style: TextStyle(fontWeight: FontWeight.w600, color: Color.fromRGBO(255, 255, 255, 1.0), fontSize: 21.0),
+                style: const TextStyle(fontWeight: FontWeight.w600, color: Color.fromRGBO(255, 255, 255, 1.0), fontSize: 21.0),
                 children: SearchService.highlightedText(searchText: this.searchText, text: this.post.title),
               ),
             ),
@@ -35,12 +34,12 @@ class SearchPostPreview extends StatelessWidget {
               maxLines: 4,
               softWrap: true,
               text: TextSpan(
-                style: TextStyle(fontSize: 16.0, color: Color.fromRGBO(255, 255, 255, 1.0), overflow: TextOverflow.ellipsis),
+                style: const TextStyle(fontSize: 16.0, color: Color.fromRGBO(255, 255, 255, 1.0), overflow: TextOverflow.ellipsis),
                 children: SearchService.highlightedText(searchText: this.searchText, text: this.post.text),
             )),
             Align(
               alignment: Alignment.centerRight,
-              child: Text(this.post.userName, style: TextStyle(fontSize: 15.0)),
+              child: Text(this.post.userName, style: const TextStyle(fontSize: 15.0)),
             ),
           ],
         ),

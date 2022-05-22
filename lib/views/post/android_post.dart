@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -17,7 +15,6 @@ class AndroidPost extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    //print(this.postsProvider.photo!.existsSync());
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
@@ -50,8 +47,7 @@ class AndroidPost extends StatelessWidget {
                 isFollowing: this.userProvider.isFollowing(this.postsProvider.post!.author.userUid),
               ),
               ...this.postsProvider.newPhotos.map((String path) => new NewPhoto(
-                  path: path, delete: this.postsProvider.deletePhoto, icon: Icons.delete)),
-              ...?this.postsProvider.post?.filePaths?.map((Uint8List bytes) => new PhotoWidget(bytes: bytes)),
+                  path: path, deleteNewPhoto: this.postsProvider.deleteNewPhoto, icon: Icons.delete)),
               Column(
                 children: <Widget>[
                   Align(

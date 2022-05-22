@@ -1,11 +1,11 @@
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart' show XFile;
 
 import '../class/checkbox_class.dart';
 import '../class/comment_class.dart';
+import '../class/photo_class.dart';
 import '../class/post_class.dart';
+import '../class/preview_class.dart';
 import '../class/user_class.dart';
 import '../service/image_service.dart';
 import '../service/post_service.dart';
@@ -76,10 +76,9 @@ class PostsProvider with ChangeNotifier {
   List<String> get newPhotos => [...this._newPhotos];
   set newPhotos(List<String> l) => throw "error";
 
-  // try multiple photos
-  File? _newPhoto;
-  File? get newPhoto => this._newPhoto;
-  set newPhoto(File? x) => throw "error";
+  List<Photo>? _uploadedPhotos;
+  List<Photo>? get uploadedPhotos => [...?this._uploadedPhotos];
+  set uploadedPhotos(List<Photo>? l) => throw "error";
 
   void getUser(User user){
     this._user = user;
@@ -108,13 +107,11 @@ class PostsProvider with ChangeNotifier {
 
   Future<bool> addPost({required String title, required String text}) async {
     if (this._author == null) return false;
-
-    // todo 여기 parameter뭔가 더 간략하게 할 수 있을 듯 - text, title, author, category, filePath --> filepath 다시 하셈
-    final Map<String, dynamic> _res = await this._postService.addPost(text: text, title: title, author: this._author!, category: this._categoryText(), filePath: this._newPhoto!.readAsBytesSync().toString() );
-    if (_res.containsKey("preview") && _res.containsKey("post")) {
+    final PostBody _body = PostBody(text: text, author: this._author!, title: title, filePaths: this._newPhotos, category: this._categoryText());
+    final Map<String, dynamic> _res = await this._postService.addPost(body: _body);
+    if (_res.containsKey("preview")) {
       this._postPreviews.add(_res["preview"] as Preview);
-      this._post = _res["post"] as Post;
-      // todo filepath
+      await this._getPost(_res["postUid"]);
       this.notifyListeners();
       return true;
     }
@@ -131,11 +128,9 @@ class PostsProvider with ChangeNotifier {
     }
   }
 
-  // todo 다른대도 multiple await 쓰면 이걸로 바꾸셈
   Future<void> getPostComments(String postUid) async {
     this.changeState(ProviderState.connecting);
-    // todo 그냥 해도 됨?!?!?!?!  thread (native임) - isolate (flutter) --> 속도가 떨어짐?!?!
-    // android native는 http request를 다른 thread 만들어서 함
+    // todo error handling
     await this._getPost(postUid);
     await this._getComments(postUid);
     //List<bool> _res = await Future.wait<bool>([this._getPost(postUid), this._getComments(postUid)]);
@@ -145,9 +140,11 @@ class PostsProvider with ChangeNotifier {
 
   Future<bool> _getPost(String postUid) async {
     final Map<String, dynamic> _res = await this._postService.getPost(postUid: postUid);
+    // todo 여기서 catch (e) 해서 dialog 보여줄 수 있나?
     if (_res.containsKey("post")) {
       this._post = _res["post"] as Post;
-      if (this._post?.filePaths != null) print("has file");
+
+      //this._uploadedPhotos = this._post!.photos;
       return true;
     }
     return false;
@@ -160,6 +157,10 @@ class PostsProvider with ChangeNotifier {
       return true;
     }
     return false;
+  }
+
+  Future<bool> _getPhotos(String postUid) async {
+
   }
 
   bool userLiked(String userUid){
@@ -214,33 +215,31 @@ class PostsProvider with ChangeNotifier {
 
   void resetPost(){
     this._post = null; this._comments = [];
-    this._categories = this._viewCategories.map((CheckboxClass c) => CheckboxClass.reset(c)).toList();
+    this._categories = this._categories.map((CheckboxClass c) => CheckboxClass.reset(c)).toList();
+    this.resetNewPhotos();
+  }
+
+  void resetNewPhotos(){
+    this._newPhotos = [];
     this.notifyListeners();
   }
 
   Future<bool> editPost({required String text, required String title}) async {
     if (this._post == null || this._user == null) return false;
-
     final Map<String, dynamic> _body = this._user!.toJson()..addAll({
       "postUid": this._post!.postUid,
       "updateInfo": {"text": text, "title": title},
     });
-
-    print("new photos: ${this._newPhotos}");
     if (this._newPhotos.isNotEmpty) _body["filePaths"] = this._newPhotos;
-    // if (this._newPhoto != null) {
-    //   _body["filePath"] = this._newPhoto!.path;
-    //   _body["fileName"] = this._newPhoto!.path.split("/").last;
-    // }
 
     final Map<String, dynamic> _res = await this._postService.editPost(body: _body);
     if (_res.containsKey("modifiedTime")) {
-      this._post = Post.edit(category: this._categoryText(), post: this._post!, text: text, title: title, modifiedTime: _res["modifiedTime"]);
+      await this._getPost(this._post!.postUid);
+      this._newPhotos = [];
       this.notifyListeners();
       return true;
     }
     return false;
-    // todo 하고서 refresh preview 하셈, category null
   }
 
   Future<bool> commentOnComment({required String mainCommentUid}) async {
@@ -278,6 +277,8 @@ class PostsProvider with ChangeNotifier {
     if (_res.containsKey("previews")){
       this._postPreviews = _res["previews"];
       this.notifyListeners();
+    } else {
+      // todo error handlig
     }
   }
 
@@ -295,10 +296,15 @@ class PostsProvider with ChangeNotifier {
     this.notifyListeners();
   }
 
-  // for non-uploaded photos, newly added
-  void deletePhoto(String path){
+  void deleteNewPhoto(String path){
     this._newPhotos.removeWhere((String p) => p == path);
     this.notifyListeners();
   }
 
+  Future<void> deleteOldPhoto(Photo photo) async {
+    if (this._post == null || this._user == null || this._uploadedPhotos == null) return;
+    this._uploadedPhotos!.removeWhere((Photo p) => p.imageUid == photo.imageUid);
+    this.notifyListeners();
+    await this._postService.deletePhoto(user: this._user!, postUid: this._post!.postUid, photo: photo);
+  }
 }

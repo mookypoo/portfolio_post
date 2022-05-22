@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/widgets.dart';
 import 'package:portfolio_post/repos/variables.dart';
 
+import '../../class/photo_class.dart';
 import '../../class/post_class.dart' show Post;
 
 class PostWidget extends StatelessWidget {
@@ -26,7 +27,7 @@ class PostWidget extends StatelessWidget {
           alignment: Alignment.centerLeft,
           child: Text(this.post.text),
         ),
-        ...?this.post.filePaths?.map((Uint8List bytes) => new PhotoWidget(bytes: bytes)),
+        //...?this.post.photos?.map((Photo photo) => new PhotoWidget(bytes: photo.bytes)),
         this.post.author.userUid == this.userUid ? Container() : Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[

@@ -5,7 +5,6 @@ import 'package:portfolio_post/views/scaffold/android_scaffold.dart';
 import 'package:portfolio_post/views/scaffold/ios_scaffold.dart';
 import 'package:provider/provider.dart';
 
-import '../../providers/post_provider.dart';
 import '../../providers/tab_provider.dart';
 
 class ScaffoldPage extends StatelessWidget {
@@ -15,11 +14,9 @@ class ScaffoldPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     TabProvider _tabProvider = Provider.of<TabProvider>(context);
-    void Function() _resetPost = Provider.of<PostsProvider>(context, listen: false).resetPost;
-
 
     return Platform.isAndroid
-      ? AndroidScaffold(tabProvider: _tabProvider, resetPost: _resetPost)
+      ? AndroidScaffold(tabProvider: _tabProvider)
       : IosScaffold(tabProvider: _tabProvider,);
   }
 }

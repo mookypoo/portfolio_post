@@ -9,9 +9,8 @@ import '../search/search_page.dart';
 import 'common_components.dart';
 
 class AndroidScaffold extends StatefulWidget {
-  AndroidScaffold({Key? key, required this.tabProvider, required this.resetPost}) : super(key: key);
+  AndroidScaffold({Key? key, required this.tabProvider}) : super(key: key);
   final TabProvider tabProvider;
-  final void Function() resetPost;
 
   @override
   State<AndroidScaffold> createState() => _AndroidScaffoldState();

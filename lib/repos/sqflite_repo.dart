@@ -52,10 +52,10 @@ class SqfliteRepo {
     return _data;
   }
 
-  // todo how many changes are actually made?
   Future<int> updateData({required String sql, required List<String> value}) async {
     final Database _db = await this._getDb();
     final int _changes = await _db.rawUpdate(sql, value);
+    print("updating sql data: ${_changes} changes were made");
     return _changes;
   }
 

@@ -1,12 +1,13 @@
 import 'package:flutter/widgets.dart';
 
-import '../class/post_class.dart' show Preview;
+import '../class/preview_class.dart';
 import '../repos/connect.dart';
 
 class SearchService {
   Connect _connect = Connect();
 
   Future<Map<String, dynamic>> search({required String searchText}) async {
+
     try {
       final Map<String, dynamic> _res = await this._connect.reqGetServer(path: "/search/${searchText}", cb: (ReqModel rm) {});
       if (_res.containsKey("data")){

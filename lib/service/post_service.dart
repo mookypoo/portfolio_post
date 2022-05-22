@@ -1,5 +1,7 @@
 import '../class/comment_class.dart';
+import '../class/photo_class.dart';
 import '../class/post_class.dart';
+import '../class/preview_class.dart';
 import '../class/user_class.dart';
 import '../repos/connect.dart';
 
@@ -27,23 +29,17 @@ class PostService {
   }
 
   Future refreshPreviews() async {
-    // todo refresh 할때 어떻게 하지???
+    // todo refresh reconsideration
+    // (1) refresh the whole posts
+    // (2) refresh just the chosen categories
   }
 
-  // todo 질문: 이렇게 parameter 다 받아와서 여기서 body로 변경? 아니면 provider에서 부터 body로 변경해서 줌?
-  Future<Map<String, dynamic>> addPost({String? filePath, required String? category, required String title, required String text, required Author author}) async {
-    final Map<String, dynamic> _body = {
-      "filePath": filePath,
-      "title": title,
-      "text": text,
-      "author": author.toJson(),
-      "category": category,
-    };
+  Future<Map<String, dynamic>> addPost({required PostBody body}) async {
     try {
-      final Map<String, dynamic> _res = await this._connect.reqPostServer(path: "/posts/add", cb: (ReqModel rm) {}, body: {"post": _body});
+      final Map<String, dynamic> _res = await this._connect.reqPostServer(path: "/posts/add", cb: (ReqModel rm) {}, body: {"post": body.toJson()});
       if (_res.containsKey("postUid") && _res.containsKey("createdTime")) return {
-        "post": Post(createdTime: Post.convertISOToString( _res["createdTime"]), author: author, text: text, title: title, postUid: _res["postUid"], numOfLikes: 0, likedUsers: [], category: category),
-        "preview": Preview(userName: author.userName, title: title, text: text, postUid: _res["postUid"], category: category),
+        "postUid": _res["postUid"],
+        "preview": Preview(userName: body.author.userName, title: body.title, text: body.text, postUid: _res["postUid"], category: body.category),
       };
       return _res;
     } catch (e) {
@@ -56,12 +52,7 @@ class PostService {
     try {
       final Map<String, dynamic> _res = await this._connect.reqGetServer(
         path: "/posts/getPost/${postUid}", cb: (ReqModel rm) {}, );
-      if (_res.containsKey("post")) {
-        // todo put this conversion in class
-        Map<String, dynamic> _post = _res["post"] as Map<String, dynamic>;
-        if (_post["likedUsers"] != null) _post["likedUsers"] = List<String>.from(_post["likedUsers"]);
-        return {"post": Post.fromJson(_res["post"] as Map<String, dynamic>)};
-      }
+      if (_res.containsKey("post")) return {"post": Post.fromJson(_res["post"] as Map<String, dynamic>)};
       return _res;
     } catch (e) {
       print(e);
@@ -72,6 +63,28 @@ class PostService {
   Future<Map<String, dynamic>> getComments({required String postUid}) async {
     try {
       final Map<String, dynamic> _res = await this._connect.reqGetServer(path: "/comments/get/${postUid}", cb: (ReqModel rm) {});
+      if (_res.containsKey("comments")) {
+        List<Comment> _commentsList = [];
+        if (_res["comments"] == null) return {"comments": _commentsList};
+        List<Map<String, dynamic>> _comments = List<Map<String, dynamic>>.from(_res["comments"]);
+        _comments.forEach((Map<String, dynamic> json) => _commentsList.add(Comment.fromJson(json)));
+        return {"comments": _commentsList};
+      }
+      return _res;
+    } catch (e) {
+      print(e);
+    }
+    return {};
+  }
+
+  Future<Map<String, dynamic>> getPhotos({required String postUid}) async {
+    // List<Photo> _images = [];
+    // if (json["images"] != null) {
+    //   final List<Map<String, dynamic>> _list = List<Map<String, dynamic>>.from(json["images"]);
+    //   _list.forEach((Map<String, dynamic> data) => _images.add(Photo.fromJson(data)));
+    // }
+    try {
+      final Map<String, dynamic> _res = await this._connect.reqGetServer(path: "/posts/get/${postUid}", cb: (ReqModel rm) {});
       if (_res.containsKey("comments")) {
         List<Comment> _commentsList = [];
         if (_res["comments"] == null) return {"comments": _commentsList};
@@ -153,16 +166,6 @@ class PostService {
     return {};
   }
 
-  Future uploadPhoto({required String postUid, required String filePath}) async {
-    try {
-      final _res = await this._connect.postImageServer(postUid: postUid, filePath: filePath, cb: (ReqModel rm) {});
-      return _res;
-    } catch (e) {
-      print(e);
-    }
-  }
-
-
   Future<Map<String, dynamic>> categoryPreviews({required List<String> categories}) async {
     String query = "";
     categories.forEach((String s) => query += "category[]=$s&");
@@ -177,6 +180,17 @@ class PostService {
         }
         return {"previews": _previewList};
       }
+      return _res;
+    } catch (e) {
+      print(e);
+    }
+    return {};
+  }
+
+  Future<Map<String, dynamic>> deletePhoto({required User user, required String postUid, required Photo photo}) async {
+    final Map<String, dynamic> _body = {"postUid": postUid}..addAll(user.toJson())..addAll(photo.toJson());
+    try {
+      final Map<String, dynamic> _res = await this._connect.reqPostServer(path: "/posts/deleteImage", cb: (ReqModel rm) {}, body: _body);
       return _res;
     } catch (e) {
       print(e);

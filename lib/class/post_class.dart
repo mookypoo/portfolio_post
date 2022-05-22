@@ -1,32 +1,5 @@
-import 'dart:typed_data';
-
+import 'package:portfolio_post/class/photo_class.dart';
 import 'package:portfolio_post/class/user_class.dart';
-
-class Preview {
-  final String postUid;
-  final String title;
-  final String text;
-  final String userName;
-  final String? category;
-
-  Preview({required this.postUid, required this.title, required this.text, required this.userName, required this.category});
-
-  factory Preview.fromJson(Map<String, dynamic> json) => Preview(
-    category: json["category"].toString(),
-    title: json["title"].toString(),
-    text: json["text"].toString(),
-    postUid: json["postUid"].toString(),
-    userName: json["userName"].toString(),
-  );
-
-  factory Preview.edited({required String? category, required Preview preview, required String title, required String text}) => Preview(
-    text: text.substring(0, text.length > 100 ? 100 : text.length),
-    title: title,
-    postUid: preview.postUid,
-    userName: preview.userName,
-    category: category,
-  );
-}
 
 class Post {
   final String postUid;
@@ -38,7 +11,6 @@ class Post {
   final String createdTime;
   final String? modifiedTime;
   final String? category;
-  final List<Uint8List>? filePaths;
 
   static String convertISOToString(String iso) {
     if (iso.isEmpty) return "";
@@ -47,33 +19,27 @@ class Post {
     return _text;
   }
 
-  Post({required this.likedUsers, required this.title, required this.postUid, required this.author, required this.text, required this.numOfLikes, this.modifiedTime, required this.createdTime, required this.category, this.filePaths});
+  Post({required this.likedUsers, required this.title, required this.postUid, required this.author, required this.text, required this.numOfLikes, this.modifiedTime, required this.createdTime, this.category});
 
   factory Post.fromJson(Map<String, dynamic> json) {
-    // Uint8List.fromList(this.postsProvider.post!.filePaths!)
-    print("filePaths: ${json["filePaths"]}");
-    List<Uint8List> _filePaths = [];
-    // todo check if its null or empty for those that dont have images
-    if (json["filePaths"] != null) {
-      final List<Map<String, dynamic>> _list = List<Map<String, dynamic>>.from(json["filePaths"]);
-      _list.forEach((Map<String, dynamic> data) {
-        final List<int> _filePath = List<int>.from(data["data"]);
-        _filePaths.add(Uint8List.fromList(_filePath));
-      });
-    }
+    List<String> _likedUsers = [];
+    if (json["likedUsers"] != null) _likedUsers = List<String>.from(json["likedUsers"]);
     return Post(
       title: json["title"].toString(),
       text: json["text"].toString(),
       postUid: json["postUid"].toString(),
       author: Author.fromJson(json["author"] as Map<String, dynamic>),
       numOfLikes: json["numOfLikes"] ?? 0,
-      likedUsers: json["likedUsers"] ?? [],
+      likedUsers: _likedUsers,
       createdTime: Post.convertISOToString(json["createdTime"].toString()),
       modifiedTime: Post.convertISOToString(json["modifiedTime"] ?? ""),
       category: json["category"].toString(),
-      filePaths: _filePaths,
     );
   }
+
+  factory Post.init({required String createdTime, required String title, required Author author, required String text, required String postUid, String? category}) => Post(
+    title: title, author: author, text: text, postUid: postUid, createdTime: Post.convertISOToString(createdTime), likedUsers: [], numOfLikes: 0,
+  );
 
   factory Post.like({required Post post, required int numOfLikes, required List<String> likedUsers}) => Post(
     text: post.text,
@@ -87,7 +53,7 @@ class Post {
     category: post.category,
   );
 
-  factory Post.edit({required String? category, required Post post, required String text, required String title, required String modifiedTime}) => Post(
+  factory Post.edit({required String? category, required Post post, required String text, required String title, required String modifiedTime, List<Photo>? images}) => Post(
     text: text,
     postUid: post.postUid,
     title: title,
@@ -98,4 +64,22 @@ class Post {
     modifiedTime: Post.convertISOToString(modifiedTime),
     category: category,
   );
+}
+
+class PostBody {
+  final String title;
+  final String text;
+  final Author author;
+  final String? category;
+  final List<String> filePaths;
+
+  PostBody({required this.title, required this.text, required this.author, required this.category, required this.filePaths});
+
+  Map<String, dynamic> toJson() => {
+    "title": this.title,
+     "text": this.text,
+    "author": this.author,
+    "category": this.category,
+    "filePaths": this.filePaths,
+  };
 }

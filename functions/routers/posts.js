@@ -12,6 +12,9 @@ app.post("/unlike", postsController.unlike);
 app.post("/delete", postsController.deletePost);
 app.post("/edit", postsController.edit); // upload - multer 필요? 
 app.get("/category", postsController.category);
+app.post("/deleteImage", postsController.deleteImage);
+app.get("/getImage/:postUid", postsController.getImage);
+
 // addPreview = functions.region("asia-northeast3").database.instance("mooky-post-default-rtdb").ref('/posts/{postUid}')
 //     .onCreate((snapshot, context) => {
 //         const original = snapshot.val();

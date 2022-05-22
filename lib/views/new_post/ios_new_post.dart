@@ -1,13 +1,11 @@
-import 'dart:typed_data';
-
 import 'package:flutter/cupertino.dart';
 import 'package:portfolio_post/views/new_post/common_components.dart';
 import 'package:provider/provider.dart';
 
 import '../../class/checkbox_class.dart';
+import '../../class/photo_class.dart';
 import '../../providers/post_provider.dart';
 import '../components/ios_checkbox.dart';
-import '../post/common_components.dart';
 import '../post/post_page.dart';
 
 class IosNewPost extends StatefulWidget {
@@ -42,116 +40,123 @@ class _IosNewPostState extends State<IosNewPost> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: CupertinoNavigationBar(
-        middle: Text(this.widget.pageTitle),
-        trailing: CupertinoButton(
-          padding: EdgeInsets.zero,
-          child: Icon(CupertinoIcons.add),
-          onPressed: () async {
-            bool _success;
-            if (this.widget.postsProvider.post != null) {
-              _success = await this.widget.postsProvider.editPost(title: this._titleCt.text, text: this._textCt.text);
-            } else {
-              _success = await this.widget.postsProvider.addPost(
-                text: this._textCt.text,
-                title: this._titleCt.text,
-              );
-            }
-            if (!_success) return; // todo tell user "couldn't add post"
-            Navigator.of(context).pop(PostPage.routeName);
-          },
-        ),
-      ),
-      child: SafeArea(
-        child: SingleChildScrollView(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 25.0, vertical: 20.0),
-            child: this.widget.postsProvider.user == null
-              ? Center(child: Text("로그인을 해야지 글을 쓸 수 있습니다."))
-              : Column(
-                  children: <Widget>[
-                    Container(
-                      margin: EdgeInsets.only(bottom: 20.0),
-                      child: Column(
-                        children: <Widget>[
-                          GestureDetector(
-                            onTap: () {
-                              this.setState(() {
-                                this._isExpanded = !this._isExpanded;
-                              });
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.only(bottom: 7.0),
-                              child: const Text("Choose a Category", style: TextStyle(fontWeight: FontWeight.w500, fontSize: 18.0),),
-                            ),
-                          ),
-                          this._isExpanded
-                            ? Container(
-                                child: Column(
-                                    children: this.widget.postsProvider.categories.map((CheckboxClass c) => IosCheckbox(
-                                      data: c, onChanged: this.widget.postsProvider.onCheckWrite)).toList()
-                                ),
-                              )
-                            : Container()
-                        ],
-                      ),
-                    ),
-                    CupertinoTextField(
-                      controller: this._titleCt,
-                      placeholder: "Title",
-                      decoration: const BoxDecoration(border: Border(bottom: BorderSide())),
-                    ),
-                    Container(
-                      alignment: Alignment.topCenter,
-                      margin: EdgeInsets.only(top: 25.0),
-                      height: 500.0,
-                      decoration: BoxDecoration(border: Border.all()),
-                      child: CupertinoTextField(
-                        controller: this._textCt,
-                        maxLines: null,
-                        placeholder: "Text",
-                        decoration: const BoxDecoration(),
-                      ),
-                    ),
-                    CupertinoButton(
-                      child: Text("Add Image"),
-                      onPressed: () async {
-                        await showCupertinoDialog(
-                          barrierDismissible: true,
-                          context: context,
-                          builder: (BuildContext context) {
-                            PostsProvider _pp = Provider.of<PostsProvider>(context);
-                            return CupertinoAlertDialog(
-                              content: Container(
-                                color: CupertinoColors.white,
-                                width: 100.0,
-                                height: 100.0,
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                  children: <Widget>[
-                                    CameraGalleryButton(
-                                      icon: CupertinoIcons.camera,
-                                      text: "Camera",
-                                      onTap: _pp.takePhoto,
-                                    ),
-                                    CameraGalleryButton(
-                                      icon: CupertinoIcons.photo,
-                                      text: "Gallery",
-                                      onTap: _pp.selectPhotos,
-                                    ),
-                                  ],
+    return WillPopScope(
+      onWillPop: () async {
+        this.widget.postsProvider.resetNewPhotos();
+        return await true;
+      },
+      child: GestureDetector(
+        onTap: FocusManager.instance.primaryFocus?.unfocus,
+        child: CupertinoPageScaffold(
+          navigationBar: CupertinoNavigationBar(
+            middle: Text(this.widget.pageTitle),
+            trailing: CupertinoButton(
+              padding: EdgeInsets.zero,
+              child: const Icon(CupertinoIcons.add),
+              onPressed: () async {
+                bool _success;
+                if (this.widget.postsProvider.post != null) {
+                  _success = await this.widget.postsProvider.editPost(title: this._titleCt.text, text: this._textCt.text);
+                } else {
+                  _success = await this.widget.postsProvider.addPost(
+                    text: this._textCt.text,
+                    title: this._titleCt.text,
+                  );
+                }
+                if (!_success) return; // todo tell user "couldn't add post"
+                Navigator.of(context).pop(PostPage.routeName);
+              },
+            ),
+          ),
+          child: SafeArea(
+            child: SingleChildScrollView(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 25.0, vertical: 20.0),
+                child: this.widget.postsProvider.user == null
+                  ? Center(child: Text("로그인을 해야지 글을 쓸 수 있습니다."))
+                  : Column(
+                      children: <Widget>[
+                        Container(
+                          margin: const EdgeInsets.only(bottom: 20.0),
+                          child: Column(
+                            children: <Widget>[
+                              GestureDetector(
+                                onTap: () => this.setState(() => this._isExpanded = !this._isExpanded),
+                                child: Padding(
+                                  padding: const EdgeInsets.only(bottom: 7.0),
+                                  child: const Text("Choose a Category", style: TextStyle(fontWeight: FontWeight.w500, fontSize: 18.0),),
                                 ),
                               ),
+                              this._isExpanded
+                                ? Container(
+                                    child: Column(
+                                      children: this.widget.postsProvider.categories.map((CheckboxClass c) => IosCheckbox(
+                                        data: c, onChanged: this.widget.postsProvider.onCheckWrite)).toList()
+                                    ),
+                                  )
+                                : Container()
+                            ],
+                          ),
+                        ),
+                        CupertinoTextField(
+                          controller: this._titleCt,
+                          placeholder: "Title",
+                          decoration: const BoxDecoration(border: Border(bottom: BorderSide())),
+                        ),
+                        Container(
+                          alignment: Alignment.topCenter,
+                          margin: const EdgeInsets.only(top: 25.0),
+                          height: 500.0,
+                          decoration: BoxDecoration(border: Border.all()),
+                          child: CupertinoTextField(
+                            controller: this._textCt,
+                            maxLines: null,
+                            placeholder: "Text",
+                            decoration: const BoxDecoration(),
+                          ),
+                        ),
+                        CupertinoButton(
+                          child: const Text("Add Image"),
+                          onPressed: () async {
+                            await showCupertinoDialog(
+                              barrierDismissible: true,
+                              context: context,
+                              builder: (BuildContext context) {
+                                final PostsProvider _pp = Provider.of<PostsProvider>(context);
+                                return CupertinoAlertDialog(
+                                  content: Container(
+                                    color: CupertinoColors.white,
+                                    width: 100.0,
+                                    height: 100.0,
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                      children: <Widget>[
+                                        CameraGalleryButton(
+                                          icon: CupertinoIcons.camera,
+                                          text: "Camera",
+                                          onTap: _pp.takePhoto,
+                                        ),
+                                        CameraGalleryButton(
+                                          icon: CupertinoIcons.photo,
+                                          text: "Gallery",
+                                          onTap: _pp.selectPhotos,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
                             );
                           },
-                        );
-                      },
-                    ),
-                    ...this.widget.postsProvider.newPhotos.map((String path) => new NewPhoto(
-                      path: path, delete: this.widget.postsProvider.deletePhoto, icon: CupertinoIcons.delete)),
-                    ...?this.widget.postsProvider.post?.filePaths?.map((Uint8List bytes) => new PhotoWidget(bytes: bytes)),
-                  ],
+                        ),
+                        ...this.widget.postsProvider.newPhotos.map((String path) => new NewPhoto(
+                          path: path, deleteNewPhoto: this.widget.postsProvider.deleteNewPhoto, icon: CupertinoIcons.delete)),
+                        ...?this.widget.postsProvider.uploadedPhotos?.map((Photo photo) => new OldPhoto(
+                          icon: CupertinoIcons.delete, deleteOldPhoto: this.widget.postsProvider.deleteOldPhoto, photo: photo,
+                        )),
+                      ],
+                ),
+              ),
             ),
           ),
         ),

@@ -2,7 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:portfolio_post/service/search_service.dart';
 
 import '../class/comment_class.dart';
-import '../class/post_class.dart';
+import '../class/post_class.dart' show Post;
+import '../class/preview_class.dart';
 
 class SearchProvider with ChangeNotifier {
   SearchService _searchService = SearchService();

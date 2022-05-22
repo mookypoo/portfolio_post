@@ -54,6 +54,9 @@ class FCMService {
         if (_res["data"].toString() == "success") return;
         if (_res["data"].toString() == "need token"){
           final String? _deviceToken = await FirebaseMessaging.instance.getToken();
+          // todo: two ways to re-do FCM token
+          // (1) save time-stamp along with it, and after every month, refresh
+          // (2) every time the app is turned on, refresh
           if (_deviceToken != null) await this._saveDeviceToken(user: user, deviceToken: _deviceToken);
         }
       }
