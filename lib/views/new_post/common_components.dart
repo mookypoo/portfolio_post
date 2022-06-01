@@ -40,7 +40,7 @@ class NewPhoto extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          Image.file(File(this.path), fit: BoxFit.contain, width: 280.0),
+          Image.file(File(this.path), fit: BoxFit.contain, width: MediaQuery.of(context).size.width * 0.7),
           GestureDetector(
             onTap: () => this.deleteNewPhoto(this.path),
             child: Icon(this.icon, size: 20.0,),
@@ -64,7 +64,7 @@ class OldPhoto extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          Image.memory(photo.bytes, fit: BoxFit.contain, width: 280.0),
+          Image.memory(photo.bytes, fit: BoxFit.contain, width: MediaQuery.of(context).size.width * 0.7),
           GestureDetector(
             onTap: () => this.deleteOldPhoto(this.photo),
             child: Icon(this.icon, size: 20.0,),

@@ -53,14 +53,14 @@ class _IosAuthState extends State<IosAuth> {
             width: _size.width,
             child: Stack(
               children: <Widget>[
-                TopImage(),
+                const TopImage(),
                 Positioned(
                   left: 0.0,
                   right: 0.0,
                   bottom: 0.0,
                   child: Stack(
                     children: <Widget>[
-                      BackgroundContainer(),
+                      const BackgroundContainer(),
                       Positioned(
                         top: 10.0,
                         left: 0.0,

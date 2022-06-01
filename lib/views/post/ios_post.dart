@@ -15,8 +15,11 @@ class IosPost extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    MediaQueryData _mq = MediaQuery.of(context);
+
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
+        transitionBetweenRoutes: false,
         middle: Text(this.postsProvider.post?.title ?? ""),
         trailing: CupertinoButton(
           padding: EdgeInsets.zero,
@@ -28,7 +31,7 @@ class IosPost extends StatelessWidget {
         child: SingleChildScrollView(
           child: Container(
             constraints: BoxConstraints(
-              minHeight: MediaQuery.of(context).size.height,
+              minHeight: _mq.size.height - 66.0 - _mq.viewPadding.top - _mq.viewPadding.bottom,
             ),
             padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
             child: Column(
@@ -36,13 +39,15 @@ class IosPost extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 this.postsProvider.post?.author.userUid == this.postsProvider.user?.userUid
-                  ? EditDelete(delete: this.postsProvider.deletePost, userUid: this.postsProvider.user!.userUid, resetPost: this.postsProvider.resetPost,)
+                  ? EditDelete(delete: this.postsProvider.deletePost, userUid: this.postsProvider.user!.userUid, resetPost: this.postsProvider.resetPost, initCategory: this.postsProvider.initCategory,)
                   : Container(),
                 PostWidget(
+                  state: this.postsProvider.state,
                   userUid: this.userProvider.user?.userUid ?? "",
                   post: this.postsProvider.post!,
                   follow: this.userProvider.follow,
                   isFollowing: this.userProvider.isFollowing(this.postsProvider.post!.author.userUid),
+                  photos: this.postsProvider.uploadedPhotos,
                 ),
                 ...this.postsProvider.newPhotos.map((String path) => new NewPhoto(
                     path: path, deleteNewPhoto: this.postsProvider.deleteNewPhoto, icon: CupertinoIcons.delete)),
@@ -69,13 +74,8 @@ class IosPost extends StatelessWidget {
                   ),
                 ),
                 this.postsProvider.comments.isNotEmpty
-                    ? Container(
-                        child: Comments(postsProvider: this.postsProvider),
-                        constraints: BoxConstraints(
-                          maxHeight: 100.0 * this.postsProvider.comments.length,
-                        ),
-                      )
-                    : Container(),
+                  ? Comments(postsProvider: this.postsProvider)
+                  : Container(),
               ],
             ),
           ),

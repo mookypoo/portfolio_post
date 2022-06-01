@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart' show XFile;
+import 'package:portfolio_post/providers/state_provider.dart';
 
 import '../class/checkbox_class.dart';
 import '../class/comment_class.dart';
@@ -7,40 +8,28 @@ import '../class/photo_class.dart';
 import '../class/post_class.dart';
 import '../class/preview_class.dart';
 import '../class/user_class.dart';
-import '../service/image_service.dart';
+import '../service/photo_service.dart';
 import '../service/post_service.dart';
 
-enum ProviderState {
-  open, connecting, complete, error
-}
-
 class PostsProvider with ChangeNotifier {
-  PostService _postService = PostService();
-  ImageService _imageService = ImageService();
+  final PostService _postService = PostService();
+  final PhotoService _imageService = PhotoService();
+  final StateProvider stateProvider;
 
-  PostsProvider(){
+  PostsProvider(this.stateProvider){
     print("post provider init");
     this.getPreviews();
   }
 
-  // todo category도 uid줘서 다시 하기
-  List<CheckboxClass> _categories = [
-    CheckboxClass(text: "Firebase"),
-    CheckboxClass(text: "Flutter"),
-    CheckboxClass(text: "JavaScript"),
-    CheckboxClass(text: "Node.js"),
-    CheckboxClass(text: "Miscellaneous"),
-  ];
+  ProviderState _state = ProviderState.open;
+  ProviderState get state => this._state;
+  set state(ProviderState s) => throw "error";
+
+  List<CheckboxClass> _categories = [...PostService.categories];
   List<CheckboxClass> get categories => [...this._categories];
   set categories(List<CheckboxClass> s) => throw "error";
 
-  List<CheckboxClass> _viewCategories = [
-    CheckboxClass(text: "Firebase"),
-    CheckboxClass(text: "Flutter"),
-    CheckboxClass(text: "JavaScript"),
-    CheckboxClass(text: "Node.js"),
-    CheckboxClass(text: "Miscellaneous"),
-  ];
+  List<CheckboxClass> _viewCategories = [...PostService.categories];
   List<CheckboxClass> get viewCategories => [...this._viewCategories];
   set viewCategories(List<CheckboxClass> s) => throw "error";
 
@@ -49,10 +38,6 @@ class PostsProvider with ChangeNotifier {
   set user(User? u) => throw "error";
 
   Author? _author;
-
-  ProviderState _state = ProviderState.open;
-  ProviderState get state => this._state;
-  set state(ProviderState s) => throw "error";
 
   List<Preview> _postPreviews = [];
   List<Preview> get postPreviews => [...this._postPreviews];
@@ -85,11 +70,6 @@ class PostsProvider with ChangeNotifier {
     this._author = Author(userName: user.userName, userUid: user.userUid);
   }
 
-  void changeState(ProviderState state){
-    this._state = state;
-    this.notifyListeners();
-  }
-
   List<String> saveCategory(){
     List<String> _categories = [];
     this._viewCategories.forEach((CheckboxClass c) {
@@ -120,47 +100,54 @@ class PostsProvider with ChangeNotifier {
 
   Future<void> getPreviews() async {
     final Map<String, dynamic> _res = await this._postService.getPreviews();
+    if (_res.containsKey("error")) this.stateProvider.changeState(state: ProviderState.error, error: _res["error"].toString());
     if (_res.containsKey("previews")) {
       this._postPreviews = _res["previews"];
       this.notifyListeners();
-    } else {
-      this.changeState(ProviderState.error);
     }
   }
 
-  Future<void> getPostComments(String postUid) async {
-    this.changeState(ProviderState.connecting);
-    // todo error handling
-    await this._getPost(postUid);
-    await this._getComments(postUid);
-    //List<bool> _res = await Future.wait<bool>([this._getPost(postUid), this._getComments(postUid)]);
-    //if (_res.any((bool b) => b == false)) this.changeState(ProviderState.error);
-    this.changeState(ProviderState.complete);
+  Future<void> getFullPost(String postUid) async {
+    this.resetPost();
+    this._getPost(postUid);
+    this._getComments(postUid);
+    this._getPhotos(postUid);
   }
 
-  Future<bool> _getPost(String postUid) async {
+  Future<void> _getPost(String postUid) async {
     final Map<String, dynamic> _res = await this._postService.getPost(postUid: postUid);
-    // todo 여기서 catch (e) 해서 dialog 보여줄 수 있나?
+    if (_res.containsKey("error")) this.stateProvider.changeState(state: ProviderState.error, error: _res["error"].toString());
     if (_res.containsKey("post")) {
       this._post = _res["post"] as Post;
-
-      //this._uploadedPhotos = this._post!.photos;
-      return true;
+      this.notifyListeners();
     }
-    return false;
   }
 
-  Future<bool> _getComments(String postUid) async {
+  Future<void> _getComments(String postUid) async {
     final Map<String, dynamic> _res = await this._postService.getComments(postUid: postUid);
-    if (_res.containsKey("comments")) {
-      this._comments = _res["comments"] as List<Comment>;
-      return true;
-    }
-    return false;
+    if (_res.containsKey("comments")) this._comments = _res["comments"] as List<Comment>;
+    this.notifyListeners();
   }
 
-  Future<bool> _getPhotos(String postUid) async {
+  void initCategory(){
+    final int _index = this._categories.indexWhere((CheckboxClass c) => c.text == this._post!.category);
+    if (_index != -1) this._categories[_index] = CheckboxClass.onTap(this._categories[_index]);
+    this.notifyListeners();
+  }
 
+  void changeState(ProviderState state){
+    this._state = state;
+    this.notifyListeners();
+  }
+
+  Future<void> _getPhotos(String postUid) async {
+    Map<String, dynamic> _res = {};
+    Future.delayed(Duration(milliseconds: 1200), () {
+      if (_res.isEmpty) this.changeState(ProviderState.connecting);
+    });
+    _res = await this._imageService.getPhotos(postUid: postUid);
+    if (_res.containsKey("photos")) this._uploadedPhotos = _res["photos"] as List<Photo>;
+    if (this._state == ProviderState.connecting) this.changeState(ProviderState.complete);
   }
 
   bool userLiked(String userUid){
@@ -173,11 +160,10 @@ class PostsProvider with ChangeNotifier {
   Future<void> like() async {
     if (this._post == null || this._user == null) return;
     final Map<String, dynamic> _res = await this._postService.like(post: this._post!, userUid: this.user!.userUid);
+    if (_res.containsKey("error")) this.stateProvider.changeState(state: ProviderState.error, error: _res["error"].toString());
     if (_res.containsKey("post")) {
       this._post = _res["post"] as Post;
       this.notifyListeners();
-    } else {
-      // todo error handling
     }
   }
 
@@ -185,14 +171,12 @@ class PostsProvider with ChangeNotifier {
 
   Future<void> addComment() async {
     if (this._post == null || this._author == null) return;
-    final Map<String, dynamic> _res = await this._postService.addComment(
-        body: CommentBody(postUid: this.post!.postUid, text: this._comment, author: this._author!, isPrivate: this._isPrivate,
-    ));
+    final CommentBody _body = CommentBody(postUid: this.post!.postUid, text: this._comment, author: this._author!, isPrivate: this._isPrivate);
+    final Map<String, dynamic> _res = await this._postService.addComment(body: _body);
+    if (_res.containsKey("error")) this.stateProvider.changeState(state: ProviderState.error, error: _res["error"].toString());
     if (_res.containsKey("comment")) {
       this._comments.add(_res["comment"] as Comment);
       this.notifyListeners();
-    } else {
-      // todo error handling
     }
   }
 
@@ -204,6 +188,7 @@ class PostsProvider with ChangeNotifier {
   Future<bool> deletePost() async {
     if (this._post == null || this._user == null) return false;
     final Map<String, dynamic> _res = await this._postService.deletePost(postUid: this._post!.postUid, user: this._user!);
+    if (_res.containsKey("error")) this.stateProvider.changeState(state: ProviderState.error, error: _res["error"].toString());
     if (_res.containsKey("deleted") && _res["deleted"]) {
       final int _index = this._postPreviews.indexWhere((Preview p) => p.postUid == this._post!.postUid);
       this._postPreviews.removeAt(_index);
@@ -213,9 +198,9 @@ class PostsProvider with ChangeNotifier {
     return false;
   }
 
-  void resetPost(){
-    this._post = null; this._comments = [];
-    this._categories = this._categories.map((CheckboxClass c) => CheckboxClass.reset(c)).toList();
+  void resetPost({bool resetCategories = true}){
+    this._post = null; this._comments = []; this._uploadedPhotos = null;
+    if (resetCategories) this._categories = this._categories.map((CheckboxClass c) => CheckboxClass.reset(c)).toList();
     this.resetNewPhotos();
   }
 
@@ -230,16 +215,16 @@ class PostsProvider with ChangeNotifier {
       "postUid": this._post!.postUid,
       "updateInfo": {"text": text, "title": title},
     });
-    if (this._newPhotos.isNotEmpty) _body["filePaths"] = this._newPhotos;
-
+    if (this._newPhotos.isNotEmpty) await this._imageService.uploadPhoto(postUid: this._post!.postUid, filePaths: this._newPhotos, user: this._user!);
     final Map<String, dynamic> _res = await this._postService.editPost(body: _body);
+    if (_res.containsKey("error")) return false;
     if (_res.containsKey("modifiedTime")) {
-      await this._getPost(this._post!.postUid);
-      this._newPhotos = [];
-      this.notifyListeners();
-      return true;
+      final int _index = this._postPreviews.indexWhere((Preview preview) => preview.postUid == this._post!.postUid);
+      this._postPreviews[_index] = Preview.edit(category: this._categoryText(), oldPreview: this._postPreviews[_index], title: title, text: text.substring(0, text.length < 100 ? text.length : 100));
+      await this.getFullPost(this._post!.postUid);
+      this.resetNewPhotos();
     }
-    return false;
+    return true;
   }
 
   Future<bool> commentOnComment({required String mainCommentUid}) async {
@@ -248,22 +233,22 @@ class PostsProvider with ChangeNotifier {
       body: CommentBody(postUid: this._post!.postUid, text: this._comment, isPrivate: this._isPrivate, author: this._author!, mainCommentUid: mainCommentUid),
       commentOnComment: true,
     );
+    if (_res.containsKey("error")) return false;
     if (_res.containsKey("comment")) {
       final int _index = this._comments.indexWhere((Comment c) => c.commentUid == mainCommentUid);
       this._comments[_index].comments.add(_res["comment"]);
       this.notifyListeners();
-      return true;
     }
-    return false;
+    return true;
   }
 
-  void onCheckView(CheckboxClass c){
+  void onCheckViewCat(CheckboxClass c){
     final int _index = this._viewCategories.indexWhere((CheckboxClass ch) => ch.text == c.text);
     this._viewCategories[_index] = CheckboxClass.onTap(c);
     this.notifyListeners();
   }
 
-  void onCheckWrite(CheckboxClass c){
+  void onCheckWriteCat(CheckboxClass c){
     final int _prevIndex = this._categories.indexWhere((CheckboxClass ch) => ch.isChecked == true);
     if (_prevIndex != -1) this._categories[_prevIndex] = CheckboxClass.onTap(this._categories[_prevIndex]);
     final int _index = this._categories.indexWhere((CheckboxClass ch) => ch.text == c.text);
@@ -272,14 +257,14 @@ class PostsProvider with ChangeNotifier {
   }
 
   Future<void> getCategoryPreviews() async {
-    if (this._viewCategories.every((CheckboxClass ch) => ch.isChecked == false)) return;
-    final Map<String, dynamic> _res = await this._postService.categoryPreviews(categories: this.saveCategory());
-    if (_res.containsKey("previews")){
-      this._postPreviews = _res["previews"];
-      this.notifyListeners();
-    } else {
-      // todo error handlig
+    if (this._viewCategories.every((CheckboxClass ch) => ch.isChecked == false)) {
+      await this.getPreviews();
+      return;
     }
+    final Map<String, dynamic> _res = await this._postService.categoryPreviews(categories: this.saveCategory());
+    if (_res.containsKey("error")) this.stateProvider.changeState(state: ProviderState.error, error: _res["error"].toString());
+    if (_res.containsKey("previews")) this._postPreviews = _res["previews"];
+    this.notifyListeners();
   }
 
   Future<void> takePhoto() async {
@@ -290,7 +275,7 @@ class PostsProvider with ChangeNotifier {
   }
 
   Future<void> selectPhotos() async {
-    final List<XFile>? _xFiles = await this._imageService.multipleImages();
+    final List<XFile>? _xFiles = await this._imageService.multiplePhotos();
     if (_xFiles == null) return;
     _xFiles.forEach((XFile x) => this._newPhotos.add(x.path));
     this.notifyListeners();
@@ -303,8 +288,11 @@ class PostsProvider with ChangeNotifier {
 
   Future<void> deleteOldPhoto(Photo photo) async {
     if (this._post == null || this._user == null || this._uploadedPhotos == null) return;
-    this._uploadedPhotos!.removeWhere((Photo p) => p.imageUid == photo.imageUid);
-    this.notifyListeners();
-    await this._postService.deletePhoto(user: this._user!, postUid: this._post!.postUid, photo: photo);
+    final Map<String, dynamic> _res = await this._imageService.deletePhoto(user: this._user!, postUid: this._post!.postUid, photo: photo);
+    if (_res.containsKey("data")) {
+      this._uploadedPhotos!.removeWhere((Photo p) => p.fileName == photo.fileName);
+      this.notifyListeners();
+    }
+
   }
 }

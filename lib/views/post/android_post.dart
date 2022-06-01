@@ -15,6 +15,8 @@ class AndroidPost extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    MediaQueryData _mq = MediaQuery.of(context);
+
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
@@ -23,7 +25,7 @@ class AndroidPost extends StatelessWidget {
         actions: [
           IconButton(
             padding: EdgeInsets.zero,
-            icon: this.postsProvider.user == null ? Container() : !this.postsProvider.userLiked(this.postsProvider.user!.userUid) ? Icon(Icons.thumb_up_outlined) : Icon(Icons.thumb_up_alt_outlined),
+            icon: this.postsProvider.user == null ? Container() : !this.postsProvider.userLiked(this.postsProvider.user!.userUid) ? Icon(Icons.thumb_up_outlined) : Icon(Icons.thumb_up_sharp),
             onPressed: this.postsProvider.user == null ? null : () async => await this.postsProvider.like(),
           ),
         ],
@@ -31,16 +33,18 @@ class AndroidPost extends StatelessWidget {
       body: SingleChildScrollView(
         child: Container(
           constraints: BoxConstraints(
-            minHeight: MediaQuery.of(context).size.height,
+            minHeight: _mq.size.height - 66.0 - _mq.viewPadding.top - _mq.viewPadding.bottom,
           ),
           margin: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               this.postsProvider.post?.author.userUid == this.postsProvider.user?.userUid
-                ? EditDelete(delete: this.postsProvider.deletePost, userUid: this.postsProvider.user!.userUid, resetPost: this.postsProvider.resetPost,)
+                ? EditDelete(delete: this.postsProvider.deletePost, userUid: this.postsProvider.user!.userUid, resetPost: this.postsProvider.resetPost, initCategory: this.postsProvider.initCategory,)
                 : Container(),
               PostWidget(
+                state: this.postsProvider.state,
+                photos: this.postsProvider.uploadedPhotos,
                 userUid: this.userProvider.user?.userUid ?? "",
                 post: this.postsProvider.post!,
                 follow: this.userProvider.follow, // todo show snackbar
@@ -57,7 +61,7 @@ class AndroidPost extends StatelessWidget {
                         final bool _save = await showModalBottomSheet<bool>(
                           context: context,
                           builder: (BuildContext ctx) {
-                            PostsProvider _postsProvider = Provider.of<PostsProvider>(ctx);
+                            final PostsProvider _postsProvider = Provider.of<PostsProvider>(ctx);
                             return CommentBottomSheet(
                               isPrivate: _postsProvider.isPrivate,
                               onComment:  _postsProvider.onComment,
@@ -74,12 +78,7 @@ class AndroidPost extends StatelessWidget {
                 ],
               ),
               this.postsProvider.comments.isNotEmpty
-                ? Container(
-                    constraints: BoxConstraints(
-                      maxHeight: MediaQuery.of(context).size.height,
-                    ),
-                    child: Comments(postsProvider: this.postsProvider,),
-                  )
+                ? Comments(postsProvider: this.postsProvider)
                 : Container(),
             ],
           ),

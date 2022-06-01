@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../class/checkbox_class.dart';
@@ -30,26 +31,28 @@ class _AndroidMainState extends State<AndroidMain> with AutomaticKeepAliveClient
           child: CustomScrollView(
             slivers: [
               SliverAppBar(
+                pinned: true,
+                systemOverlayStyle: SystemUiOverlayStyle.light,
                 title: const Text("계시판", style: TextStyle(fontWeight: FontWeight.w500),),
                 centerTitle: true,
                 backgroundColor: MyColors.primary,
                 actions: [
                   IconButton(
-                    icon: Icon(Icons.more_vert_sharp),
+                    icon: const Icon(Icons.more_vert_sharp),
                     onPressed: () async {
                       await showDialog(
                         context: context,
                         builder: (BuildContext ctx) {
-                          PostsProvider _pp = Provider.of<PostsProvider>(ctx);
+                          final PostsProvider _pp = Provider.of<PostsProvider>(ctx);
                             return Dialog(
                               child: Padding(
-                                padding: EdgeInsets.symmetric(vertical: 10.0),
+                                padding: const EdgeInsets.symmetric(vertical: 10.0),
                                 child: Column(
                                   mainAxisSize: MainAxisSize.min,
                                   children: <Widget>[
                                     Text("Categories", style: TextStyle(fontWeight: FontWeight.w500, fontSize: 18.0),),
                                     ..._pp.viewCategories.map((CheckboxClass c) => AndroidCheckbox(
-                                        data: c, onChanged: _pp.onCheckView)).toList()
+                                        data: c, onChanged: _pp.onCheckViewCat)).toList()
                                   ]
                               ),
                             ),
@@ -63,13 +66,13 @@ class _AndroidMainState extends State<AndroidMain> with AutomaticKeepAliveClient
               ),
               SliverList(
                 delegate: SliverChildBuilderDelegate((BuildContext ctx, int index) {
-                  PostsProvider _pp = Provider.of<PostsProvider>(context);
+                  final PostsProvider _pp = Provider.of<PostsProvider>(context);
                     return PostPreviewTile(
-                      getPost: _pp.getPostComments,
+                      getPost: _pp.getFullPost,
                       post: _pp.postPreviews[index],
                     );
                   },
-                  childCount: this.widget.postsProvider.postPreviews.length,
+                  childCount: context.watch<PostsProvider>().postPreviews.length,
                 ),
               ),
             ],
@@ -78,12 +81,12 @@ class _AndroidMainState extends State<AndroidMain> with AutomaticKeepAliveClient
         Positioned(
           bottom: 15.0,
           right: 20.0,
-          child: IconButton(
-            padding: EdgeInsets.zero,
-            icon: const Icon(Icons.add_circle_outlined, size: 55.0, color: MyColors.primary),
+          child: FloatingActionButton(
+            backgroundColor: MyColors.primary,
+            child: const Icon(Icons.add, size: 30.0,),
             onPressed: () async {
               this.widget.postsProvider.resetPost();
-              await Navigator.of(context).pushNamed(NewPostPage.routeName, arguments: "새 글 쓰기",);
+              await Navigator.of(context).pushNamed(NewPostPage.routeName, arguments: "새 글 작성하기",);
             },
           ),
         ),

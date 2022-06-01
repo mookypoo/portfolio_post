@@ -15,11 +15,11 @@ class Preview {
     userName: json["userName"].toString(),
   );
 
-  factory Preview.edited({required String? category, required Preview preview, required String title, required String text}) => Preview(
-    text: text.substring(0, text.length > 100 ? 100 : text.length),
+  factory Preview.edit({required String? category, required Preview oldPreview, required String title, required String text}) => Preview(
+    category: category ?? oldPreview.category,
     title: title,
-    postUid: preview.postUid,
-    userName: preview.userName,
-    category: category,
+    text: text,
+    postUid: oldPreview.postUid,
+    userName: oldPreview.userName,
   );
 }

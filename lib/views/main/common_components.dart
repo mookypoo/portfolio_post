@@ -12,6 +12,7 @@ class PostPreviewTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () async {
+
         this.getPost(this.post.postUid);
         await Navigator.of(context).pushNamed(PostPage.routeName);
       },
@@ -22,7 +23,7 @@ class PostPreviewTile extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text(this.post.title, style: const TextStyle(fontWeight: FontWeight.w600, color: Color.fromRGBO(0, 0, 0, 1.0), fontSize: 20.0),),
+            Text(this.post.title, style: const TextStyle(overflow: TextOverflow.ellipsis, fontWeight: FontWeight.w600, color: Color.fromRGBO(0, 0, 0, 1.0), fontSize: 20.0), maxLines: 2),
             Text(this.post.text, style: const TextStyle(overflow: TextOverflow.ellipsis, fontSize: 16.0), maxLines: 2,),
             Align(
               alignment: Alignment.centerRight,

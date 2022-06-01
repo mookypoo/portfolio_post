@@ -7,10 +7,11 @@ import '../../repos/variables.dart';
 import '../new_post/new_post_page.dart';
 
 class EditDelete extends StatelessWidget {
-  const EditDelete({Key? key, required this.delete, required this.userUid, required this.resetPost}) : super(key: key);
+  const EditDelete({Key? key, required this.initCategory, required this.delete, required this.userUid, required this.resetPost}) : super(key: key);
   final Future<bool> Function() delete;
   final String userUid;
   final void Function() resetPost;
+  final void Function() initCategory;
 
   @override
   Widget build(BuildContext context) {
@@ -18,11 +19,14 @@ class EditDelete extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.end,
       children: <Widget>[
         TextButton(
-          child: const Text("Edit"),
-          onPressed: () async => await Navigator.of(context).pushNamed(NewPostPage.routeName, arguments: "글 수정하기"),
+          child: const Text("Edit", style: TextStyle(color: MyColors.primary),),
+          onPressed: () async {
+            this.initCategory();
+            await Navigator.of(context).pushNamed(NewPostPage.routeName, arguments: "글 수정하기");
+          },
         ),
         TextButton(
-          child: const Text("Delete"),
+          child: const Text("Delete", style: TextStyle(color: MyColors.primary)),
           onPressed: () async {
             final bool _deleted = await this.delete();
             if (!_deleted) return; // todo error handling
@@ -58,7 +62,7 @@ class CommentBottomSheet extends StatelessWidget {
           ),
           TextField(
             decoration: InputDecoration(
-              contentPadding: EdgeInsets.only(left: 15.0),
+              contentPadding: const EdgeInsets.only(left: 15.0),
                 hintText: "comment",
                 border: InputBorder.none
             ),
@@ -96,7 +100,7 @@ class Comments extends StatelessWidget {
   Widget _mainCommentWidget({required String text}){
     return Container(
       alignment: Alignment.centerLeft,
-      height: 35.0,
+      constraints: const BoxConstraints(minHeight: 30.0),
       padding: const EdgeInsets.only(left: 10.0),
       decoration: BoxDecoration(border: Border.all()),
       child: Text(text),
@@ -117,6 +121,8 @@ class Comments extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
+        physics: NeverScrollableScrollPhysics(),
+        shrinkWrap: true,
         itemCount: this.postsProvider.comments.length,
         itemBuilder: (BuildContext context, int index) {
           final Comment _comment = this.postsProvider.comments[index];
@@ -135,9 +141,9 @@ class Comments extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    Text("${_comment.createdTime}", style: TextStyle(fontSize: 13.5),),
+                    Text("${_comment.createdTime}", style: const TextStyle(fontSize: 13.5),),
                     GestureDetector(
-                      child: Text("댓글달기", style: TextStyle(fontWeight: FontWeight.w600, color: MyColors.primary, fontSize: 15.0)),
+                      child: Text("댓글달기", style: const TextStyle(fontWeight: FontWeight.w600, color: MyColors.primary, fontSize: 15.0)),
                       onTap: () async {
                         final bool _save = await showModalBottomSheet<bool>(
                           context: context,
@@ -162,6 +168,8 @@ class Comments extends StatelessWidget {
                       width: 300.0,
                       height: 45.0 * this.postsProvider.comments[index].comments.length,
                       child: ListView.builder(
+                        physics: NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
                         itemCount: this.postsProvider.comments[index].comments.length,
                         itemBuilder: (BuildContext ctx, int i) {
                           final Comment _subComment = this.postsProvider.comments[index].comments[i];

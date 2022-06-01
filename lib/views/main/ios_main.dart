@@ -21,6 +21,7 @@ class _IosMainState extends State<IosMain> with AutomaticKeepAliveClientMixin<Io
   @override
   Widget build(BuildContext context) {
     super.build(context); // 안해도 된뎁
+
     return Stack(
       children: <Widget>[
         CustomScrollView(
@@ -35,14 +36,14 @@ class _IosMainState extends State<IosMain> with AutomaticKeepAliveClientMixin<Io
                     barrierDismissible: true,
                       context: context,
                       builder: (BuildContext ctx) {
-                        PostsProvider _pp = Provider.of<PostsProvider>(ctx);
+                        final PostsProvider _pp = Provider.of<PostsProvider>(ctx);
                         return CupertinoAlertDialog(
                           title: const Text("Categories", style: TextStyle(fontWeight: FontWeight.w500, fontSize: 18.0),),
                           content: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 10.0),
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
-                              children: _pp.viewCategories.map((CheckboxClass c) => IosCheckbox(data: c, onChanged: _pp.onCheckView)).toList(),
+                              children: _pp.viewCategories.map((CheckboxClass c) => IosCheckbox(data: c, onChanged: _pp.onCheckViewCat)).toList(),
                             ),
                           ),
                         );
@@ -58,9 +59,9 @@ class _IosMainState extends State<IosMain> with AutomaticKeepAliveClientMixin<Io
             ),
             SliverList(
               delegate: SliverChildBuilderDelegate((BuildContext ctx, int index) {
-                PostsProvider _pp = Provider.of<PostsProvider>(ctx);
+                final PostsProvider _pp = Provider.of<PostsProvider>(ctx);
                   return PostPreviewTile(
-                    getPost: _pp.getPostComments,
+                    getPost: _pp.getFullPost,
                     post: _pp.postPreviews[index],
                   );
                 },
@@ -76,7 +77,7 @@ class _IosMainState extends State<IosMain> with AutomaticKeepAliveClientMixin<Io
             child: const Icon(CupertinoIcons.add_circled_solid, size: 55.0, color: MyColors.primary),
             onPressed: () async {
               this.widget.postsProvider.resetPost();
-              await Navigator.of(context).pushNamed(NewPostPage.routeName, arguments: "새 글 쓰기",);
+              await Navigator.of(context).pushNamed(NewPostPage.routeName, arguments: "새 글 작성하기",);
             },
           ),
         ),

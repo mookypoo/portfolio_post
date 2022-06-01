@@ -2,7 +2,7 @@ const express = require("express"),
     axios = require("axios"),
     qs = require("qs"),
     admin = require("firebase-admin"),
-    { firebaseAPI } = require("../../secret/firebaseAPI"),
+    { firebaseAPI } = require("../secret/firebaseAPI"),
     endPoint = (firebasePath) => `https://identitytoolkit.googleapis.com/v1/accounts:${firebasePath}?key=${firebaseAPI}`;
 
 const verifyUser = async (req) => {

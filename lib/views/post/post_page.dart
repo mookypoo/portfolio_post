@@ -15,10 +15,9 @@ class PostPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    PostsProvider _postsProvider = Provider.of<PostsProvider>(context);
-    UserProvider _userProvider = Provider.of<UserProvider>(context);
+    final PostsProvider _postsProvider = Provider.of<PostsProvider>(context);
+    final UserProvider _userProvider = Provider.of<UserProvider>(context);
 
-    if (_postsProvider.state == ProviderState.connecting) return LoadingPage();
     if (_postsProvider.post == null) return LoadingPage();
 
     return Platform.isAndroid

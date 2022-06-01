@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../class/checkbox_class.dart';
 import '../../class/photo_class.dart';
 import '../../providers/post_provider.dart';
+import '../../repos/variables.dart';
 import '../components/ios_checkbox.dart';
 import '../post/post_page.dart';
 
@@ -21,9 +22,14 @@ class _IosNewPostState extends State<IosNewPost> {
   final TextEditingController _titleCt = TextEditingController();
   final TextEditingController _textCt = TextEditingController();
   bool _isExpanded = false;
+  final String _newText = "뒤로 가시면\n새로 작성한 글이 사라집니다.";
+  final String _editText = "뒤로 가시면\n수정이 반영되지 않습니다.";
+  String? _confirmText;
 
   @override
   void initState() {
+    if (this.widget.pageTitle.contains("수정")) _confirmText = _editText;
+    if (this.widget.pageTitle.contains("작성하기")) _confirmText = _newText;
     if (this.widget.postsProvider.post != null) {
       this._titleCt.text = this.widget.postsProvider.post!.title;
       this._textCt.text = this.widget.postsProvider.post!.text;
@@ -42,8 +48,32 @@ class _IosNewPostState extends State<IosNewPost> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        this.widget.postsProvider.resetNewPhotos();
-        return await true;
+        final bool _goBack = await showCupertinoDialog(
+          barrierDismissible: true,
+          context: context,
+          builder: (BuildContext ctx) => CupertinoAlertDialog(
+            content: Container(
+              padding: const EdgeInsets.only(top: 25.0, right: 10.0, bottom: 10.0, left: 10.0),
+              height: 150.0,
+              child: Text(_confirmText!, style: const TextStyle(fontSize: 17.0),),
+            ),
+            actions: <Widget>[
+              CupertinoButton(
+                child: const Text("뒤로가기", style: TextStyle(fontWeight: FontWeight.w500, color: CupertinoColors.black, fontSize: 15.5)),
+                onPressed: () => Navigator.of(ctx).pop(true),
+              ),
+              CupertinoButton(
+                child: const Text("머무르기", style: TextStyle(fontWeight: FontWeight.w600, color: MyColors.primary, fontSize: 15.5)),
+                onPressed: () => Navigator.of(ctx).pop(false),
+              ),
+            ],
+          ),
+        ) ?? false;
+        if (_goBack) {
+          this.widget.postsProvider.resetNewPhotos();
+          return await true;
+        }
+        return await false;
       },
       child: GestureDetector(
         onTap: FocusManager.instance.primaryFocus?.unfocus,
@@ -52,7 +82,7 @@ class _IosNewPostState extends State<IosNewPost> {
             middle: Text(this.widget.pageTitle),
             trailing: CupertinoButton(
               padding: EdgeInsets.zero,
-              child: const Icon(CupertinoIcons.add),
+              child: this.widget.pageTitle.contains("수정") ? const Icon(CupertinoIcons.floppy_disk) : const Icon(CupertinoIcons.add),
               onPressed: () async {
                 bool _success;
                 if (this.widget.postsProvider.post != null) {
@@ -91,7 +121,7 @@ class _IosNewPostState extends State<IosNewPost> {
                                 ? Container(
                                     child: Column(
                                       children: this.widget.postsProvider.categories.map((CheckboxClass c) => IosCheckbox(
-                                        data: c, onChanged: this.widget.postsProvider.onCheckWrite)).toList()
+                                        data: c, onChanged: this.widget.postsProvider.onCheckWriteCat)).toList()
                                     ),
                                   )
                                 : Container()
@@ -116,13 +146,13 @@ class _IosNewPostState extends State<IosNewPost> {
                           ),
                         ),
                         CupertinoButton(
-                          child: const Text("Add Image"),
+                          child: const Text("Add Image", style: TextStyle(color: MyColors.primary),),
                           onPressed: () async {
                             await showCupertinoDialog(
                               barrierDismissible: true,
                               context: context,
-                              builder: (BuildContext context) {
-                                final PostsProvider _pp = Provider.of<PostsProvider>(context);
+                              builder: (BuildContext ctx) {
+                                final PostsProvider _pp = Provider.of<PostsProvider>(ctx);
                                 return CupertinoAlertDialog(
                                   content: Container(
                                     color: CupertinoColors.white,

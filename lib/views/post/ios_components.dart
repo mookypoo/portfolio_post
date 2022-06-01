@@ -7,10 +7,11 @@ import '../../repos/variables.dart';
 import '../new_post/new_post_page.dart';
 
 class EditDelete extends StatelessWidget {
-  const EditDelete({Key? key, required this.delete, required this.userUid, required this.resetPost}) : super(key: key);
+  const EditDelete({Key? key, required this.initCategory, required this.delete, required this.userUid, required this.resetPost}) : super(key: key);
   final Future<bool> Function() delete;
   final String userUid;
   final void Function() resetPost;
+  final void Function() initCategory;
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +21,10 @@ class EditDelete extends StatelessWidget {
         CupertinoButton(
           padding: EdgeInsets.zero,
           child: const Text("수정"),
-          onPressed: () async => await Navigator.of(context).pushNamed(NewPostPage.routeName, arguments: "글 수정하기"),
+          onPressed: () async {
+            this.initCategory();
+            await Navigator.of(context).pushNamed(NewPostPage.routeName, arguments: "글 수정하기");
+          },
         ),
         CupertinoButton(
           padding: EdgeInsets.zero,
@@ -93,7 +97,7 @@ class Comments extends StatelessWidget {
   Widget _mainCommentWidget({required String text}){
     return Container(
       alignment: Alignment.centerLeft,
-      height: 35.0,
+      constraints: BoxConstraints(minHeight: 30.0),
       padding: const EdgeInsets.only(left: 10.0),
       decoration: BoxDecoration(border: Border.all()),
       child: Text(text),
@@ -114,7 +118,8 @@ class Comments extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-
+      physics: NeverScrollableScrollPhysics(),
+      shrinkWrap: true,
         itemCount: this.postsProvider.comments.length,
         itemBuilder: (BuildContext context, int index) {
           final Comment _comment = this.postsProvider.comments[index];
@@ -125,7 +130,6 @@ class Comments extends StatelessWidget {
                 && this.postsProvider.user?.userUid != this.postsProvider.post?.author.userUid) _text = _secret;
           };
           return Container(
-
             margin: const EdgeInsets.symmetric(vertical: 5.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -161,6 +165,8 @@ class Comments extends StatelessWidget {
                       width: 300.0,
                       height: 45.0 * this.postsProvider.comments[index].comments.length,
                       child: ListView.builder(
+                        physics: NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
                         itemCount: this.postsProvider.comments[index].comments.length,
                         itemBuilder: (BuildContext ctx, int i) {
                           final Comment _subComment = this.postsProvider.comments[index].comments[i];

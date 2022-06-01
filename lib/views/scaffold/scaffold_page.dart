@@ -13,7 +13,7 @@ class ScaffoldPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    TabProvider _tabProvider = Provider.of<TabProvider>(context);
+    final TabProvider _tabProvider = Provider.of<TabProvider>(context);
 
     return Platform.isAndroid
       ? AndroidScaffold(tabProvider: _tabProvider)

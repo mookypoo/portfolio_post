@@ -20,18 +20,15 @@ const checkDeviceToken = async (req, res) => {
     }
 }
 
-const getDeviceToken = functions.https.onRequest(async (req, _) => {
-    console.log("getting user device token");
-    const _dataSnapshot = await admin.database().ref(`/users/${req.body.userUid}`).child("deviceToken").get();
-    req.body.deviceToken = _dataSnapshot.val();
-});
-
 const saveDeviceToken = async (req, res) => {
     console.log("saving device token");
     try {
         const _verified = await verifyUser(req);
-        if (_verified) await admin.database().ref(`/users/${req.body.userUid}`).child("deviceToken").set(req.body.deviceToken);
-        res.end();
+        if (_verified) {
+            await admin.database().ref(`/users/${req.body.userUid}`).child("deviceToken").set(req.body.deviceToken);
+            res.send({ data: "success" });
+        }
+        if (!_verified) res.send({ error: "user not verified" });
     } catch (e) {
         console.log(e);
         res.send({ error: e });
@@ -42,8 +39,11 @@ const deleteDeviceToken = async (req, res) => {
     console.log("deleting device token");
     try {
         const _verified = await verifyUser(req);
-        if (_verified) await admin.database().ref(`/users/${req.body.userUid}`).child("deviceToken").remove();
-        res.end();
+        if (_verified) {
+            await admin.database().ref(`/users/${req.body.userUid}`).child("deviceToken").remove();
+            res.send({ data: "success" });
+        }
+        if (!_verified) res.send({ error: "user not verified" });
     } catch (e) {
         console.log(e);
         res.send({ error: e });

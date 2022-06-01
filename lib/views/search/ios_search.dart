@@ -2,19 +2,22 @@ import 'package:flutter/cupertino.dart';
 
 import '../../providers/post_provider.dart';
 import '../../providers/search_provider.dart';
+import '../../providers/state_provider.dart' show ProviderState;
+import '../loading/widget/loading_widget.dart';
 import 'common_components.dart';
 
 class IosSearch extends StatefulWidget {
-  const IosSearch({Key? key, required this.searchProvider, required this.postsProvider}) : super(key: key);
+  const IosSearch({Key? key, required this.searchProvider, required this.postsProvider, required this.state}) : super(key: key);
   final SearchProvider searchProvider;
   final PostsProvider postsProvider;
+  final ProviderState state;
 
   @override
   State<IosSearch> createState() => _IosSearchState();
 }
 
 class _IosSearchState extends State<IosSearch> {
-  TextEditingController _ct = TextEditingController();
+  final TextEditingController _ct = TextEditingController();
 
   @override
   void dispose() {
@@ -27,10 +30,12 @@ class _IosSearchState extends State<IosSearch> {
     return CustomScrollView(
       slivers: <Widget>[
         CupertinoSliverNavigationBar(
+          transitionBetweenRoutes: false,
           middle: const Text("Search"),
           largeTitle: Padding(
             padding: const EdgeInsets.only(right: 15.0),
             child: CupertinoTextField(
+              onSubmitted: (String? s) => this.widget.searchProvider.search(s!.trim()),
               controller: this._ct,
               suffix: CupertinoButton(
                 padding: const EdgeInsets.only(right: 5.0),
@@ -41,12 +46,15 @@ class _IosSearchState extends State<IosSearch> {
           ),
         ),
         SliverList(
-          delegate: SliverChildBuilderDelegate((BuildContext ctx, int index) => SearchPostPreview(
+          delegate: SliverChildBuilderDelegate((BuildContext ctx, int index) {
+            this.widget.state == ProviderState.connecting ? LoadingWidget() : Container();
+            return SearchPostPreview(
               searchText: this._ct.text.trim(),
               post: this.widget.searchProvider.postPreviews[index],
-              getPost: this.widget.postsProvider.getPostComments,
-            ),
-            childCount: this.widget.searchProvider.postPreviews.length,
+              getPost: this.widget.postsProvider.getFullPost,
+            );
+          },
+            childCount: this.widget.state == ProviderState.connecting ? 0 : this.widget.searchProvider.postPreviews.length,
           ),
         ),
       ],

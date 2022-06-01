@@ -3,19 +3,22 @@ import 'package:portfolio_post/repos/variables.dart';
 
 import '../../providers/post_provider.dart';
 import '../../providers/search_provider.dart';
+import '../../providers/state_provider.dart' show ProviderState;
+import '../loading/widget/loading_widget.dart';
 import 'common_components.dart';
 
 class AndroidSearch extends StatefulWidget {
-  const AndroidSearch({Key? key, required this.searchProvider, required this.postsProvider}) : super(key: key);
+  const AndroidSearch({Key? key, required this.searchProvider, required this.postsProvider, required this.state}) : super(key: key);
   final SearchProvider searchProvider;
   final PostsProvider postsProvider;
+  final ProviderState state;
 
   @override
   State<AndroidSearch> createState() => _AndroidSearchState();
 }
 
 class _AndroidSearchState extends State<AndroidSearch> {
-  TextEditingController _ct = TextEditingController();
+  final TextEditingController _ct = TextEditingController();
 
   @override
   void dispose() {
@@ -38,17 +41,18 @@ class _AndroidSearchState extends State<AndroidSearch> {
                 height: 40.0,
                 margin: const EdgeInsets.only(top: 10.0),
                 child: TextField(
+                  onSubmitted: (String? s) => this.widget.searchProvider.search(s!.trim()),
                   controller: this._ct,
                   decoration: InputDecoration(
                     contentPadding: const EdgeInsets.only(left: 15.0, bottom: 0.0),
                     filled: true,
                     fillColor: MyColors.bg,
                     border: OutlineInputBorder(
-                      borderSide: BorderSide(color: MyColors.bg),
+                      borderSide: const BorderSide(color: MyColors.bg),
                       borderRadius: BorderRadius.circular(25.0)
                     ),
                     enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: MyColors.bg),
+                        borderSide: const BorderSide(color: MyColors.bg),
                         borderRadius: BorderRadius.circular(25.0)
                     ),
                     suffixIcon: IconButton(
@@ -64,12 +68,16 @@ class _AndroidSearchState extends State<AndroidSearch> {
           toolbarHeight: 100.0,
         ),
         SliverList(
-          delegate: SliverChildBuilderDelegate((BuildContext ctx, int index) => SearchPostPreview(
-            searchText: this._ct.text.trim(),
-            post: this.widget.searchProvider.postPreviews[index],
-            getPost: this.widget.postsProvider.getPostComments,
-          ),
-            childCount: this.widget.searchProvider.postPreviews.length,
+          delegate: SliverChildBuilderDelegate((BuildContext ctx, int index) {
+            return this.widget.state == ProviderState.connecting
+              ? LoadingWidget(height: MediaQuery.of(context).size.height - 150.0,)
+              : SearchPostPreview(
+                searchText: this._ct.text.trim(),
+                post: this.widget.searchProvider.postPreviews[index],
+                getPost: this.widget.postsProvider.getFullPost,
+              );
+          },
+            childCount: this.widget.state == ProviderState.connecting ? 1 : this.widget.searchProvider.postPreviews.length,
           ),
         ),
       ],

@@ -8,7 +8,5 @@ class CheckboxClass {
     text: c.text, isChecked: !c.isChecked
   );
 
-  factory CheckboxClass.reset(CheckboxClass c) => CheckboxClass(
-    text: c.text, isChecked: false,
-  );
+  factory CheckboxClass.reset(CheckboxClass c) => CheckboxClass(text: c.text);
 }

@@ -17,11 +17,6 @@ class User extends UserAbstract {
   Map<String, dynamic> toJson() => {
     "userUid": this.userUid,
     "idToken": this.idToken,
-  };
-
-  Map<String, dynamic> toJsonWithName() => {
-    "userUid": this.userUid,
-    "idToken": this.idToken,
     "userName": this.userName,
   };
 }
@@ -45,8 +40,4 @@ class Author extends UserAbstract {
     "userName": this.userName,
   };
 
-  factory Author.fromUser(User user) => Author(
-      userName: user.userName,
-      userUid: user.userUid
-  );
 }

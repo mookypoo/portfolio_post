@@ -25,6 +25,8 @@ class SearchPostPreview extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             RichText(
+              maxLines: 2,
+              softWrap: true,
               text: TextSpan(
                 style: const TextStyle(fontWeight: FontWeight.w600, color: Color.fromRGBO(255, 255, 255, 1.0), fontSize: 21.0),
                 children: SearchService.highlightedText(searchText: this.searchText, text: this.post.title),
@@ -39,7 +41,7 @@ class SearchPostPreview extends StatelessWidget {
             )),
             Align(
               alignment: Alignment.centerRight,
-              child: Text(this.post.userName, style: const TextStyle(fontSize: 15.0)),
+              child: Text(this.post.userName, style: const TextStyle(fontSize: 15.0, fontWeight: FontWeight.w500)),
             ),
           ],
         ),

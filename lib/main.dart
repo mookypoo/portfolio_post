@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:portfolio_post/providers/auth_provider.dart';
 import 'package:portfolio_post/providers/post_provider.dart';
 import 'package:portfolio_post/providers/search_provider.dart';
+import 'package:portfolio_post/providers/state_provider.dart';
 import 'package:portfolio_post/providers/tab_provider.dart';
 import 'package:portfolio_post/providers/user_provider.dart';
 import 'package:portfolio_post/repos/variables.dart';
@@ -34,46 +35,49 @@ class PortfolioPost extends StatelessWidget {
     if (route.name == NewPostPage.routeName) {
       final String _pageTitle = route.arguments.toString();
       return MaterialPageRoute(
-        builder: (BuildContext context) => NewPostPage(),
+        builder: (_) => const NewPostPage(),
         settings: RouteSettings(name: NewPostPage.routeName, arguments: _pageTitle),
       );
     };
     if (route.name == ProfilePage.routeName) {
       return MaterialPageRoute(
-        builder: (BuildContext context) => ProfilePage(),
+        builder: (_) => const ProfilePage(),
         settings: RouteSettings(name: ProfilePage.routeName),
       );
     };
     if (route.name == AuthPage.routeName) {
       return MaterialPageRoute<bool>(
-        builder: (BuildContext context) => AuthPage(),
+        builder: (_) => const AuthPage(),
         settings: RouteSettings(name: AuthPage.routeName),
       );
     };
     if (route.name == PostPage.routeName) {
       return MaterialPageRoute(
-        builder: (BuildContext context) => PostPage(),
+        builder: (_) => const PostPage(),
         settings: RouteSettings(name: PostPage.routeName),
       );
     };
     return MaterialPageRoute(
-      builder: (BuildContext context) => ScaffoldPage(),
+      builder: (_) => const ScaffoldPage(),
       settings: RouteSettings(name: ScaffoldPage.routeName),
     );
   },
-    home: ScaffoldPage(),
+    debugShowCheckedModeBanner: false,
+    home: const ScaffoldPage(),
     theme: ThemeData(
-      textTheme: TextTheme(
+      checkboxTheme: CheckboxThemeData(fillColor: MaterialStateProperty.all<Color>(MyColors.primary)),
+      primaryColor: MyColors.primary,
+      textTheme: const TextTheme(
         bodyText2: TextStyle(fontSize: 17.0),
-        button: TextStyle(color: MyColors.primary, fontSize: 17.0)
+        button: TextStyle(color: MyColors.primary, fontSize: 16.0)
       ),
-      iconTheme: IconThemeData(color: MyColors.primary),
+      iconTheme: const IconThemeData(color: MyColors.primary),
     ),
   );
 
   Widget _iosApp() => CupertinoApp(
     theme: CupertinoThemeData(
-      textTheme: CupertinoTextThemeData(
+      textTheme: const CupertinoTextThemeData(
         textStyle: TextStyle(fontSize: 16.0, color: CupertinoColors.black),
       ),
     ),
@@ -81,39 +85,41 @@ class PortfolioPost extends StatelessWidget {
       if (route.name == NewPostPage.routeName) {
         final String _pageTitle = route.arguments.toString();
         return CupertinoPageRoute(
-          builder: (BuildContext context) => NewPostPage(),
+          builder: (_) => const NewPostPage(),
           settings: RouteSettings(name: NewPostPage.routeName, arguments: _pageTitle),
         );
       };
       if (route.name == AuthPage.routeName) {
         return CupertinoPageRoute<bool>(
-          builder: (BuildContext context) => AuthPage(),
+          builder: (_) => const AuthPage(),
           settings: RouteSettings(name: AuthPage.routeName),
         );
       };
       if (route.name == PostPage.routeName) {
         return CupertinoPageRoute(
-          builder: (BuildContext context) => PostPage(),
+          builder: (_) => const PostPage(),
           settings: RouteSettings(name: PostPage.routeName),
         );
       };
       return CupertinoPageRoute(
-        builder: (BuildContext context) => ScaffoldPage(),
+        builder: (_) => const ScaffoldPage(),
         settings: RouteSettings(name: ScaffoldPage.routeName),
       );
     },
-    home: ScaffoldPage(),
+    home: const ScaffoldPage(),
+
   );
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider<StateProvider>(create: (_) => StateProvider()),
         ChangeNotifierProvider<AuthProvider>(create: (_) => AuthProvider()),
-        ChangeNotifierProvider<PostsProvider>(create: (_) => PostsProvider()),
-        ChangeNotifierProvider<UserProvider>(create: (_) => UserProvider()),
+        ChangeNotifierProvider<PostsProvider>(create: (BuildContext ctx) => PostsProvider(Provider.of<StateProvider>(ctx, listen: false))),
+        ChangeNotifierProvider<UserProvider>(create: (BuildContext ctx) => UserProvider(Provider.of<StateProvider>(ctx, listen: false))),
         ChangeNotifierProvider<TabProvider>(create: (_) => TabProvider()),
-        ChangeNotifierProvider<SearchProvider>(create: (_) => SearchProvider())
+        ChangeNotifierProvider<SearchProvider>(create: (BuildContext ctx) => SearchProvider(Provider.of<StateProvider>(ctx, listen: false)))
       ],
       child: Platform.isAndroid ? this._androidApp() : this._iosApp(),
     );

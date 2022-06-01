@@ -117,10 +117,11 @@ class LoggedIn extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.all(60.0),
           child: RichText(
+            textAlign: TextAlign.center,
             text: TextSpan(
               children: <InlineSpan>[
                 TextSpan(text: "Welcome ", style: TextStyle(fontSize: 30.0, color: Color.fromRGBO(0, 0, 0, 1.0))),
-                TextSpan(text: "${this.profile?.userName ?? ""}", style: TextStyle(fontSize: 30.0, color: MyColors.primary, fontWeight: FontWeight.w500)),
+                TextSpan(text: "\n${this.profile?.userName ?? ""}", style: TextStyle(fontSize: 30.0, color: MyColors.primary, fontWeight: FontWeight.w500)),
               ],
             ),
           ),

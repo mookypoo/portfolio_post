@@ -14,18 +14,13 @@ class IosProfile extends StatelessWidget {
 
     return CustomScrollView(
       slivers: [
-        CupertinoSliverNavigationBar(
-          largeTitle: const Text("프로필"),
-        ),
+        CupertinoSliverNavigationBar(largeTitle: const Text("프로필")),
         SliverList(
           delegate: SliverChildListDelegate.fixed([
             this.userProvider.user == null
               ? NotLoggedIn(changeTab: this.changeTab)
               : LoggedIn(
-                  logOut: () async {
-                    this.userProvider.logout();
-                    await this.logOut();
-                  },
+                  logOut: this.logOut,
                   profile: this.userProvider.profile,
                   switchWidget: Container(
                     child: CustomSwitch(

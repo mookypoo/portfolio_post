@@ -34,7 +34,6 @@ class _IosScaffoldState extends State<IosScaffold> {
   @override
   Widget build(BuildContext context) {
     Size _size = MediaQuery.of(context).size;
-    Navigator.of(context);
 
     return GestureDetector(
       onTap: FocusManager.instance.primaryFocus?.unfocus,
@@ -53,7 +52,7 @@ class _IosScaffoldState extends State<IosScaffold> {
               ),
             ),
             Container(
-              padding: EdgeInsets.only(bottom: 10.0),
+              padding: const EdgeInsets.only(bottom: 10.0),
               height: 66.0,
               width: _size.width,
               color: MyColors.bg,

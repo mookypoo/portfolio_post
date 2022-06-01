@@ -2,16 +2,20 @@ import 'dart:typed_data';
 
 import 'package:flutter/widgets.dart';
 import 'package:portfolio_post/repos/variables.dart';
+import 'package:portfolio_post/views/loading/widget/loading_widget.dart';
 
 import '../../class/photo_class.dart';
 import '../../class/post_class.dart' show Post;
+import '../../providers/state_provider.dart' show ProviderState;
 
 class PostWidget extends StatelessWidget {
-  const PostWidget({Key? key,required this.userUid, required this.post, required this.follow, required this.isFollowing}) : super(key: key);
+  const PostWidget({Key? key, required this.state, required this.userUid, required this.post, required this.follow, required this.isFollowing, required this.photos}) : super(key: key);
   final Post post;
-  final Future<String?> Function(String postAuthorUid) follow; // todo  이거 문가 알아야될꺼같은데
+  final Future<String?> Function(String postAuthorUid) follow;
   final bool? isFollowing;
   final String userUid;
+  final List<Photo>? photos;
+  final ProviderState state;
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +31,8 @@ class PostWidget extends StatelessWidget {
           alignment: Alignment.centerLeft,
           child: Text(this.post.text),
         ),
-        //...?this.post.photos?.map((Photo photo) => new PhotoWidget(bytes: photo.bytes)),
+        ...?this.photos?.map((Photo photo) => new PhotoWidget(bytes: photo.bytes)),
+        this.state == ProviderState.connecting ? LoadingWidget() : Container(),
         this.post.author.userUid == this.userUid ? Container() : Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[

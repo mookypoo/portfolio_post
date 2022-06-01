@@ -24,10 +24,7 @@ class AndroidProfile extends StatelessWidget {
             this.userProvider.user == null
               ? NotLoggedIn(changeTab: this.changeTab, )
               : LoggedIn(
-                  logOut: () async {
-                    this.userProvider.logout();
-                    await this.logOut();
-                  },
+                  logOut: this.logOut,
                   profile: this.userProvider.profile,
                   switchWidget: Container(
                     child: CustomSwitch(

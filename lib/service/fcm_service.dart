@@ -6,8 +6,12 @@ import '../class/user_class.dart';
 import '../repos/connect.dart';
 
 class FCMService {
-  Connect _connect = Connect();
-  static Future<void> initializeFirebase() async => await Firebase.initializeApp();
+  final Connect _connect = Connect();
+  static FirebaseMessaging? _firebaseMessaging;
+  static Future<void> initializeFirebase() async {
+    await Firebase.initializeApp();
+    FCMService._firebaseMessaging = FirebaseMessaging.instance;
+  }
 
   static FlutterLocalNotificationsPlugin _localNotificationsPlugin = FlutterLocalNotificationsPlugin();
   static Future<void> initializeLocalNotifications() async {
@@ -24,8 +28,16 @@ class FCMService {
       ),
   );
 
+  static FirebaseMessaging _getFMInstance(){
+    if (FCMService._firebaseMessaging == null) {
+      return FirebaseMessaging.instance;
+    } else {
+      return FCMService._firebaseMessaging!;
+    }
+  }
+
   static Future<void> onBackgroundMsg() async {
-    await FirebaseMessaging.instance.getInitialMessage();
+    await FCMService._getFMInstance().getInitialMessage();
     FirebaseMessaging.onBackgroundMessage(FCMService.fcmBackgroundHandler);
   }
 
@@ -34,7 +46,7 @@ class FCMService {
   }
 
   static Future<void> onMessage() async {
-    await FirebaseMessaging.instance.getInitialMessage();
+    await FCMService._getFMInstance().getInitialMessage();
     FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
       await FCMService._localNotificationsPlugin.show(
         0, message.notification!.title, message.notification!.body, FCMService.platformChannelSpecifics,
@@ -44,38 +56,26 @@ class FCMService {
   }
 
   Future<void> checkDeviceToken({required User user}) async {
-    try {
-      final Map<String, dynamic> _res = await this._connect.reqPostServer(
-          path: "/user/checkDeviceToken",
-          cb: (ReqModel rm) {},
-          body: user.toJson(),
-      );
-      if (_res.containsKey("data")){
-        if (_res["data"].toString() == "success") return;
-        if (_res["data"].toString() == "need token"){
-          final String? _deviceToken = await FirebaseMessaging.instance.getToken();
-          // todo: two ways to re-do FCM token
-          // (1) save time-stamp along with it, and after every month, refresh
-          // (2) every time the app is turned on, refresh
-          if (_deviceToken != null) await this._saveDeviceToken(user: user, deviceToken: _deviceToken);
-        }
+    final Map<String, dynamic> _res = await this._connect.reqPostServer(path: "/user/checkDeviceToken", body: user.toJson(),);
+    if (_res.containsKey("data")){
+      if (_res["data"].toString() == "success") return;
+      if (_res["data"].toString() == "need token"){
+        final String? _deviceToken = await FCMService._getFMInstance().getToken();
+        // todo: two ways to re-do FCM token
+        // (1) save time-stamp along with it, and after every month, refresh
+        // (2) every time the app is turned on, refresh
+        if (_deviceToken != null) await this._saveDeviceToken(user: user, deviceToken: _deviceToken);
       }
-    } catch (e) {
-      print(e);
     }
   }
 
   Future<void> _saveDeviceToken({required User user, required String deviceToken}) async {
     final Map<String, dynamic> _body = user.toJson()..addAll({"deviceToken": deviceToken});
-    try {
-      await this._connect.reqPostServer(path: "/user/saveDeviceToken", cb: (ReqModel rm) {}, body: _body);
-    } catch (e) {
-      print(e);
-    }
+    await this._connect.reqPostServer(path: "/user/saveDeviceToken", body: _body);
   }
 
   Future<Map<String, dynamic>> receiveNotifications({required User user, required bool isReceiving}) async {
-    final Map<String, dynamic> _body = user.toJsonWithName()..addAll({ "receiveNotifications": isReceiving });
+    final Map<String, dynamic> _body = user.toJson()..addAll({ "receiveNotifications": isReceiving });
     try {
       final Map<String, dynamic> _res = await this._connect.reqPostServer(path: "/user/setNotifications", cb: (ReqModel rm) {}, body: _body);
       return _res;
@@ -85,17 +85,9 @@ class FCMService {
     return {};
   }
 
-  // todo user.toJSON있으니 딴대고 고치셈
-  // todo delete info when unfollow
   Future<Map<String, dynamic>> follow({required User user, required String postAuthorUid}) async {
-    final Map<String, dynamic> _body = user.toJsonWithName()..addAll({ "postAuthorUid": postAuthorUid });
-    print(_body["userName"]);
-    try {
-      final Map<String, dynamic> _res = await this._connect.reqPostServer(path: "/user/follow", cb: (ReqModel rm) {}, body: _body);
-      return _res;
-    } catch (e) {
-      print(e);
-    }
-    return {};
+    final Map<String, dynamic> _body = user.toJson()..addAll({ "postAuthorUid": postAuthorUid });
+    final Map<String, dynamic> _res = await this._connect.reqPostServer(path: "/user/follow", cb: (ReqModel rm) {}, body: _body);
+    return _res;
   }
 }
