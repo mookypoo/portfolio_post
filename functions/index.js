@@ -7,7 +7,7 @@ const express = require("express"),
     { comments } = require("./routers/comments"),
     { user } = require("./routers/user"),
     { search } = require("./routers/search"),
-    { addPreview, deletePreviewAndComment, editPreview } = require("./controllers/posts_controller"),
+    { addPreview, deletePreviewCommentPhoto, editPreview } = require("./controllers/posts_controller"),
     { sendNewFollowerNotification } = require("./controllers/user_controller"),
     { photos } = require("./routers/photos");
 
@@ -22,8 +22,8 @@ admin.initializeApp({
 // app.use(morgan("dev"));
 
 // extended true = any type?? false = string or array 
-app.use(express.json()); // { limit: "50mb" }
-//app.use(express.urlencoded({ extended: false, limit: "50mb" })); // limit: "50mb"  urlencoded도 필요없는데? 
+app.use(express.json({ limit: "50mb" })); // need this or "Request entity too large"
+//app.use(express.urlencoded({ extended: false, limit: "50mb" })); 
 
 app.use("/auth", auth);
 app.use("/posts", posts);
@@ -34,7 +34,7 @@ app.use("/photos", photos);
 
 module.exports = {
     auth, posts, comments, user, search, photos,
-    addPreview, deletePreviewAndComment, sendNewFollowerNotification, editPreview 
+    addPreview, deletePreviewCommentPhoto, sendNewFollowerNotification, editPreview
 }
     
 app.listen(3000, _ => console.log("connected to server"));

@@ -19,7 +19,7 @@ class SearchPage extends StatelessWidget {
     final PostsProvider _postsProvider = Provider.of<PostsProvider>(context, listen: false);
     final StateProvider _stateProvider = Provider.of<StateProvider>(context);
 
-    if (_stateProvider.state == ProviderState.error) return ErrorPage(text: _stateProvider.error,);
+    if (_stateProvider.state == ProviderState.error) return CustomErrorWidget(text: _stateProvider.error,);
 
     return Platform.isAndroid
       ? AndroidSearch(postsProvider: _postsProvider, searchProvider: _searchProvider, state: _stateProvider.state)

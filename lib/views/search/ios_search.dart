@@ -47,14 +47,25 @@ class _IosSearchState extends State<IosSearch> {
         ),
         SliverList(
           delegate: SliverChildBuilderDelegate((BuildContext ctx, int index) {
-            this.widget.state == ProviderState.connecting ? LoadingWidget() : Container();
-            return SearchPostPreview(
-              searchText: this._ct.text.trim(),
-              post: this.widget.searchProvider.postPreviews[index],
-              getPost: this.widget.postsProvider.getFullPost,
+            return Container(
+              height: MediaQuery.of(context).size.height - 170.0,
+              child: Center(child: Text("Sorry, there are no posts that match your search.")),
             );
           },
-            childCount: this.widget.state == ProviderState.connecting ? 0 : this.widget.searchProvider.postPreviews.length,
+            childCount: this.widget.searchProvider.postPreviews.length == 0 ? 1 : 0,
+          ),
+        ),
+        SliverList(
+          delegate: SliverChildBuilderDelegate((BuildContext ctx, int index) {
+            return this.widget.state == ProviderState.connecting
+              ? LoadingWidget(height: MediaQuery.of(context).size.height - 150.0,)
+              : SearchPostPreview(
+                  searchText: this._ct.text.trim(),
+                  post: this.widget.searchProvider.postPreviews[index],
+                  getPost: this.widget.postsProvider.getFullPost,
+                );
+          },
+            childCount: this.widget.state == ProviderState.connecting ? 1 : this.widget.searchProvider.postPreviews.length,
           ),
         ),
       ],

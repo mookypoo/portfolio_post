@@ -26,10 +26,7 @@ class MainPage extends StatelessWidget {
       _postsProvider.getUser(_user);
       _userProvider.getUser(_user);
     }
-    if (_stateProvider.state == ProviderState.error) {
-      print("main page error");
-      return ErrorPage(text: _stateProvider.error,);
-    }
+    if (_stateProvider.state == ProviderState.error) return CustomErrorWidget(text: _stateProvider.error,);
 
     return Platform.isAndroid
         ? AndroidMain(postsProvider: _postsProvider)

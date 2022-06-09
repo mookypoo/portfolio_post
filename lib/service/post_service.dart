@@ -39,8 +39,7 @@ class PostService {
   }
 
   Future<Map<String, dynamic>> getPost({required String postUid}) async {
-    final Map<String, dynamic> _res = await this._connect.reqGetServer(
-      path: "/posts/getPost/${postUid}", cb: (ReqModel rm) {}, );
+    final Map<String, dynamic> _res = await this._connect.reqGetServer(path: "/posts/getPost/${postUid}");
     if (_res.containsKey("post")) return {"post": Post.fromJson(_res["post"] as Map<String, dynamic>)};
     return _res;
   }

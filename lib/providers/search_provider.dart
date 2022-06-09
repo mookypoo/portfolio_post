@@ -14,6 +14,10 @@ class SearchProvider with ChangeNotifier {
   List<Preview> get postPreviews => [...this._postPreviews];
   set postPreviews(List<Preview> p) => throw "error";
 
+  bool _noResults = false;
+  bool get noResults => this._noResults;
+  set noResults(bool b) => throw "error";
+
   Future<void> search(String searchText) async {
     if (searchText.isEmpty) return;
     if (this._postPreviews.isNotEmpty) this._postPreviews = [];
@@ -22,6 +26,8 @@ class SearchProvider with ChangeNotifier {
     if (_res.containsKey("error")) this.stateProvider.changeState(state: ProviderState.error, error: _res["error"].toString());
     if (_res.containsKey("previews")){
       this._postPreviews = _res["previews"];
+      if (this._postPreviews.isEmpty) this._noResults = true;
+      if (this._postPreviews.isNotEmpty) this._noResults = false;
       this.stateProvider.changeState(state: ProviderState.complete);
       this.notifyListeners();
     }

@@ -33,6 +33,7 @@ class SearchPostPreview extends StatelessWidget {
               ),
             ),
             RichText(
+            
               maxLines: 4,
               softWrap: true,
               text: TextSpan(

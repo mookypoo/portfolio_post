@@ -84,6 +84,23 @@ class _IosNewPostState extends State<IosNewPost> {
               padding: EdgeInsets.zero,
               child: this.widget.pageTitle.contains("수정") ? const Icon(CupertinoIcons.floppy_disk) : const Icon(CupertinoIcons.add),
               onPressed: () async {
+                if (this.widget.postsProvider.categoryText() == null) {
+                  await showCupertinoDialog(
+                    barrierDismissible: true,
+                    context: context,
+                    builder: (BuildContext ctx) => CupertinoAlertDialog(
+                      content: const Text("Please choose a category", style: TextStyle(fontSize: 16.0),),
+                      actions: <Widget>[
+                        CupertinoButton(
+                          padding: EdgeInsets.zero,
+                          child: const Text("확인"),
+                          onPressed: Navigator.of(ctx).pop,
+                        )
+                      ],
+                    ),
+                  );
+                  return;
+                }
                 bool _success;
                 if (this.widget.postsProvider.post != null) {
                   _success = await this.widget.postsProvider.editPost(title: this._titleCt.text, text: this._textCt.text);
@@ -94,7 +111,8 @@ class _IosNewPostState extends State<IosNewPost> {
                   );
                 }
                 if (!_success) return; // todo tell user "couldn't add post"
-                Navigator.of(context).pop(PostPage.routeName);
+                if (this.widget.pageTitle.contains("수정")) Navigator.of(context).pop(PostPage.routeName);
+                if (this.widget.pageTitle.contains("작성")) Navigator.of(context).popAndPushNamed(PostPage.routeName);
               },
             ),
           ),
@@ -120,7 +138,7 @@ class _IosNewPostState extends State<IosNewPost> {
                               this._isExpanded
                                 ? Container(
                                     child: Column(
-                                      children: this.widget.postsProvider.categories.map((CheckboxClass c) => IosCheckbox(
+                                      children: this.widget.postsProvider.categories.map((CheckboxClass c) => new IosCheckbox(
                                         data: c, onChanged: this.widget.postsProvider.onCheckWriteCat)).toList()
                                     ),
                                   )
@@ -179,10 +197,10 @@ class _IosNewPostState extends State<IosNewPost> {
                             );
                           },
                         ),
-                        ...this.widget.postsProvider.newPhotos.map((String path) => new NewPhoto(
-                          path: path, deleteNewPhoto: this.widget.postsProvider.deleteNewPhoto, icon: CupertinoIcons.delete)),
-                        ...?this.widget.postsProvider.uploadedPhotos?.map((Photo photo) => new OldPhoto(
-                          icon: CupertinoIcons.delete, deleteOldPhoto: this.widget.postsProvider.deleteOldPhoto, photo: photo,
+                        ...this.widget.postsProvider.newPhotos.map((Photo photo) => new PhotoWidget(
+                            photo: photo, deletePhoto: this.widget.postsProvider.deleteNewPhoto, icon: CupertinoIcons.delete)),
+                        ...?this.widget.postsProvider.uploadedPhotos?.map((Photo photo) => new PhotoWidget(
+                          icon: CupertinoIcons.delete, deletePhoto: this.widget.postsProvider.deleteOldPhoto, photo: photo,
                         )),
                       ],
                 ),

@@ -8,10 +8,11 @@ class TopImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      width: MediaQuery.of(context).size.width,
       height: MediaQuery.of(context).size.height * 0.4,
       child: Image.network(
         "https://www.pixelstalk.net/wp-content/uploads/2014/12/Abstract-flower-wallpaper-download-free.jpg",
-        fit: BoxFit.fitHeight,
+        fit: BoxFit.fill,
       ),
     );
   }

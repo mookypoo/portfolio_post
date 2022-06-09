@@ -17,14 +17,24 @@ const addPost = async (req, res) => {
     }
 }
 
+// todo does this work 
+const previewText = (text) => {
+    const subText = text.substring(0, 250);
+    const lastSpace = subText.lastIndexOf(" ");
+    const lastPeriod = subText.lastIndexOf(".") + 1;
+    return subText.substring(0, lastSpace > lastPeriod ? lastSpace : lastPeriod);
+}
+
+// todo change all previews
 const addPreview = functions.region("asia-northeast3").database.instance("mooky-post-default-rtdb").ref('/posts/{postUid}')
     .onCreate((snapshot, context) => {
         const original = snapshot.val();
         functions.logger.log("adding post preview", context.params.postUid, original);
+        const textPreview = previewText(original.text);
         const preview = {
             postUid: context.params.postUid,
             title: original.title,
-            text: original.text.substring(0, 100),
+            text: textPreview,
             userName: original.author.userName,
             createdTime: original.createdTime,
             category: original.category,
@@ -40,7 +50,9 @@ const deletePreviewCommentPhoto = functions.region("asia-northeast3").database.i
         const bucket = getStorage().bucket();
         await bucket.deleteFiles({ prefix: context.params.postUid });
 
-        return snapshot.ref.database.ref().set({ [`previews/${context.params.postUid}`]: null, [`comments/${context.params.postUid}`]: null, });
+        await snapshot.ref.database.ref("/previews").child(context.params.postUid).remove();
+        return snapshot.ref.database.ref("/comments").child(context.params.postUid).remove();
+    
     });
 
 const getPreviews = async (_, res) => {
@@ -159,12 +171,17 @@ const editPreview = functions.region("asia-northeast3").database.instance("mooky
         functions.logger.log("editing preview");
         const oldTitle = change.before.val().title;
         const newTitle = change.after.val().title;
-        const oldText = change.before.val().text.substring(0, 100);
-        const newText = change.after.val().text.substring(0, 100);
-        let preview = {};
 
+        const oldText = change.before.val().text.substring(0, 250);
+        const newText = change.after.val().text.substring(0, 250);
+
+        const oldCategory = change.before.val().category;
+        const newCategory = change.after.val().category;
+        let preview = {};
+        functions.logger.log(`prev category: ${oldCategory}`, `new category: ${newCategory}`);
         if (oldTitle != newTitle) preview.title = newTitle;
-        if (oldText != newText) preview.text = newText;
+        if (oldText != newText) preview.text = previewText(newText);
+        if (oldCategory != newCategory) preview.category = newCategory;
     
         return change.after.ref.database.ref("/previews").child(context.params.postUid).update(preview);
     });
@@ -190,6 +207,6 @@ const category = async (req, res) => {
 }
  
 module.exports = {
-    addPost, getPreviews, refreshPreviews, getPost, like, unlike, deletePost, edit, category,
+    addPost, getPreviews, refreshPreviews, getPost, like, unlike, deletePost, edit, category, previewText,
     addPreview, deletePreviewCommentPhoto, editPreview, verifyPostAuthor
 }

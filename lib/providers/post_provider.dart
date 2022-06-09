@@ -57,9 +57,9 @@ class PostsProvider with ChangeNotifier {
   bool get isPrivate => this._isPrivate;
   set isPrivate(bool b) => throw "error";
 
-  List<String> _newPhotos = [];
-  List<String> get newPhotos => [...this._newPhotos];
-  set newPhotos(List<String> l) => throw "error";
+  List<Photo> _newPhotos = [];
+  List<Photo> get newPhotos => [...this._newPhotos];
+  set newPhotos(List<Photo> l) => throw "error";
 
   List<Photo>? _uploadedPhotos;
   List<Photo>? get uploadedPhotos => [...?this._uploadedPhotos];
@@ -78,7 +78,7 @@ class PostsProvider with ChangeNotifier {
     return _categories;
   }
 
-  String? _categoryText(){
+  String? categoryText(){
     final int _catIndex = this._categories.indexWhere((CheckboxClass c) => c.isChecked == true);
     String? _category;
     if (_catIndex != -1) _category = this._categories[_catIndex].text;
@@ -87,11 +87,11 @@ class PostsProvider with ChangeNotifier {
 
   Future<bool> addPost({required String title, required String text}) async {
     if (this._author == null) return false;
-    final PostBody _body = PostBody(text: text, author: this._author!, title: title, filePaths: this._newPhotos, category: this._categoryText());
+    final PostBody _body = PostBody(text: text, author: this._author!, title: title, photos: this._newPhotos, category: this.categoryText());
     final Map<String, dynamic> _res = await this._postService.addPost(body: _body);
     if (_res.containsKey("preview")) {
       this._postPreviews.add(_res["preview"] as Preview);
-      await this._getPost(_res["postUid"]);
+      await this.getFullPost(_res["postUid"]);
       this.notifyListeners();
       return true;
     }
@@ -211,16 +211,13 @@ class PostsProvider with ChangeNotifier {
 
   Future<bool> editPost({required String text, required String title}) async {
     if (this._post == null || this._user == null) return false;
-    final Map<String, dynamic> _body = this._user!.toJson()..addAll({
-      "postUid": this._post!.postUid,
-      "updateInfo": {"text": text, "title": title},
-    });
-    if (this._newPhotos.isNotEmpty) await this._imageService.uploadPhoto(postUid: this._post!.postUid, filePaths: this._newPhotos, user: this._user!);
+    final Map<String, dynamic> _body = {...this._user!.toJson(), "postUid": this._post!.postUid, "updateInfo": {"text": text, "title": title}};
+    if (this._newPhotos.isNotEmpty) await this._imageService.uploadPhoto(photos: this._newPhotos, user: this._user!);
     final Map<String, dynamic> _res = await this._postService.editPost(body: _body);
     if (_res.containsKey("error")) return false;
     if (_res.containsKey("modifiedTime")) {
       final int _index = this._postPreviews.indexWhere((Preview preview) => preview.postUid == this._post!.postUid);
-      this._postPreviews[_index] = Preview.edit(category: this._categoryText(), oldPreview: this._postPreviews[_index], title: title, text: text.substring(0, text.length < 100 ? text.length : 100));
+      this._postPreviews[_index] = Preview.edit(category: this.categoryText(), oldPreview: this._postPreviews[_index], title: title, text: text.substring(0, text.length < 100 ? text.length : 100));
       await this.getFullPost(this._post!.postUid);
       this.resetNewPhotos();
     }
@@ -269,20 +266,24 @@ class PostsProvider with ChangeNotifier {
 
   Future<void> takePhoto() async {
     final XFile? _xFile = await this._imageService.takePhoto();
-    if (_xFile == null) return;
-    this._newPhotos.add(_xFile.path);
+    if (_xFile == null || this._post == null) return;
+    final Photo _photo = await this._imageService.newPhoto(xFile: _xFile, postUid: this._post!.postUid);
+    this._newPhotos.add(_photo);
     this.notifyListeners();
   }
 
   Future<void> selectPhotos() async {
     final List<XFile>? _xFiles = await this._imageService.multiplePhotos();
-    if (_xFiles == null) return;
-    _xFiles.forEach((XFile x) => this._newPhotos.add(x.path));
+    if (_xFiles == null || this._post == null) return;
+    _xFiles.forEach((XFile x) async {
+      final Photo _photo = await this._imageService.newPhoto(xFile: x, postUid: this._post!.postUid);
+      this._newPhotos.add(_photo);
+    });
     this.notifyListeners();
   }
 
-  void deleteNewPhoto(String path){
-    this._newPhotos.removeWhere((String p) => p == path);
+  void deleteNewPhoto(Photo photo){
+    this._newPhotos.removeWhere((Photo p) => p.fileName == photo.fileName);
     this.notifyListeners();
   }
 
@@ -293,6 +294,5 @@ class PostsProvider with ChangeNotifier {
       this._uploadedPhotos!.removeWhere((Photo p) => p.fileName == photo.fileName);
       this.notifyListeners();
     }
-
   }
 }

@@ -31,7 +31,7 @@ class _AndroidMainState extends State<AndroidMain> with AutomaticKeepAliveClient
           child: CustomScrollView(
             slivers: [
               SliverAppBar(
-                pinned: true,
+                stretch: true,
                 systemOverlayStyle: SystemUiOverlayStyle.light,
                 title: const Text("계시판", style: TextStyle(fontWeight: FontWeight.w500),),
                 centerTitle: true,

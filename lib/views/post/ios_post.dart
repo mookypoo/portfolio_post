@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import '../../providers/post_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../repos/variables.dart';
-import '../new_post/common_components.dart';
 import 'common_components.dart';
 import 'ios_components.dart';
 
@@ -49,8 +48,6 @@ class IosPost extends StatelessWidget {
                   isFollowing: this.userProvider.isFollowing(this.postsProvider.post!.author.userUid),
                   photos: this.postsProvider.uploadedPhotos,
                 ),
-                ...this.postsProvider.newPhotos.map((String path) => new NewPhoto(
-                    path: path, deleteNewPhoto: this.postsProvider.deleteNewPhoto, icon: CupertinoIcons.delete)),
                 Align(
                   alignment: Alignment.centerRight,
                   child: CupertinoButton(

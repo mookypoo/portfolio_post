@@ -14,5 +14,8 @@ class Photo {
     );
   }
 
-  Map<String, dynamic> toJson() => {"fileName": this.fileName};
+  Map<String, dynamic> toJson() => {"fileName": this.fileName, "bytes": this.bytes};
+
+  static List<Map<String, dynamic>> photoListToJson(List<Photo> photos)
+    => photos.map<Map<String, dynamic>>((Photo p) => p.toJson()).toList();
 }

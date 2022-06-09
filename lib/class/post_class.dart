@@ -1,3 +1,4 @@
+import 'package:portfolio_post/class/photo_class.dart';
 import 'package:portfolio_post/class/user_class.dart';
 
 import 'dateText_class.dart';
@@ -49,15 +50,15 @@ class PostBody {
   final String text;
   final Author author;
   final String? category;
-  final List<String> filePaths;
+  final List<Photo> photos;
 
-  PostBody({required this.title, required this.text, required this.author, required this.category, required this.filePaths});
+  PostBody({required this.title, required this.text, required this.author, required this.category, required this.photos});
 
   Map<String, dynamic> toJson() => {
     "title": this.title,
     "text": this.text,
     "author": this.author,
     "category": this.category,
-    "filePaths": this.filePaths,
+    "photos": Photo.photoListToJson(this.photos),
   };
 }

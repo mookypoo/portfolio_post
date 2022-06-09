@@ -69,6 +69,16 @@ class _AndroidSearchState extends State<AndroidSearch> {
         ),
         SliverList(
           delegate: SliverChildBuilderDelegate((BuildContext ctx, int index) {
+            return Container(
+              height: MediaQuery.of(context).size.height - 170.0,
+              child: Center(child: Text("Sorry, there are no posts that match your search.")),
+            );
+          },
+            childCount: this.widget.searchProvider.noResults ? 1 : 0,
+          ),
+        ),
+        SliverList(
+          delegate: SliverChildBuilderDelegate((BuildContext ctx, int index) {
             return this.widget.state == ProviderState.connecting
               ? LoadingWidget(height: MediaQuery.of(context).size.height - 150.0,)
               : SearchPostPreview(

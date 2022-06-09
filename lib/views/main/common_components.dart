@@ -12,7 +12,6 @@ class PostPreviewTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () async {
-
         this.getPost(this.post.postUid);
         await Navigator.of(context).pushNamed(PostPage.routeName);
       },

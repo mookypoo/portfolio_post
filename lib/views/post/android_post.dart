@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import '../../providers/post_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../repos/variables.dart';
-import '../new_post/common_components.dart';
 import 'android_components.dart';
 import 'common_components.dart';
 
@@ -50,8 +49,6 @@ class AndroidPost extends StatelessWidget {
                 follow: this.userProvider.follow, // todo show snackbar
                 isFollowing: this.userProvider.isFollowing(this.postsProvider.post!.author.userUid),
               ),
-              ...this.postsProvider.newPhotos.map((String path) => new NewPhoto(
-                  path: path, deleteNewPhoto: this.postsProvider.deleteNewPhoto, icon: Icons.delete)),
               Column(
                 children: <Widget>[
                   Align(

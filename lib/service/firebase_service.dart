@@ -33,7 +33,8 @@ class FirebaseService {
 
   /// send user info to realtime db
   Future<bool> _saveUserInfoDb({required SignUpInfo info, required String uid, required String idToken}) async {
-    final Map<String, dynamic> _body = {"userUid": uid, "info": info.toJson()..addAll({"idToken": idToken})};
+    //final Map<String, dynamic> _body = {"userUid": uid, "info": info.toJson()..addAll({"idToken": idToken})};
+    final Map<String, dynamic> _body = {"userUid": uid, "info": {...info.toJson(), "idToken": idToken}};
     final Map<String, dynamic> _res = await this._connect.reqPostServer(path: "auth/saveUserInfo", cb: (ReqModel rm) {}, body: _body);
     if (_res.containsKey("data")) return true;
     return false;

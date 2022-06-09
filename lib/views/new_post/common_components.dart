@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/widgets.dart';
 
 import '../../class/photo_class.dart';
@@ -27,35 +26,11 @@ class CameraGalleryButton extends StatelessWidget {
   }
 }
 
-class NewPhoto extends StatelessWidget {
-  const NewPhoto({Key? key, required this.path, required this.deleteNewPhoto, required this.icon}) : super(key: key);
-  final String path;
-  final void Function(String path) deleteNewPhoto;
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.only(bottom: 15.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          Image.file(File(this.path), fit: BoxFit.contain, width: MediaQuery.of(context).size.width * 0.7),
-          GestureDetector(
-            onTap: () => this.deleteNewPhoto(this.path),
-            child: Icon(this.icon, size: 20.0,),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class OldPhoto extends StatelessWidget {
-  const OldPhoto({Key? key, required this.icon, required this.photo, required this.deleteOldPhoto}) : super(key: key);
+class PhotoWidget extends StatelessWidget {
+  const PhotoWidget({Key? key, required this.icon, required this.photo, required this.deletePhoto}) : super(key: key);
   final IconData icon;
   final Photo photo;
-  final void Function(Photo photo) deleteOldPhoto;
+  final void Function(Photo photo) deletePhoto;
 
   @override
   Widget build(BuildContext context) {
@@ -66,8 +41,8 @@ class OldPhoto extends StatelessWidget {
         children: <Widget>[
           Image.memory(photo.bytes, fit: BoxFit.contain, width: MediaQuery.of(context).size.width * 0.7),
           GestureDetector(
-            onTap: () => this.deleteOldPhoto(this.photo),
-            child: Icon(this.icon, size: 20.0,),
+            onTap: () => this.deletePhoto(this.photo),
+            child: Icon(this.icon, size: 25.0,),
           ),
         ],
       ),

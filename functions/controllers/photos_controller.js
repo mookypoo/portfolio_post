@@ -1,11 +1,4 @@
-const functions = require("firebase-functions"),
-    admin = require("firebase-admin"),
-    { verifyPostAuthor } = require("./posts_controller"),
-    //multer = require("multer"),
-    //storage = multer.memoryStorage(),
-    //upload = multer({ dest: "uploads/" }),
-    fs = require("fs"),
-    
+const { verifyPostAuthor } = require("./posts_controller"),
     { getStorage } = require("firebase-admin/storage");
 
 const uploadPhoto = async (req, res) => {
@@ -14,25 +7,16 @@ const uploadPhoto = async (req, res) => {
         const verified = await verifyPostAuthor(req, res);
         if (verified) {
             const bucket = getStorage().bucket();
-            console.log(1);
-            const response = await new Promise(resolve => {
-                req.body.filePaths.forEach(async filePath => {
-                    console.log(2);
-                    var huh = new File(filePath);
-                    fs.writeFileSync(`${filePath}`, filePath);
-                    //var huh = fs.readFileSync(`${filePath}`, { encoding:  });
-                    console.log(huh);
-                    const subPaths = filePath.split("/");
-                    const fileName = subPaths[subPaths.length - 1];
-                    console.log(3);
-                    await bucket.upload(filePath, { destination: `${req.params.postUid}/${fileName}`, resumable: true })
+            await new Promise(resolve => {
+                req.body.photos.forEach(async photo => {
+                    var buffer = new Uint8Array(photo.bytes);
+                    var file = bucket.file(photo.fileName);
+                    await file.save(buffer, { resumable: true });
                 });
                 setTimeout(_ => resolve(), 3000)
             });
-            console.log(response);
             res.send({ data: "success" });
         }
-        console.log(4);
         if (!verified) res.send({ error: "user not verified" });
     } catch (e) {
         console.log(e);
@@ -68,11 +52,10 @@ const getPhoto = async (req, res) => {
 const deletePhoto = async (req, res) => {
     console.log("deleting image");
     try {
-        const verified = await verifyPostAuthor;
+        const verified = await verifyPostAuthor(req, res);
         if (verified) {
             const bucket = getStorage().bucket();
             await bucket.file(`${req.body.fileName}`).delete();
-            // await admin.database().ref(`/posts/${req.params.postUid}/images`).child(req.body.imageUid).remove();
             res.send({ data: "success" });
         }
         if (!verified) res.send({ error: "user not verified" });

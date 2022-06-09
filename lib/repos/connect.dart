@@ -4,8 +4,8 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 
 class Connect {
-  //final String _serverEndPoint = "https://us-central1-mooky-post.cloudfunctions.net";
-  final String _serverEndPoint = "http://192.168.200.181:3000";
+  final String _serverEndPoint = "https://us-central1-mooky-post.cloudfunctions.net";
+  //final String _serverEndPoint = "http://192.168.35.146:3000";
   final Map<String, String> _headers = {"Mooky": "post", "content-type":"application/json"};
 
   Future<T?> reqPostServer<T>({required String path, void Function(ReqModel)? cb, Map<String, String>? headers, dynamic body}) async {
@@ -20,7 +20,7 @@ class Connect {
       if (cb != null) cb(ReqModel(statusCode: _res.statusCode));
 
       print(_res.body);
-      if (_res.statusCode == 404) return {"error": "Sorry, could not find the page you requested"} as T;
+      if (_res.statusCode == 404) return {"error": "Sorry, we could not find the page you requested"} as T;
       if (_res.headers["content-type"] == "text/html; charset=utf-8") return _res.body as T;
       return json.decode(_res.body) as T;
     } catch (e) {
@@ -56,3 +56,4 @@ class ReqModel {
   int statusCode;
   ReqModel({required this.statusCode});
 }
+

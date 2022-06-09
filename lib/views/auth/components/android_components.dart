@@ -88,7 +88,7 @@ class AndroidSignUpWidget extends StatelessWidget {
     Size _size = MediaQuery.of(context).size;
 
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: _size.width * 0.08),
+      margin: EdgeInsets.symmetric(horizontal: _size.width * 0.08, vertical: 25.0),
       height: _size.height * 0.55,
       child: Column(
         children: <Widget>[

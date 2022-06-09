@@ -169,10 +169,8 @@ class AuthProvider with ChangeNotifier {
     this.changeState(state: AuthState.loggedOut);
   }
 
-  // todo redo
   Future<void> _refreshToken({required Map<String, dynamic> info}) async {
     final Map<String, dynamic> _newInfo = await this._firebaseService.refreshToken(refreshToken: info["refresh_token"], userUid: info["user_uid"]);
-    print("refreshToken method: $_newInfo[display_name]");
     if (_newInfo.containsKey("error")) return;
     if (_newInfo.isNotEmpty) {
       this._user = User(userUid: info["user_uid"], idToken: _newInfo["id_token"], userName: "Soo Kim");

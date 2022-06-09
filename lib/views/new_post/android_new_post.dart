@@ -94,6 +94,22 @@ class _AndroidNewPostState extends State<AndroidNewPost> {
                 padding: EdgeInsets.zero,
                 icon: this.widget.pageTitle.contains("수정") ? const Icon(Icons.save) : const Icon(Icons.add),
                 onPressed: () async {
+                  if (this.widget.postsProvider.categoryText() == null) {
+                    await showDialog(
+                      barrierDismissible: true,
+                      context: context,
+                      builder: (BuildContext ctx) => AlertDialog(
+                        content: const Text("Please choose a category", style: TextStyle(fontSize: 16.0),),
+                        actions: <Widget>[
+                          TextButton(
+                            child: const Text("확인"),
+                            onPressed: Navigator.of(ctx).pop,
+                          )
+                        ],
+                      ),
+                    );
+                    return;
+                  }
                   bool _success;
                   if (this.widget.postsProvider.post != null) {
                     _success = await this.widget.postsProvider.editPost(title: this._titleCt.text, text: this._textCt.text);
@@ -104,7 +120,8 @@ class _AndroidNewPostState extends State<AndroidNewPost> {
                     );
                   }
                   if (!_success) return; // todo tell user "couldn't add post"
-                  Navigator.of(context).pop(PostPage.routeName);
+                  if (this.widget.pageTitle.contains("수정")) Navigator.of(context).pop(PostPage.routeName);
+                  if (this.widget.pageTitle.contains("작성")) Navigator.of(context).popAndPushNamed(PostPage.routeName);
                 },
               ),
             ],
@@ -205,10 +222,10 @@ class _AndroidNewPostState extends State<AndroidNewPost> {
                           );
                         },
                       ),
-                      ...this.widget.postsProvider.newPhotos.map((String path) => new NewPhoto(
-                          path: path, deleteNewPhoto: this.widget.postsProvider.deleteNewPhoto, icon: Icons.delete)),
-                      ...?this.widget.postsProvider.uploadedPhotos?.map((Photo photo) => new OldPhoto(
-                        icon: Icons.delete, deleteOldPhoto: this.widget.postsProvider.deleteOldPhoto, photo: photo,
+                      ...this.widget.postsProvider.newPhotos.map((Photo photo) => new PhotoWidget(
+                          photo: photo, deletePhoto: this.widget.postsProvider.deleteNewPhoto, icon: Icons.delete)),
+                      ...?this.widget.postsProvider.uploadedPhotos?.map((Photo photo) => new PhotoWidget(
+                        icon: Icons.delete, deletePhoto: this.widget.postsProvider.deleteOldPhoto, photo: photo,
                       )),
                     ],
                   ),

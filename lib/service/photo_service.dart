@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:image_picker/image_picker.dart';
 
 import '../class/photo_class.dart';
@@ -22,11 +24,22 @@ class PhotoService {
     maxWidth: 300.0, maxHeight: 250.0, imageQuality: 80,
   );
 
-  Future<Map<String, dynamic>> uploadPhoto({required User user, required String postUid, required List<String> filePaths}) async {
-    print(filePaths);
-    final Map<String, dynamic> _body = user.toJson()..addAll({ "filePaths": filePaths });
-    final Map<String, dynamic> _res = await this._connect.reqPostServer(path: "/photos/upload/$postUid", body: _body);
+  Future<Map<String, dynamic>> uploadPhoto({required User user, required List<Photo> photos}) async {
+    final Map<String, dynamic> _body = {...user.toJson(), "photos": Photo.photoListToJson(photos)};
+    final Map<String, dynamic> _res = await this._connect.reqPostServer(path: "/photos/upload", body: _body);
     return _res;
+  }
+
+  Future<Photo> newPhoto({required XFile xFile, required String postUid}) async {
+    final Uint8List _bytes = await xFile.readAsBytes();
+    final String _fileName = this._fileName(postUid: postUid, filePath: xFile.path);
+    final Photo _photo = new Photo(fileName: _fileName, bytes: _bytes);
+    return _photo;
+  }
+
+  String _fileName({required String filePath, required String postUid}){
+    final String originalName = filePath.split("/").last;
+    return "$postUid/$originalName";
   }
 
   Future<Map<String, dynamic>> getPhotos({required String postUid}) async {
@@ -43,8 +56,7 @@ class PhotoService {
   }
 
   Future<Map<String, dynamic>> deletePhoto({required User user, required String postUid, required Photo photo}) async {
-    final Map<String, dynamic> _body = user.toJson()..addAll(photo.toJson());
-    print(_body["fileName"]);
+    final Map<String, dynamic> _body = {...user.toJson(), ...photo.toJson()};
     final Map<String, dynamic> _res = await this._connect.reqPostServer(path: "/photos/delete/$postUid", body: _body);
     return _res;
   }
