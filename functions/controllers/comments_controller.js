@@ -1,5 +1,4 @@
-const functions = require("firebase-functions"),
-    admin = require("firebase-admin"),
+const admin = require("firebase-admin"),
     uuid = require("uuid");
 
 const getComment = async (req, res) => {

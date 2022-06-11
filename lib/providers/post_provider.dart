@@ -104,6 +104,7 @@ class PostsProvider with ChangeNotifier {
     if (_res.containsKey("previews")) {
       this._postPreviews = _res["previews"];
       this.notifyListeners();
+      this.stateProvider.changeGotPreviews();
     }
   }
 
@@ -289,7 +290,7 @@ class PostsProvider with ChangeNotifier {
 
   Future<void> deleteOldPhoto(Photo photo) async {
     if (this._post == null || this._user == null || this._uploadedPhotos == null) return;
-    final Map<String, dynamic> _res = await this._imageService.deletePhoto(user: this._user!, postUid: this._post!.postUid, photo: photo);
+    final Map<String, dynamic> _res = await this._imageService.deletePhoto(user: this._user!, photo: photo);
     if (_res.containsKey("data")) {
       this._uploadedPhotos!.removeWhere((Photo p) => p.fileName == photo.fileName);
       this.notifyListeners();

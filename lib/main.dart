@@ -115,7 +115,7 @@ class PortfolioPost extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<StateProvider>(create: (_) => StateProvider()),
-        ChangeNotifierProvider<AuthProvider>(create: (_) => AuthProvider()),
+        ChangeNotifierProvider<AuthProvider>(create: (BuildContext ctx) => AuthProvider(Provider.of<StateProvider>(ctx, listen: false))),
         ChangeNotifierProvider<PostsProvider>(create: (BuildContext ctx) => PostsProvider(Provider.of<StateProvider>(ctx, listen: false))),
         ChangeNotifierProvider<UserProvider>(create: (BuildContext ctx) => UserProvider(Provider.of<StateProvider>(ctx, listen: false))),
         ChangeNotifierProvider<TabProvider>(create: (_) => TabProvider()),

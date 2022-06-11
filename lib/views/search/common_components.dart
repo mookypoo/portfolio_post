@@ -4,6 +4,19 @@ import '../../class/preview_class.dart';
 import '../../service/search_service.dart';
 import '../post/post_page.dart';
 
+class NoSearchMatch extends StatelessWidget {
+  const NoSearchMatch({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: MediaQuery.of(context).size.height - 170.0,
+      child: Center(child: Text("Sorry, there are no posts that match your search.")),
+    );
+  }
+}
+
+
 class SearchPostPreview extends StatelessWidget {
   const SearchPostPreview({Key? key, required this.post, required this.getPost, required this.searchText}) : super(key: key);
   final Preview post;

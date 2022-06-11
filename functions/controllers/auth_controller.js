@@ -24,9 +24,8 @@ const sign = async (req, res) => {
         if (req.params.action == "in") await admin.database().ref(`/users`).child(_res.data.localId).update({ "idToken": `${_res.data.idToken}` });
         res.send({ data: _res.data });
     } catch (e) {
-        console.log(e);
         console.log(e.response.data);
-        res.send(e);
+        res.send(e.response.data);
     }
 }
 

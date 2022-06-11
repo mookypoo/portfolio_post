@@ -6,12 +6,13 @@ import 'package:portfolio_post/views/loading/widget/loading_widget.dart';
 
 import '../../class/photo_class.dart';
 import '../../class/post_class.dart' show Post;
+import '../../class/user_class.dart';
 import '../../providers/state_provider.dart' show ProviderState;
 
 class PostWidget extends StatelessWidget {
   const PostWidget({Key? key, required this.state, required this.userUid, required this.post, required this.follow, required this.isFollowing, required this.photos}) : super(key: key);
   final Post post;
-  final Future<String?> Function(String postAuthorUid) follow;
+  final Future<String?> Function(Author author) follow;
   final bool? isFollowing;
   final String userUid;
   final List<Photo>? photos;
@@ -39,7 +40,7 @@ class PostWidget extends StatelessWidget {
             Text("written by: ${this.post.author.userName}", style: const TextStyle(fontWeight: FontWeight.w500),),
             GestureDetector(
               onTap: () async {
-                final String? _result = await this.follow(this.post.author.userUid);
+                final String? _result = await this.follow(this.post.author);
                 if (_result == null) {
                   // server error occurred
                 }

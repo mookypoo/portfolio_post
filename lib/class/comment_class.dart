@@ -8,10 +8,9 @@ class Comment {
   final Author author;
   final bool isPrivate;
   final String createdTime;
-  final String? modifiedTime;
   final List<Comment> comments;
 
-  Comment({required this.commentUid, required this.text, required this.author, this.isPrivate = false, required this.createdTime, this.modifiedTime, required this.comments});
+  Comment({required this.commentUid, required this.text, required this.author, this.isPrivate = false, required this.createdTime, required this.comments});
 
   factory Comment.fromJson(Map<String, dynamic> json) {
     List<Comment> _commentsList = [];
@@ -25,7 +24,6 @@ class Comment {
       text: json["text"].toString(),
       isPrivate: json["isPrivate"] as bool,
       createdTime: DateText.convertISOToString(json["createdTime"]),
-      modifiedTime: DateText.convertISOToString(json["modifiedTime"] ?? ""),
       comments: _commentsList,
     );
   }

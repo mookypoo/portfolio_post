@@ -1,5 +1,6 @@
 import '../class/checkbox_class.dart';
 import '../class/comment_class.dart';
+import '../class/dateText_class.dart';
 import '../class/post_class.dart';
 import '../class/preview_class.dart';
 import '../class/user_class.dart';
@@ -84,7 +85,7 @@ class PostService {
     if (_res.containsKey("commentUid") && _res.containsKey("createdTime")) {
       return {"comment": Comment(
         comments: [],
-        createdTime: _res["createdTime"].toString(),
+        createdTime: DateText.convertISOToString(_res["createdTime"].toString()),
         commentUid: _res["commentUid"].toString(),
         author: body.author,
         text: body.text,

@@ -22,6 +22,7 @@ class FirebaseService {
       }
     }
     if (_res.containsKey("error")) {
+      if (_res["error"]["message"].toString() == "MISSING_PASSWORD") return {"errorText": "비밀번호를 입력하세요."};
       if (_res["error"]["message"].toString() == "WEAK_PASSWORD") return {"errorText": "더 강화된 비밀번호를 사용하세요."};
       if (_res["error"]["message"].toString() == "INVALID_EMAIL") return {"errorText": "잘못된 이메일 주소입니다."};
       if (_res["error"]["message"].toString() == "EMAIL_EXISTS") return {"errorText": "이미 가입한 이메일입니다."};
@@ -48,6 +49,7 @@ class FirebaseService {
       return {"user": User(userName: _res["data"]["displayName"].toString(), userUid: _res["data"]["localId"].toString(), idToken: _res["data"]["idToken"].toString())};
     }
     if (_res.containsKey("error")){
+      if (_res["error"]["message"].toString() == "MISSING_PASSWORD") return {"errorText": "비밀번호를 입력하세요."};
       if (_res["error"]["message"].toString() == "INVALID_PASSWORD") return {"errorText": "잘못된 비밀번호입니다."};
       if (_res["error"]["message"].toString() == "EMAIL_NOT_FOUND") return {"errorText": "아직 가입하지 않은 이메일입니다."};
       return {"errorText": _res["error"]["message"].toString()};

@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:portfolio_post/providers/state_provider.dart';
 import 'package:portfolio_post/service/auth_service.dart';
 
 import '../class/auth_class.dart';
@@ -12,8 +13,9 @@ enum AuthState {
 class AuthProvider with ChangeNotifier {
   final FirebaseService _firebaseService = FirebaseService();
   final AuthService _authService = AuthService();
+  final StateProvider stateProvider;
 
-  AuthProvider(){
+  AuthProvider(this.stateProvider){
     print("auth provider init");
     this._init();
   }
@@ -77,6 +79,7 @@ class AuthProvider with ChangeNotifier {
       }
       if (!_success) await this._refreshToken(info: _info);
     }
+    this.stateProvider.changeGotUser();
   }
 
   void switchPage(){
@@ -140,8 +143,8 @@ class AuthProvider with ChangeNotifier {
       return true;
     }
     if (_res.containsKey("errorText")) {
-      if (_res["errorText"].contains("이메일")) this._emailErrorText = _res["error"].toString();
-      if (_res["errorText"].contains("비밀번호")) this._pwErrorText = _res["error"].toString();
+      if (_res["errorText"].contains("이메일")) this._emailErrorText = _res["errorText"].toString();
+      if (_res["errorText"].contains("비밀번호")) this._pwErrorText = _res["errorText"].toString();
       this.notifyListeners();
     }
     return false;
@@ -155,8 +158,8 @@ class AuthProvider with ChangeNotifier {
       return true;
     }
     if (_res.containsKey("errorText")) {
-      if (_res["errorText"].contains("이메일")) this._emailErrorText = _res["error"].toString();
-      if (_res["errorText"].contains("비밀번호")) this._pwErrorText = _res["error"].toString();
+      if (_res["errorText"].contains("이메일")) this._emailErrorText = _res["errorText"].toString();
+      if (_res["errorText"].contains("비밀번호")) this._pwErrorText = _res["errorText"].toString();
       this.notifyListeners();
     }
     return false;

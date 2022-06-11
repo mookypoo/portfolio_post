@@ -17,15 +17,15 @@ const addPost = async (req, res) => {
     }
 }
 
-// todo does this work 
 const previewText = (text) => {
     const subText = text.substring(0, 250);
-    const lastSpace = subText.lastIndexOf(" ");
-    const lastPeriod = subText.lastIndexOf(".") + 1;
+    let lastSpace = subText.lastIndexOf(" ");
+    if (lastSpace == -1) lastSpace = text.length;
+    let lastPeriod = subText.lastIndexOf(".");
+    if (lastPeriod == -1) lastPeriod = text.length;
     return subText.substring(0, lastSpace > lastPeriod ? lastSpace : lastPeriod);
 }
 
-// todo change all previews
 const addPreview = functions.region("asia-northeast3").database.instance("mooky-post-default-rtdb").ref('/posts/{postUid}')
     .onCreate((snapshot, context) => {
         const original = snapshot.val();

@@ -64,47 +64,44 @@ const setNotification = async (req, res) => {
     }
 }
 
-const saveFollower = functions.https.onRequest(async (req, res) => {
-    const followerUid = req.body.userUid;
-    const followers = await admin.database().ref(`/followers/${req.body.postAuthorUid}`).child(followerUid).get();
-    console.log(followers.val());
+// save to followers/post author uid/followerUid: followerName
+const saveFollower = async (body) => {
+    console.log("saving follower");
+    const { userUid, userName, authorUid } = body;
+    const followers = await admin.database().ref(`/followers/${authorUid}`).child(userUid).get();
     if (followers.val() == null) {
         console.log("adding follower");
-        const followerInfo = {
-            deviceToken: req.body.deviceToken,
-            name: req.body.userName,
-        }
-        await admin.database().ref(`/followers/${req.body.postAuthorUid}`).child(followerUid).set(followerInfo);
+        await admin.database().ref(`/followers/${authorUid}`).child(userUid).set(userName);
         return "successfully followed";
     }
     if (followers.val() != null) {
         console.log("removing follower");
-        await admin.database().ref(`/followers/${req.body.postAuthorUid}`).child(followerUid).remove();
+        await admin.database().ref(`/followers/${authorUid}`).child(userUid).remove();
         return "successfully unfollowed";
     }
-});
+}
 
-saveFollowing = functions.https.onRequest(async (req, res) => {
+// save post author to follow on user/following/followingUid:name
+const saveFollowing = async (body) => {
     console.log("saving following");
-    const followingUid = req.body.postAuthorUid;
-    const following = await admin.database().ref(`/users/${req.body.userUid}/following`).child(followingUid).get();
+    const { userUid, authorUid, authorName } = body;
+    const following = await admin.database().ref(`/users/${userUid}/following`).child(authorUid).get();
     if (following.val() == null) {
         console.log("adding new author to follow");
-        await admin.database().ref(`/users/${req.body.userUid}/following`).child(followingUid).set("follow");
+        await admin.database().ref(`/users/${userUid}/following`).child(authorUid).set(authorName);
         return "successfully followed";
     }
     if (following.val()) {
         console.log("unfollowing");
-        await admin.database().ref(`/users/${req.body.userUid}/following`).child(followingUid).remove();
+        await admin.database().ref(`/users/${userUid}/following`).child(authorUid).remove();
         return "successfully unfollowed";
     }
-});
+}
 
 const follow = async (req, res) => {
     try {
-        // todo 여기 뭔가 하나가 잘못되면 나머지도 다시 원상복귀해야되는데...
-        const savingFollower = await saveFollower(req, res);
-        const savingFollowing = await saveFollowing(req, res);
+        const savingFollower = await saveFollower(req.body);
+        const savingFollowing = await saveFollowing(req.body);
         if (savingFollower == savingFollowing) res.send({ data: savingFollowing });
         if (savingFollower != savingFollowing) res.send({ error: "Temporary Error: please try again later" });
     } catch (e) {
@@ -120,13 +117,14 @@ const sendNewFollowerNotification = functions.region("asia-northeast3").database
 
         if (!change.after.val()) return functions.logger.log(followedUid, "unfollowed by", followerUid);
 
-        functions.logger.log("added follower info", change.after.val()); // should be { deviceToken: ... , name: ... }
+        functions.logger.log("added follower info", change.after.val()); 
         const receiveNotifications = await admin.database().ref(`/users/${followedUid}`).child("receiveNotifications").get();
         if (!receiveNotifications) return functions.logger.log(followedUid, "does not receive notifications");
         if (receiveNotifications) {
             const deviceToken = await admin.database().ref(`/users/${followedUid}`).child("deviceToken").get();
-            functions.logger.log("sending notification to followed user ");
-            const followerName = change.after.val().name;
+            if (deviceToken.val() == null) return functions.logger.log("user is logged out of all devices");
+            functions.logger.log("sending notification to followed user");
+            const followerName = Object.values(change.after.val());
             const payload = {
                 notification: {
                     title: "You have a new follower!",
@@ -140,6 +138,7 @@ const sendNewFollowerNotification = functions.region("asia-northeast3").database
     });
 
 const getUserInfo = async (req, res) => {
+    console.log("getting user info");
     try {
         const userSnapshot = await admin.database().ref(`/users`).child(req.params.userUid).get();
         let userInfo = userSnapshot.val();
@@ -157,5 +156,5 @@ const getUserInfo = async (req, res) => {
 
 module.exports = {
     checkDeviceToken, saveDeviceToken, deleteDeviceToken, setNotification,
-    follow, sendNewFollowerNotification, getUserInfo,
+    follow, sendNewFollowerNotification, getUserInfo
 }

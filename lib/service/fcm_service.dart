@@ -70,23 +70,18 @@ class FCMService {
   }
 
   Future<void> _saveDeviceToken({required User user, required String deviceToken}) async {
-    final Map<String, dynamic> _body = user.toJson()..addAll({"deviceToken": deviceToken});
+    final Map<String, dynamic> _body = {...user.toJson(), "deviceToken": deviceToken};
     await this._connect.reqPostServer(path: "/user/saveDeviceToken", body: _body);
   }
 
   Future<Map<String, dynamic>> receiveNotifications({required User user, required bool isReceiving}) async {
-    final Map<String, dynamic> _body = user.toJson()..addAll({ "receiveNotifications": isReceiving });
-    try {
-      final Map<String, dynamic> _res = await this._connect.reqPostServer(path: "/user/setNotifications", cb: (ReqModel rm) {}, body: _body);
-      return _res;
-    } catch (e) {
-      print(e);
-    }
-    return {};
+    final Map<String, dynamic> _body = {...user.toJson(), "receiveNotifications": isReceiving};
+    final Map<String, dynamic> _res = await this._connect.reqPostServer(path: "/user/setNotifications", cb: (ReqModel rm) {}, body: _body);
+    return _res;
   }
 
-  Future<Map<String, dynamic>> follow({required User user, required String postAuthorUid}) async {
-    final Map<String, dynamic> _body = user.toJson()..addAll({ "postAuthorUid": postAuthorUid });
+  Future<Map<String, dynamic>> follow({required User user, required Author author}) async {
+    final Map<String, dynamic> _body = {...user.toJson(), "authorUid": author.userUid, "authorName": author.userName};
     final Map<String, dynamic> _res = await this._connect.reqPostServer(path: "/user/follow", cb: (ReqModel rm) {}, body: _body);
     return _res;
   }

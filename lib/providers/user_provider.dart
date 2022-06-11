@@ -31,13 +31,13 @@ class UserProvider with ChangeNotifier {
     }
   }
 
-  Future<String?> follow(String postAuthorUid) async {
+  Future<String?> follow(Author author) async {
     if (this._profile == null) return null;
-    final Map<String, dynamic> _res = await this._fcmService.follow(user: this._user!, postAuthorUid: postAuthorUid);
+    final Map<String, dynamic> _res = await this._fcmService.follow(user: this._user!, author: author);
     if (_res.containsKey("error")) this.stateProvider.changeState(state: ProviderState.error, error: _res["error"].toString());
     if (_res.containsKey("data")) {
-      if (_res["data"].toString().contains("un")) this._profile!.following.removeWhere((String uid) => uid == postAuthorUid);
-      if (!_res["data"].toString().contains("un")) this._profile!.following.add(postAuthorUid);
+      if (_res["data"].toString().contains("un")) this._profile!.following.removeWhere((String uid) => uid == author.userUid);
+      if (!_res["data"].toString().contains("un")) this._profile!.following.add(author.userUid);
       this.notifyListeners();
       return _res["data"].toString();
     }

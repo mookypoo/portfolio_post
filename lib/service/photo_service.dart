@@ -55,9 +55,9 @@ class PhotoService {
     return _res;
   }
 
-  Future<Map<String, dynamic>> deletePhoto({required User user, required String postUid, required Photo photo}) async {
+  Future<Map<String, dynamic>> deletePhoto({required User user, required Photo photo}) async {
     final Map<String, dynamic> _body = {...user.toJson(), ...photo.toJson()};
-    final Map<String, dynamic> _res = await this._connect.reqPostServer(path: "/photos/delete/$postUid", body: _body);
+    final Map<String, dynamic> _res = await this._connect.reqPostServer(path: "/photos/delete", body: _body);
     return _res;
   }
 }
