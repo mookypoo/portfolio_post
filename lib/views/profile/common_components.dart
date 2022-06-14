@@ -5,15 +5,16 @@ import '../../repos/variables.dart';
 import '../auth/auth_page.dart';
 
 class NotLoggedIn extends StatelessWidget {
-  const NotLoggedIn({Key? key, required this.changeTab}) : super(key: key);
+  const NotLoggedIn({Key? key, required this.changeTab, required this.toolBarAndBottomNavHeight}) : super(key: key);
   final void Function(int index) changeTab;
+  final double toolBarAndBottomNavHeight;
 
   @override
   Widget build(BuildContext context) {
     Size _size = MediaQuery.of(context).size;
 
     return Container(
-      height: _size.height - 230.0,
+      height: _size.height - this.toolBarAndBottomNavHeight,
       width: _size.width,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

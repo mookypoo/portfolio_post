@@ -84,6 +84,11 @@ class _IosAuthState extends State<IosAuth> {
                       this.widget.authProvider.isLoginPage
                         ? LogInBottom(
                             onTapLogin: () async {
+                              final bool _validated = this.widget.authProvider.loginValidate(
+                                email: this._emailCt.textCt.text.trim(),
+                                pw: this._pw1Ct.textCt.text.trim(),
+                              );
+                              if (!_validated) return;
                               final bool _success = await this.widget.authProvider.firebaseSignIn(
                                 data: LoginInfo(
                                   email: this._emailCt.textCt.text.trim(),
@@ -105,6 +110,13 @@ class _IosAuthState extends State<IosAuth> {
                               this.widget.authProvider.switchPage();
                             },
                             onTapSignUp: () async {
+                              final bool _verified = this.widget.authProvider.signUpValidate(
+                                email: this._emailCt.textCt.text.trim(),
+                                name: this._nameCt.textCt.text.trim(),
+                                pw: this._pw1Ct.textCt.text.trim(),
+                                pw2: this._pw2Ct.textCt.text.trim(),
+                              );
+                              if (!_verified) return;
                               final bool _success = await this.widget.authProvider.firebaseSignUp(
                                 info: SignUpInfo(
                                   name: this._nameCt.textCt.text.trim(),

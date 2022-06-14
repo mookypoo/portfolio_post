@@ -14,6 +14,7 @@ class AuthTextField extends StatelessWidget {
     this.textInputAction,
     this.textInputType,
     this.errorText,
+    this.padding,
   }) : super(key: key);
 
   final bool? obscureText;
@@ -24,6 +25,7 @@ class AuthTextField extends StatelessWidget {
   final TextInputAction? textInputAction;
   final TextInputType? textInputType;
   final String? errorText;
+  final EdgeInsets? padding;
 
   @override
   Widget build(BuildContext context) {
@@ -31,9 +33,9 @@ class AuthTextField extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         CupertinoTextField(
-          padding: EdgeInsets.only(top: 25.0, bottom: 3.0, left: 5.0),
+          padding: this.padding ?? const EdgeInsets.only(top: 25.0, bottom: 3.0, left: 5.0),
           controller: this.textCt,
-          style: TextStyle(fontSize: 17.0),
+          style: const TextStyle(fontSize: 17.0),
           textAlignVertical: TextAlignVertical.bottom,
           placeholder: this.hintText,
           suffix: this.suffixIcon ?? null,
@@ -114,9 +116,10 @@ class IosSignUpWidget extends StatelessWidget {
 
     return Container(
       margin: EdgeInsets.symmetric(horizontal: _size.width * 0.08),
-      height: _size.height * 0.55,
+      height: _size.height * 0.7,
       child: Column(
         children: <Widget>[
+          Text("가입하기", textAlign: TextAlign.center, style: TextStyle(fontSize: 30.0, fontWeight: FontWeight.w600),),
           AuthTextField(
             textCt: this.ctsNodes.firstWhere((ControllerClass cn) => cn.name == "nameCt").textCt,
             hintText: "이름",
@@ -176,12 +179,12 @@ class IosLoginWidget extends StatelessWidget {
 
     return Container(
       margin: EdgeInsets.symmetric(horizontal: _size.width * 0.08),
-      height: _size.height * 0.45,
+      height: _size.height * 0.4,
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Padding(child: Text("Mooky's Posts", style: const TextStyle(fontSize: 25.0),), padding: EdgeInsets.only(bottom: 35.0)),
+          Padding(child: Text("Mooky's Dev Posts", style: const TextStyle(fontSize: 30.0, fontWeight: FontWeight.w600),), padding: EdgeInsets.only(bottom: 35.0)),
           AuthTextField(
+            padding: const EdgeInsets.only(top: 40.0, right: 5.0, left: 5.0, bottom: 30.0),
             textCt: this.ctsNodes.firstWhere((ControllerClass cn) => cn.name == "emailCt").textCt,
             hintText: "이메일",
             errorText: this.authProvider.emailErrorText,

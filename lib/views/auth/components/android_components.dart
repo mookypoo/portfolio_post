@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../class/controller_node_class.dart';
 import '../../../providers/auth_provider.dart';
+import '../../../repos/variables.dart';
 import 'common_components.dart' show Tos;
 
 class AuthTextField extends StatelessWidget {
@@ -14,6 +15,7 @@ class AuthTextField extends StatelessWidget {
     this.textInputAction,
     this.textInputType,
     this.errorText,
+    this.padding,
   }) : super(key: key);
 
   final bool? obscureText;
@@ -24,14 +26,15 @@ class AuthTextField extends StatelessWidget {
   final TextInputAction? textInputAction;
   final TextInputType? textInputType;
   final String? errorText;
+  final EdgeInsets? padding;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.only(top: 22.0, right: 5.0, left: 5.0),
+      padding: this.padding ?? const EdgeInsets.only(top: 22.0, right: 5.0, left: 5.0),
       child: TextField(
         controller: this.textCt,
-        style: TextStyle(fontSize: 17.0),
+        style: const TextStyle(fontSize: 17.0),
         textAlignVertical: TextAlignVertical.bottom,
         decoration: InputDecoration(
           counterText: "",
@@ -89,9 +92,10 @@ class AndroidSignUpWidget extends StatelessWidget {
 
     return Container(
       margin: EdgeInsets.symmetric(horizontal: _size.width * 0.08, vertical: 25.0),
-      height: _size.height * 0.55,
+      height: _size.height * 0.7,
       child: Column(
         children: <Widget>[
+          Text("가입하기", textAlign: TextAlign.center, style: TextStyle(fontSize: 30.0, fontWeight: FontWeight.w600),),
           AuthTextField(
             textCt: this.ctsNodes.firstWhere((ControllerClass cn) => cn.name == "nameCt").textCt,
             hintText: "이름",
@@ -185,13 +189,13 @@ class AndroidLoginWidget extends StatelessWidget {
     Size _size = MediaQuery.of(context).size;
 
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: _size.width * 0.08),
-      height: _size.height * 0.45,
+      margin: EdgeInsets.only(left: _size.width * 0.08, right: _size.width * 0.08, top: 70.0),
+      height: _size.height * 0.4,
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Padding(child: Text("Mooky's Posts", style: const TextStyle(fontSize: 25.0),), padding: EdgeInsets.only(bottom: 35.0)),
+          Padding(child: Text("Mooky's Dev Posts", style: const TextStyle(fontSize: 30.0, fontWeight: FontWeight.w600),), padding: EdgeInsets.only(bottom: 35.0)),
           AuthTextField(
+            padding: const EdgeInsets.only(top: 40.0, right: 5.0, left: 5.0, bottom: 30.0),
             textCt: this.ctsNodes.firstWhere((ControllerClass cn) => cn.name == "emailCt").textCt,
             hintText: "이메일",
             errorText: this.authProvider.emailErrorText,

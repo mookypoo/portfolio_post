@@ -9,10 +9,10 @@ class TopImage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: MediaQuery.of(context).size.width,
-      height: MediaQuery.of(context).size.height * 0.4,
-      child: Image.network(
-        "https://www.pixelstalk.net/wp-content/uploads/2014/12/Abstract-flower-wallpaper-download-free.jpg",
-        fit: BoxFit.fill,
+      height: MediaQuery.of(context).size.height * 0.5,
+      child: Image.asset(
+        "assets/images/bg.jpg",
+        fit: BoxFit.fitHeight,
       ),
     );
   }
@@ -32,7 +32,7 @@ class BackgroundContainer extends StatelessWidget {
             const Color.fromRGBO(255, 255, 255, 1.0),
           ],
           begin: const Alignment(0.0, -1.0),
-          end: const Alignment(0.0, -0.7),
+          end: const Alignment(0.0, -0.5),
         ),
         borderRadius: BorderRadius.circular(45.0),
       ),

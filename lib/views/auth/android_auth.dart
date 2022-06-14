@@ -63,15 +63,9 @@ class _AndroidAuthState extends State<AndroidAuth> {
                     children: <Widget>[
                       BackgroundContainer(),
                       Positioned(
+                        left: 0.0,
+                        right: 0.0,
                         top: 10.0,
-                        left: 0.0,
-                        right: 0.0,
-                        child: Icon(Icons.person, size: _size.width * 0.20,),
-                      ),
-                      Positioned(
-                        left: 0.0,
-                        right: 0.0,
-                        top: 77.0,
                         child: this.widget.authProvider.isLoginPage
                           ? AndroidLoginWidget(
                               ctsNodes: <ControllerClass>[this._emailCt, this._pw1Ct],
@@ -85,6 +79,11 @@ class _AndroidAuthState extends State<AndroidAuth> {
                       this.widget.authProvider.isLoginPage
                         ? LogInBottom(
                             onTapLogin: () async {
+                              final bool _validated = this.widget.authProvider.loginValidate(
+                                email: this._emailCt.textCt.text.trim(),
+                                pw: this._pw1Ct.textCt.text.trim(),
+                              );
+                              if (!_validated) return;
                               final bool _success = await this.widget.authProvider.firebaseSignIn(
                                 data: LoginInfo(
                                   email: this._emailCt.textCt.text.trim(),
@@ -106,6 +105,13 @@ class _AndroidAuthState extends State<AndroidAuth> {
                               this.widget.authProvider.switchPage();
                             },
                             onTapSignUp: () async {
+                              final bool _verified = this.widget.authProvider.signUpValidate(
+                                email: this._emailCt.textCt.text.trim(),
+                                name: this._nameCt.textCt.text.trim(),
+                                pw: this._pw1Ct.textCt.text.trim(),
+                                pw2: this._pw2Ct.textCt.text.trim(),
+                              );
+                              if (!_verified) return;
                               final bool _success = await this.widget.authProvider.firebaseSignUp(
                                 info: SignUpInfo(
                                   name: this._nameCt.textCt.text.trim(),

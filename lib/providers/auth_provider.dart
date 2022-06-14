@@ -130,9 +130,16 @@ class AuthProvider with ChangeNotifier {
     this.notifyListeners();
   }
 
-  bool validateFields(){ // true 이면 가입하기 버튼 안눌러짐
-    if ([this._nameErrorText, this._pwErrorText, this._pw2ErrorText].any((String? s) => s != null)) return true;
-    return false;
+  bool loginValidate({required String email, required String pw}){
+    this.checkEmail(email: email); this.checkPw(pw: pw);
+    if ([this._emailErrorText, this._pwErrorText].any((String? s) => s != null)) return false;
+    return true;
+  }
+
+  bool signUpValidate({required String email, required String name, required String pw, required String pw2}){ // false 이면 가입하기 버튼 안눌러짐
+    this.checkEmail(email: email); this.checkName(name: name); this.checkPw(pw: pw); this.confirmPw(pw: pw, pw2: pw2);
+    if ([this._emailErrorText, this._nameErrorText, this._pwErrorText, this._pw2ErrorText].any((String? s) => s != null)) return false;
+    return true;
   }
 
   Future<bool> firebaseSignUp({required SignUpInfo info}) async {

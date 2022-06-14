@@ -22,7 +22,7 @@ class AndroidProfile extends StatelessWidget {
         SliverList(
           delegate: SliverChildListDelegate.fixed([
             this.userProvider.user == null
-              ? NotLoggedIn(changeTab: this.changeTab, )
+              ? NotLoggedIn(changeTab: this.changeTab, toolBarAndBottomNavHeight: kToolbarHeight + 52.0,)
               : LoggedIn(
                   logOut: this.logOut,
                   profile: this.userProvider.profile,

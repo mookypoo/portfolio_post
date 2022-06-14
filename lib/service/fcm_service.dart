@@ -46,7 +46,7 @@ class FCMService {
   }
 
   static Future<void> onMessage() async {
-    await FCMService._getFMInstance().getInitialMessage();
+    //await FCMService._getFMInstance().getInitialMessage();
     FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
       await FCMService._localNotificationsPlugin.show(
         0, message.notification!.title, message.notification!.body, FCMService.platformChannelSpecifics,
