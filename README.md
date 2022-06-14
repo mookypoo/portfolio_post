@@ -12,6 +12,6 @@ Firebase Realtime DB, Google Cloud Storage와 Cloud Functions를 사용하고 �
 
 비디오 링크:
 FCM Notification - https://youtube.com/shorts/YSICHAPJ8dc 
-Login/Sign up - https://youtube.com/shorts/0Icm7VLOgZM?feature=share
+Login/Sign up - https://youtu.be/2cbqGRsazHk
 App - https://youtu.be/nux865WHuiU
 
